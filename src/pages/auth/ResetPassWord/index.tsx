@@ -1,28 +1,42 @@
-import { View, Text, Pressable, ScrollView } from 'react-native'
+import { View, Text, Pressable, ScrollView, Alert } from 'react-native'
 import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { AuthStackParamList } from '../../../types/navigation'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native'
 import TextInput from '../../../components/TextImput'
 import Button from '../../../components/Button'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import styles from './style'
 import COLORS from '../../colors'
+import { useAppDispatch, useAppSelector } from '../../../hooks/store'
+import { resetPasswordAction } from '../../../store/password/actions'
+import { selectResetPassword } from '../../../store/password/slice'
+import { LoadingType } from '../../../models/store'
 
 type ResetPasswordNavigationProp = NativeStackNavigationProp<
   AuthStackParamList,
   'ResetPassword'
 >
 
+type ResetPasswordRouteProp = RouteProp<AuthStackParamList, 'ResetPassword'>
+
 const ResetPassword = () => {
   const navigation = useNavigation<ResetPasswordNavigationProp>()
+  const route = useRoute<ResetPasswordRouteProp>()
+  const dispatch = useAppDispatch()
+
+  // ✅ Pattern Redux standardisé avec hooks typés
+  const resetPasswordState = useAppSelector(selectResetPassword)
+  const isLoading = resetPasswordState.status === LoadingType.PENDING
 
   const [password, setPassword] = React.useState('')
   const [confirmPassword, setConfirmPassword] = React.useState('')
   const [passwordError, setPasswordError] = React.useState('')
   const [confirmPasswordError, setConfirmPasswordError] = React.useState('')
-  const [isLoading, setIsLoading] = React.useState(false)
+  
+  // Récupérer le token depuis les params de navigation (ou vide si non fourni)
+  const token = (route.params as any)?.token || ''
 
   const handleResetPassword = async () => {
     setPasswordError('')
@@ -49,13 +63,71 @@ const ResetPassword = () => {
       isValid = false
     }
 
+    if (!token) {
+      Alert.alert('Erreur', 'Token de réinitialisation manquant', [{ text: 'OK' }])
+      return
+    }
+
     if (isValid) {
-      setIsLoading(true)
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-        navigation.navigate('Login')
-      } finally {
-        setIsLoading(false)
+        // ✅ Dispatch de l'action Redux resetPasswordAction
+        await dispatch(
+          resetPasswordAction({
+            token: token,
+            newPassword: password,
+          })
+        ).unwrap()
+
+        // 🎉 Réinitialisation réussie
+        Alert.alert(
+          'Succès',
+          'Votre mot de passe a été réinitialisé avec succès',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                navigation.navigate('Login')
+              },
+            },
+          ]
+        )
+      } catch (error: unknown) {
+        // 🚨 Gestion d'erreurs
+        let errorMessage = 'Erreur lors de la réinitialisation'
+
+        if (error instanceof Error) {
+          errorMessage = error.message
+        } else if (typeof error === 'object' && error !== null) {
+          const wrappedError = error as {
+            message?: string
+            error?: { message?: string }
+          }
+          if (wrappedError.message) {
+            errorMessage = wrappedError.message
+          } else if (wrappedError.error?.message) {
+            errorMessage = wrappedError.error.message
+          }
+        }
+
+        // Messages d'erreur spécifiques
+        if (errorMessage.includes('expiré') || errorMessage.includes('expired')) {
+          Alert.alert(
+            'Token expiré',
+            'Le lien de réinitialisation a expiré. Veuillez refaire une demande.',
+            [
+              {
+                text: 'OK',
+                onPress: () => {
+                  navigation.navigate('ForgotPassword')
+                },
+              },
+            ]
+          )
+        } else if (errorMessage.includes('invalide') || errorMessage.includes('invalid')) {
+          Alert.alert('Erreur', 'Lien de réinitialisation invalide', [{ text: 'OK' }])
+        } else {
+          Alert.alert('Erreur', errorMessage, [{ text: 'OK' }])
+        }
       }
     }
   }

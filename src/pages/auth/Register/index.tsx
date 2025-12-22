@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView } from 'react-native'
+import { View, Text, Pressable, ScrollView, Alert } from 'react-native'
 import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -9,6 +9,11 @@ import Button from '../../../components/Button'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import styles from './style'
 import COLORS from '../../colors'
+import { useAppDispatch, useAppSelector } from '../../../hooks/store'
+import { registerAction } from '../../../store/register/actions'
+import { selectUserRegisted } from '../../../store/register/slice'
+import { LoadingType } from '../../../models/store'
+import type { UserRegisterForm } from '../../../models/user'
 
 type RegisterNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Register'>
 type AuthNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Auth'>
@@ -16,6 +21,11 @@ type AuthNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Auth'>
 const Register = () => {
   const navigation = useNavigation<RegisterNavigationProp>()
   const navigation1 = useNavigation<AuthNavigationProp>()
+  const dispatch = useAppDispatch()
+
+  // ✅ Pattern Redux standardisé avec hooks typés
+  const registerState = useAppSelector(selectUserRegisted)
+  const isLoading = registerState.status === LoadingType.PENDING
 
   const [firstName, setFirstName] = React.useState<string>('')
   const [lastName, setLastName] = React.useState<string>('')
@@ -32,7 +42,6 @@ const Register = () => {
   const [passwordError, setPasswordError] = React.useState('')
   const [confirmPasswordError, setConfirmPasswordError] = React.useState('')
   const [termsError, setTermsError] = React.useState('')
-  const [isLoading, setIsLoading] = React.useState(false)
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -120,14 +129,63 @@ const Register = () => {
     }
 
     if (isValid) {
-      setIsLoading(true)
       try {
-        // Simuler un délai API
-        await new Promise((resolve) => setTimeout(resolve, 1500))
-        // Naviguer vers Login ou Main
-        navigation.navigate('VerifyOTP')
-      } finally {
-        setIsLoading(false)
+        // ✅ Dispatch de l'action Redux registerAction
+        const result = await dispatch(
+          registerAction({
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+            email: email.trim(),
+            phone: phone.trim(),
+            password: password,
+          })
+        ).unwrap()
+
+        // 🎉 Inscription réussie - Navigation vers vérification OTP avec userId
+        Alert.alert(
+          'Inscription réussie',
+          'Un code de vérification vous a été envoyé',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                navigation.navigate('VerifyOTP', {
+                  userId: result.data?.userId,
+                })
+              },
+            },
+          ]
+        )
+      } catch (error: unknown) {
+        // 🚨 Gestion d'erreurs améliorée
+        let errorMessage = 'Erreur lors de l\'inscription'
+
+        if (error instanceof Error) {
+          errorMessage = error.message
+        } else if (typeof error === 'object' && error !== null) {
+          const wrappedError = error as {
+            message?: string
+            error?: { message?: string }
+          }
+          if (wrappedError.message) {
+            errorMessage = wrappedError.message
+          } else if (wrappedError.error?.message) {
+            errorMessage = wrappedError.error.message
+          }
+        }
+
+        // Messages d'erreur spécifiques
+        if (errorMessage.includes('existe déjà') || errorMessage.includes('already exists')) {
+          if (errorMessage.includes('email')) {
+            setEmailError('Cet email est déjà utilisé')
+          } else if (errorMessage.includes('téléphone') || errorMessage.includes('phone')) {
+            setPhoneError('Ce numéro est déjà utilisé')
+          } else {
+            Alert.alert('Erreur', errorMessage, [{ text: 'OK' }])
+          }
+        } else {
+          Alert.alert('Erreur', errorMessage, [{ text: 'OK' }])
+        }
       }
     }
   }

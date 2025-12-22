@@ -4,44 +4,43 @@ import COLORS from '../../colors'
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.white,
+    backgroundColor: '#F9FAFB',
   },
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 20,
-    paddingTop: 30,
-    paddingBottom: 30,
+    paddingTop: 25,
+    paddingBottom: 20,
+    justifyContent: 'center',
   },
 
   /* ===== HEADER SECTION ===== */
   header: {
     alignItems: 'center',
-    marginBottom: 32,
-    marginTop: 10,
-  },
-  headerIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: `${COLORS.primary}15`,
-    justifyContent: 'center',
-    alignItems: 'center',
     marginBottom: 16,
   },
+  headerIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#FFF7ED',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: COLORS.text,
-    marginBottom: 8,
-    letterSpacing: -0.5,
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 6,
+    letterSpacing: -0.3,
   },
   subtitle: {
-    fontSize: 14,
-    color: COLORS.textLight,
+    fontSize: 13,
+    color: '#6B7280',
     textAlign: 'center',
-    lineHeight: 20,
-    maxWidth: 280,
-    fontWeight: '500',
+    lineHeight: 18,
+    fontWeight: '400',
   },
 
   /* ===== FORM SECTION ===== */
@@ -49,24 +48,24 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderRadius: 16,
     paddingHorizontal: 20,
-    paddingVertical: 24,
-    marginBottom: 24,
-    shadowColor: COLORS.text,
+    paddingVertical: 18,
+    marginBottom: 16,
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
   },
 
   /* ===== TERMS SECTION ===== */
   termsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
-    marginTop: 8,
+    marginBottom: 12,
+    marginTop: 4,
     paddingHorizontal: 4,
   },
   checkbox: {
@@ -105,8 +104,8 @@ const styles = StyleSheet.create({
 
   /* ===== BUTTON SECTION ===== */
   registerButton: {
-    marginBottom: 16,
-    marginTop: 8,
+    marginBottom: 12,
+    marginTop: 4,
   },
 
   /* ===== LOGIN SECTION ===== */
@@ -133,7 +132,7 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: COLORS.border,
-    marginVertical: 24,
+    marginVertical: 16,
   },
 
   /* ===== FOOTER SECTION ===== */
@@ -142,16 +141,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: `${COLORS.success}12`,
-    borderRadius: 10,
+    paddingVertical: 10,
+    backgroundColor: '#D1FAE5',
+    borderRadius: 12,
     borderLeftWidth: 4,
-    borderLeftColor: COLORS.success,
+    borderLeftColor: '#10B981',
   },
   footerText: {
     fontSize: 12,
-    color: COLORS.text,
-    fontWeight: '600',
+    color: '#065F46',
+    fontWeight: '500',
     marginLeft: 10,
     flex: 1,
   },

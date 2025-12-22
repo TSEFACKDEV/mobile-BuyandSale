@@ -1,33 +1,37 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
-import { authService } from '../services/authService';
+import { useAppSelector, useAppDispatch } from '../hooks/store';
+import { selectUserAuthenticated } from '../store/authentification/slice';
+import { logoutAction } from '../store/authentification/actions';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const ONBOARDING_KEY = 'onboarding_complete';
 
 interface AuthContextType {
   isOnboardingComplete: boolean;
   isUserLoggedIn: boolean;
   isLoading: boolean;
   completeOnboarding: () => Promise<void>;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (data: any) => Promise<boolean>;
   logout: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const dispatch = useAppDispatch();
+  const authState = useAppSelector(selectUserAuthenticated);
   const [isOnboardingComplete, setIsOnboardingComplete] = useState(false);
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Vérifier si l'utilisateur est connecté via Redux
+  const isUserLoggedIn = authState.entities !== null && authState.entities?.token !== undefined;
 
   // Initialiser l'état au montage
   useEffect(() => {
     const initializeAuth = async () => {
       setIsLoading(true);
       try {
-        const onboardingDone = await authService.isOnboardingComplete();
-        const loggedIn = await authService.isUserLoggedIn();
-        
-        setIsOnboardingComplete(onboardingDone);
-        setIsUserLoggedIn(loggedIn);
+        const onboardingDone = await AsyncStorage.getItem(ONBOARDING_KEY);
+        setIsOnboardingComplete(onboardingDone === 'true');
       } catch (error) {
         console.error('Erreur lors de l\'initialisation de l\'authentification:', error);
       } finally {
@@ -40,7 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const completeOnboarding = useCallback(async () => {
     try {
-      await authService.markOnboardingComplete();
+      await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
       setIsOnboardingComplete(true);
     } catch (error) {
       console.error('Erreur lors de la finalisation du onboarding:', error);
@@ -48,50 +52,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
-    try {
-      const result = await authService.login(email, password);
-      if (result.success) {
-        setIsUserLoggedIn(true);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Erreur lors de la connexion:', error);
-      return false;
-    }
-  }, []);
-
-  const register = useCallback(async (data: any) => {
-    try {
-      const result = await authService.register(data);
-      if (result.success) {
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Erreur lors de l\'inscription:', error);
-      return false;
-    }
-  }, []);
-
   const logout = useCallback(async () => {
     try {
-      await authService.logout();
-      setIsUserLoggedIn(false);
+      await dispatch(logoutAction()).unwrap();
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
       throw error;
     }
-  }, []);
+  }, [dispatch]);
 
   const value: AuthContextType = {
     isOnboardingComplete,
     isUserLoggedIn,
     isLoading,
     completeOnboarding,
-    login,
-    register,
     logout,
   };
 

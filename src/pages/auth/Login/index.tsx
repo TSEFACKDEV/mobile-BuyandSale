@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Switch } from 'react-native'
+import { View, Text, Pressable, ScrollView, Switch, Alert, Linking } from 'react-native'
 import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -9,19 +9,28 @@ import Button from '../../../components/Button'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import styles from './style'
 import COLORS from '../../colors'
-import { useAuth } from '../../../contexts/AuthContext'
+import { useAppDispatch, useAppSelector } from '../../../hooks/store'
+import { loginAction } from '../../../store/authentification/actions'
+import { selectUserAuthenticated } from '../../../store/authentification/slice'
+import { LoadingType } from '../../../models/store'
+import type { UserLoginForm } from '../../../models/user'
+import API_CONFIG from '../../../config/api.config'
 
 type LoginNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>
 
 const Login = () => {
   const navigation = useNavigation<LoginNavigationProp>()
-  const { login } = useAuth()
+  const dispatch = useAppDispatch()
+  
+  // ✅ Pattern Redux standardisé avec hooks typés
+  const authState = useAppSelector(selectUserAuthenticated)
+  const isLoading = authState.status === LoadingType.PENDING
+  
   const [identifier, setIdentifier] = React.useState<string>('')
   const [password, setPassword] = React.useState('')
   const [rememberMe, setRememberMe] = React.useState(false)
   const [identifierError, setIdentifierError] = React.useState('')
   const [passwordError, setPasswordError] = React.useState('')
-  const [isLoading, setIsLoading] = React.useState(false)
 
   // Déterminer si c'est un email ou un téléphone
   const getIdentifierType = (value: string): 'email' | 'phone' | 'invalid' => {
@@ -72,6 +81,39 @@ const Login = () => {
     }
   }
 
+  const handleGoogleLogin = async () => {
+    try {
+      // URL du backend pour Google OAuth
+      const googleAuthUrl = `${API_CONFIG.BASE_URL}/auth/google`
+      
+      // Vérifier si l'URL peut être ouverte
+      const supported = await Linking.canOpenURL(googleAuthUrl)
+      
+      if (supported) {
+        await Linking.openURL(googleAuthUrl)
+        
+        Alert.alert(
+          'Authentification Google',
+          'Vous allez être redirigé vers Google pour vous authentifier. Une fois connecté, vous serez redirigé vers l\'application.',
+          [{ text: 'OK' }]
+        )
+      } else {
+        Alert.alert(
+          'Erreur',
+          'Impossible d\'ouvrir le navigateur pour l\'authentification Google.',
+          [{ text: 'OK' }]
+        )
+      }
+    } catch (error) {
+      console.error('Erreur Google Auth:', error)
+      Alert.alert(
+        'Erreur',
+        'Une erreur est survenue lors de l\'authentification Google.',
+        [{ text: 'OK' }]
+      )
+    }
+  }
+
   const handleLogin = async () => {
     setIdentifierError('')
     setPasswordError('')
@@ -98,21 +140,57 @@ const Login = () => {
     }
 
     if (isValid) {
-      setIsLoading(true)
       try {
-        // Appeler la fonction login du contexte
-        const success = await login(identifier, password)
-        if (success) {
-          // La navigation se fera automatiquement via RootNavigator
-          // car isUserLoggedIn sera mise à jour
-        } else {
-          setIdentifierError('Email/téléphone ou mot de passe incorrect')
+        // ✅ Dispatch de l'action Redux loginAction
+        await dispatch(
+          loginAction({
+            identifiant: identifier.trim(),
+            password: password,
+          })
+        ).unwrap()
+
+        // 🎉 Connexion réussie - La navigation se fait automatiquement
+        // car le store Redux est surveillé par le RootNavigator
+        Alert.alert('Succès', 'Connexion réussie !', [{ text: 'OK' }])
+      } catch (error: unknown) {
+        // 🚨 Gestion d'erreurs améliorée
+        let errorMessage = 'Erreur de connexion'
+
+        if (error instanceof Error) {
+          errorMessage = error.message
+        } else if (typeof error === 'object' && error !== null) {
+          const wrappedError = error as {
+            message?: string
+            error?: { message?: string }
+          }
+          if (wrappedError.message) {
+            errorMessage = wrappedError.message
+          } else if (wrappedError.error?.message) {
+            errorMessage = wrappedError.error.message
+          }
         }
-      } catch (error) {
-        setIdentifierError('Erreur lors de la connexion')
-        console.error('Erreur login:', error)
-      } finally {
-        setIsLoading(false)
+
+        // Messages d'erreur spécifiques
+        if (errorMessage.includes('Email ou mot de passe incorrect')) {
+          setIdentifierError('Identifiants incorrects')
+        } else if (errorMessage.includes('non vérifié')) {
+          Alert.alert(
+            'Compte non vérifié',
+            'Veuillez vérifier votre email ou SMS.',
+            [{ text: 'OK' }]
+          )
+        } else if (
+          errorMessage.includes('suspendu') ||
+          errorMessage === 'ACCOUNT_SUSPENDED'
+        ) {
+          Alert.alert(
+            'Compte suspendu',
+            'Votre compte a été temporairement suspendu. Contactez le support.',
+            [{ text: 'OK' }]
+          )
+        } else {
+          Alert.alert('Erreur', errorMessage, [{ text: 'OK' }])
+        }
       }
     }
   }
@@ -198,6 +276,22 @@ const Login = () => {
             disabled={isLoading}
             containerStyle={styles.loginButton}
           />
+
+          {/* Divider OR */}
+          <View style={styles.orDivider}>
+            <View style={styles.orLine} />
+            <Text style={styles.orText}>OU</Text>
+            <View style={styles.orLine} />
+          </View>
+
+          {/* Google Auth Button */}
+          <Pressable
+            style={styles.googleButton}
+            onPress={handleGoogleLogin}
+          >
+            <MaterialCommunityIcons name="google" size={20} color="#DB4437" />
+            <Text style={styles.googleButtonText}>Continuer avec Google</Text>
+          </Pressable>
 
           {/* Register Link */}
           <View style={styles.registerContainer}>

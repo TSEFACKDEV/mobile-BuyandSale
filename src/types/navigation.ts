@@ -6,7 +6,9 @@ export type AuthStackParamList = {
   Register: undefined;
   ForgotPassword: undefined;
   ResetPassword: undefined;
-  VerifyOTP: undefined;
+  VerifyOTP: { userId?: string };
+  AccountSuspended: undefined;
+  SocialCallback: { token?: string }
 };
 
 // Main (Home) Stack

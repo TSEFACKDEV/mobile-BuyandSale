@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView } from 'react-native'
+import { View, Text, Pressable, ScrollView, Alert } from 'react-native'
 import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -9,6 +9,10 @@ import Button from '../../../components/Button'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import styles from './style'
 import COLORS from '../../colors'
+import { useAppDispatch, useAppSelector } from '../../../hooks/store'
+import { forgotPasswordAction } from '../../../store/password/actions'
+import { selectForgotPassword } from '../../../store/password/slice'
+import { LoadingType } from '../../../models/store'
 
 type ForgotPasswordNavigationProp = NativeStackNavigationProp<
   AuthStackParamList,
@@ -17,59 +21,79 @@ type ForgotPasswordNavigationProp = NativeStackNavigationProp<
 
 const ForgotPassword = () => {
   const navigation = useNavigation<ForgotPasswordNavigationProp>()
+  const dispatch = useAppDispatch()
 
-  const [identifier, setIdentifier] = React.useState<string>('')
-  const [identifierError, setIdentifierError] = React.useState('')
-  const [isLoading, setIsLoading] = React.useState(false)
+  // ✅ Pattern Redux standardisé avec hooks typés
+  const forgotPasswordState = useAppSelector(selectForgotPassword)
+  const isLoading = forgotPasswordState.status === LoadingType.PENDING
+
+  const [email, setEmail] = React.useState<string>('')
+  const [emailError, setEmailError] = React.useState('')
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     return emailRegex.test(email)
   }
 
-  const validatePhone = (phone: string) => {
-    const cleanPhone = phone.replace(/\s/g, '')
-    const phoneRegex = /^(\+237|237)\d{8,9}$|^\d{8,9}$/
-    return phoneRegex.test(cleanPhone) && cleanPhone.replace(/\D/g, '').length >= 8
-  }
-
-  const validateIdentifier = (value: string): { isValid: boolean; error: string } => {
-    const trimmed = value.trim()
-
-    if (!trimmed) {
-      return { isValid: false, error: 'Email ou téléphone requis' }
-    }
-
-    if (validateEmail(trimmed)) {
-      return { isValid: true, error: '' }
-    }
-
-    if (validatePhone(trimmed)) {
-      return { isValid: true, error: '' }
-    }
-
-    return {
-      isValid: false,
-      error: 'Entrez un email valide ou un numéro Camerounais',
-    }
-  }
-
   const handleSubmit = async () => {
-    setIdentifierError('')
+    setEmailError('')
 
-    const validation = validateIdentifier(identifier)
-    if (!validation.isValid) {
-      setIdentifierError(validation.error)
+    if (!email.trim()) {
+      setEmailError('Email requis')
       return
     }
 
-    setIsLoading(true)
+    if (!validateEmail(email)) {
+      setEmailError('Email invalide')
+      return
+    }
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      // Navigation vers ResetPassword
-      navigation.navigate('ResetPassword')
-    } finally {
-      setIsLoading(false)
+      // ✅ Dispatch de l'action Redux forgotPasswordAction
+      await dispatch(
+        forgotPasswordAction({
+          email: email.trim(),
+        })
+      ).unwrap()
+
+      // 🎉 Email envoyé avec succès
+      Alert.alert(
+        'Email envoyé',
+        'Un lien de réinitialisation a été envoyé à votre adresse email.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              // Optionnel : rediriger vers la page de connexion
+              navigation.navigate('Login')
+            },
+          },
+        ]
+      )
+    } catch (error: unknown) {
+      // 🚨 Gestion d'erreurs
+      let errorMessage = 'Erreur lors de l\'envoi de l\'email'
+
+      if (error instanceof Error) {
+        errorMessage = error.message
+      } else if (typeof error === 'object' && error !== null) {
+        const wrappedError = error as {
+          message?: string
+          error?: { message?: string }
+        }
+        if (wrappedError.message) {
+          errorMessage = wrappedError.message
+        } else if (wrappedError.error?.message) {
+          errorMessage = wrappedError.error.message
+        }
+      }
+
+      // Messages d'erreur spécifiques
+      if (errorMessage.includes('introuvable') || errorMessage.includes('not found')) {
+        setEmailError('Aucun compte associé à cet email')
+      } else {
+        Alert.alert('Erreur', errorMessage, [{ text: 'OK' }])
+      }
     }
   }
 
@@ -90,22 +114,22 @@ const ForgotPassword = () => {
           </View>
           <Text style={styles.title}>Récupérer le compte</Text>
           <Text style={styles.subtitle}>
-            Entrez votre email ou téléphone pour réinitialiser votre mot de passe
+            Entrez votre email pour réinitialiser votre mot de passe
           </Text>
         </View>
 
         {/* Form Section */}
         <View style={styles.formContainer}>
           <TextInput
-            label="Email ou Téléphone"
+            label="Email"
             type="email"
-            value={identifier}
+            value={email}
             onChangeText={(text) => {
-              setIdentifier(text)
-              setIdentifierError('')
+              setEmail(text)
+              setEmailError('')
             }}
-            placeholder="exemple@email.com ou +237 6XX XXX XXX"
-            error={identifierError}
+            placeholder="exemple@email.com"
+            error={emailError}
             required
           />
 
