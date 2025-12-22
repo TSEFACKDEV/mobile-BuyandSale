@@ -9,6 +9,8 @@ import { AuthProvider } from './src/contexts/AuthContext';
 import RootNavigator from './src/Navigation/RootNavigator';
 import { hydrateAuth } from './src/store/authentification/slice';
 import Utils from './src/utils';
+import { ThemeProvider } from './src/contexts/ThemeContext';
+
 
 // Composant interne qui a accès au store
 function AppContent() {
