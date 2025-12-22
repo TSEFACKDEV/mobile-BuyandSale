@@ -15,6 +15,10 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import Button from '../../components/Button';
 import styles, { COLORS } from './style';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../types/navigation';
+import { useNavigation } from '@react-navigation/native';
+import { useAuth } from '../../contexts/AuthContext';
 
 
 const { width, height } = Dimensions.get('window');
@@ -28,7 +32,14 @@ interface Slide {
   icon?: string;
 }
 
+type OnboardingNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Onboarding'>;
+
+
+
 const Onboarding = () => {
+  const navigation = useNavigation<OnboardingNavigationProp>();
+  const { completeOnboarding } = useAuth();
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const scrollX = useRef(new Animated.Value(0)).current;
@@ -40,7 +51,7 @@ const Onboarding = () => {
       title: 'Bienvenue sur Buy and Sale',
       description: 'La première marketplace camerounaise pour acheter et vendre facilement',
       backgroundColor: '#FFF5E6',
-      icon: 'shopping-bag'
+      icon: 'basket'
     },
     {
       id: '2',
@@ -48,7 +59,7 @@ const Onboarding = () => {
       title: 'Vendez vos produits',
       description: 'Mettez en ligne vos articles en quelques clics et trouvez des acheteurs',
       backgroundColor: '#E6F7FF',
-      icon: 'upload'
+      icon: 'pricetag'
     },
     {
       id: '3',
@@ -116,9 +127,13 @@ const Onboarding = () => {
     setCurrentSlide(slides.length - 1);
   };
 
-  const handleGetStarted = () => {
-    console.log('Get Started pressed');
-    // Navigation vers la page d'authentification
+  const handleGetStarted = async () => {
+    try {
+      await completeOnboarding();
+      // La navigation se fera automatiquement grâce à la condition dans RootNavigator
+    } catch (error) {
+      console.error('Erreur lors de la finalisation du onboarding:', error);
+    }
   };
 
   const Footer = () => {

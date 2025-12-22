@@ -21,6 +21,7 @@ export interface ButtonProps {
   rightIcon?: string;
   fullWidth?: boolean;
   style?: ViewStyle;
+  containerStyle?: ViewStyle;
   textStyle?: TextStyle;
 }
 
@@ -35,6 +36,7 @@ const Button: React.FC<ButtonProps> = ({
   rightIcon,
   fullWidth = false,
   style,
+  containerStyle,
   textStyle,
 }) => {
   const buttonStyles = [
@@ -43,7 +45,7 @@ const Button: React.FC<ButtonProps> = ({
     styles[`${size}Button`],
     disabled && styles.disabledButton,
     fullWidth && styles.fullWidthButton,
-    style,
+    containerStyle || style,
   ];
 
   const textStyles = [

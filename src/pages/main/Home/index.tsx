@@ -3,7 +3,7 @@ import React from 'react'
 import styles from './style'
 const Home = () => {
   return (
-    <View>
+    <View style={styles.container}>
       <Text>Home</Text>
     </View>
   )
