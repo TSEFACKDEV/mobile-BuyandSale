@@ -3,7 +3,7 @@ import {
   View, 
   Text, 
   StyleSheet, 
-  TouchableOpacity, 
+  Pressable,
   StatusBar,
   SafeAreaView,
   Dimensions,
@@ -13,6 +13,7 @@ import {
   ImageSourcePropType
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import Button from '../../components/Button';
 import styles, { COLORS } from './style';
 
 
@@ -71,12 +72,12 @@ const Onboarding = () => {
     return (
       <View style={[styles.slide, { width, backgroundColor: item.backgroundColor }]}>
         <View style={styles.slideContent}>
-          {/* Icône de slide */}
+          {/* Icône de slide avec couleur primary */}
           <View style={styles.iconCircle}>
             <Icon 
               name={item.icon || 'star'} 
-              size={50} 
-              color={COLORS.primary} 
+              size={52} 
+              color={COLORS.white} 
             />
           </View>
 
@@ -149,32 +150,32 @@ const Onboarding = () => {
         {/* Boutons de navigation */}
         <View style={styles.buttonContainer}>
           {currentSlide === slides.length - 1 ? (
-            <TouchableOpacity 
-              style={styles.getStartedButton}
+            <Button 
+              title="Commencer"
               onPress={handleGetStarted}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.getStartedText}>Commencer</Text>
-              <Icon name="arrow-forward" size={20} color={COLORS.white} style={styles.buttonIcon} />
-            </TouchableOpacity>
+              variant="primary"
+              size="large"
+              fullWidth
+              rightIcon="arrow-forward"
+            />
           ) : (
             <View style={styles.navigationButtons}>
-              <TouchableOpacity 
-                style={styles.skipButton}
+              <Button 
+                title="Passer"
                 onPress={handleSkip}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.skipText}>Passer</Text>
-              </TouchableOpacity>
+                variant="outline"
+                size="medium"
+                style={styles.skipButtonCustom}
+              />
               
-              <TouchableOpacity 
-                style={styles.nextButton}
+              <Button 
+                title="Suivant"
                 onPress={handleNext}
-                activeOpacity={0.85}
-              >
-                <Text style={styles.nextText}>Suivant</Text>
-                <Icon name="chevron-forward" size={20} color={COLORS.white} />
-              </TouchableOpacity>
+                variant="primary"
+                size="medium"
+                rightIcon="chevron-forward"
+                style={styles.nextButtonCustom}
+              />
             </View>
           )}
         </View>
@@ -188,7 +189,7 @@ const Onboarding = () => {
       
       {/* Bouton retour amélioré */}
       {currentSlide > 0 && (
-        <TouchableOpacity 
+        <Pressable 
           style={styles.backButton}
           onPress={() => {
             flatListRef.current?.scrollToIndex({ 
@@ -197,11 +198,15 @@ const Onboarding = () => {
             });
             setCurrentSlide(currentSlide - 1);
           }}
-          activeOpacity={0.7}
         >
-          <Icon name="chevron-back" size={28} color={COLORS.primary} />
-        </TouchableOpacity>
+          <Icon name="chevron-back" size={26} color={COLORS.primary} />
+        </Pressable>
       )}
+
+      {/* Badge de progression */}
+      <View style={styles.progressBadge}>
+        <Text style={styles.progressText}>{currentSlide + 1}/{slides.length}</Text>
+      </View>
 
       <FlatList
         ref={flatListRef}
@@ -223,6 +228,5 @@ const Onboarding = () => {
     </SafeAreaView>
   );
 };
-
 
 export default Onboarding;
