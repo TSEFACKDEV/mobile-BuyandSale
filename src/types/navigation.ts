@@ -9,22 +9,27 @@ export type AuthStackParamList = {
   VerifyOTP: undefined;
 };
 
-// Main (Home) Stack
+// Home Stack (contient les écrans de contenu)
 export type HomeStackParamList = {
   Home: undefined;
-  Products: undefined;
   ProductDetails: { productId: string };
-  Sellers: undefined;
   SellerDetails: { sellerId: string };
-  UserProfile: undefined;
 };
 
-// Bottom Tab Navigator
+// Bottom Tab Navigator (navigation principale optimisée)
 export type BottomTabParamList = {
   HomeTab: undefined;
   Products: undefined;
   Sellers: undefined;
-  Profile: undefined;
+  Settings: undefined;
+};
+
+// Main Stack Navigator (BottomTab + écrans TopNavigation)
+export type MainStackParamList = {
+  MainTab: undefined;
+  Favorites: undefined;
+  Notifications: undefined;
+  UserProfile: undefined;
 };
 
 // Root Stack (contrôle le flux : Onboarding -> Auth -> Main)
@@ -32,13 +37,6 @@ export type RootStackParamList = {
   Onboarding: undefined;
   Auth: undefined;
   Main: undefined;
-};
-
-// Drawer (optionnel pour menu latéral dans Main)
-export type DrawerParamList = {
-  Home: undefined;
-  Profile: undefined;
-  Settings: undefined;
 };
 
 // Déclaration globale pour useNavigation

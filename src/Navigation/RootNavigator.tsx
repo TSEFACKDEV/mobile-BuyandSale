@@ -18,18 +18,31 @@ import Products from '../pages/main/Products';
 import SellerDetails from '../pages/main/SellerDetails';
 import Sellers from '../pages/main/Sellers';
 import UserProfile from '../pages/main/UserProfile';
+import Favorites from '../pages/main/Favorites/index';
+import Notifications from '../pages/main/Notifications';
+import Settings from '../pages/main/Setting/index';
+
+// Components
+import TopNavigation from '../components/TopNavigation/TopNavigation';
 
 // Types
-import { RootStackParamList, AuthStackParamList, HomeStackParamList, BottomTabParamList } from '../types/navigation';
+import {
+  RootStackParamList,
+  AuthStackParamList,
+  HomeStackParamList,
+  BottomTabParamList,
+} from '../types/navigation';
 
 // Context
 import { useAuth } from '../contexts/AuthContext';
+import { useThemeColors } from '../contexts/ThemeContext';
 
 // Créer les navigateurs
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
 const BottomTab = createBottomTabNavigator<BottomTabParamList>();
+const MainStack = createNativeStackNavigator();
 
 // =====================
 // Auth Navigator
@@ -42,22 +55,10 @@ const AuthNavigator = () => {
       }}
     >
       <AuthStack.Screen name="Login" component={Login} />
-      <AuthStack.Screen 
-        name="Register" 
-        component={Register}
-      />
-      <AuthStack.Screen 
-        name="ForgotPassword" 
-        component={ForgotPassword}
-      />
-      <AuthStack.Screen 
-        name="ResetPassword" 
-        component={ResetPassword}
-      />
-      <AuthStack.Screen 
-        name="VerifyOTP" 
-        component={VerifyOTP}
-      />
+      <AuthStack.Screen name="Register" component={Register} />
+      <AuthStack.Screen name="ForgotPassword" component={ForgotPassword} />
+      <AuthStack.Screen name="ResetPassword" component={ResetPassword} />
+      <AuthStack.Screen name="VerifyOTP" component={VerifyOTP} />
     </AuthStack.Navigator>
   );
 };
@@ -69,53 +70,22 @@ const HomeStackNavigator = () => {
   return (
     <HomeStack.Navigator
       screenOptions={{
-        headerShown: true,
-        headerTintColor: '#FF6B35',
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
+        headerShown: false,
       }}
     >
-      <HomeStack.Screen 
-        name="Home" 
-        component={Home}
-        options={{
-          headerShown: false,
-        }}
-      />
-      <HomeStack.Screen 
-        name="Products" 
-        component={Products}
-        options={{
-          title: 'Produits',
-        }}
-      />
-      <HomeStack.Screen 
-        name="ProductDetails" 
+      <HomeStack.Screen name="Home" component={Home} />
+      <HomeStack.Screen
+        name="ProductDetails"
         component={ProductDetails}
         options={{
           title: 'Détails du produit',
         }}
       />
-      <HomeStack.Screen 
-        name="Sellers" 
-        component={Sellers}
-        options={{
-          title: 'Vendeurs',
-        }}
-      />
-      <HomeStack.Screen 
-        name="SellerDetails" 
+      <HomeStack.Screen
+        name="SellerDetails"
         component={SellerDetails}
         options={{
           title: 'Profil du vendeur',
-        }}
-      />
-      <HomeStack.Screen 
-        name="UserProfile" 
-        component={UserProfile}
-        options={{
-          title: 'Mon profil',
         }}
       />
     </HomeStack.Navigator>
@@ -123,66 +93,164 @@ const HomeStackNavigator = () => {
 };
 
 // =====================
-// Bottom Tab Navigator (pour la partie Main)
+// Wrapper components for screens with TopNavigation
+// =====================
+const ProductsWithNav = () => (
+  <View style={{ flex: 1 }}>
+    <TopNavigation showBackButton title="Produits" />
+    <Products />
+  </View>
+);
+
+const SellersWithNav = () => (
+  <View style={{ flex: 1 }}>
+    <TopNavigation showBackButton title="Vendeurs" />
+    <Sellers />
+  </View>
+);
+
+const FavoritesWithNav = () => (
+  <View style={{ flex: 1 }}>
+    <TopNavigation showBackButton title="Favoris" />
+    <Favorites />
+  </View>
+);
+
+const NotificationsWithNav = () => (
+  <View style={{ flex: 1 }}>
+    <TopNavigation showBackButton title="Notifications" />
+    <Notifications />
+  </View>
+);
+
+const UserProfileWithNav = () => (
+  <View style={{ flex: 1 }}>
+    <TopNavigation showBackButton title="Mon profil" />
+    <UserProfile />
+  </View>
+);
+
+const SettingsWithNav = () => (
+  <View style={{ flex: 1 }}>
+    <Settings />
+  </View>
+);
+
+// =====================
+// Bottom Tab Navigator (optimisé)
 // =====================
 const MainTabNavigator = () => {
+  const colors = useThemeColors();
+
   return (
     <BottomTab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarIcon: ({ focused, color }) => {
           let iconName: string = 'home';
+          const iconSize = 24;
 
-          if (route.name === 'HomeTab') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Products') {
-            iconName = focused ? 'grid' : 'grid-outline';
-          } else if (route.name === 'Sellers') {
-            iconName = focused ? 'people' : 'people-outline';
-          } else if (route.name === 'Profile') {
-            iconName = focused ? 'person' : 'person-outline';
+          switch (route.name) {
+            case 'HomeTab':
+              iconName = focused ? 'home' : 'home-outline';
+              break;
+            case 'Products':
+              iconName = focused ? 'grid' : 'grid-outline';
+              break;
+            case 'Sellers':
+              iconName = focused ? 'people' : 'people-outline';
+              break;
+            case 'Settings':
+              iconName = focused ? 'settings' : 'settings-outline';
+              break;
+            default:
+              break;
           }
 
-          return <Icon name={iconName} size={size} color={color} />;
+          return <Icon name={iconName} size={iconSize} color={color} />;
         },
         tabBarActiveTintColor: '#FF6B35',
-        tabBarInactiveTintColor: '#95969D',
+        tabBarInactiveTintColor: colors.textTertiary,
         headerShown: false,
-        tabBarLabel: route.name === 'HomeTab' ? 'Accueil' : route.name,
+        lazy: true,
       })}
     >
-      <BottomTab.Screen 
-        name="HomeTab" 
+      {/* HOME */}
+      <BottomTab.Screen
+        name="HomeTab"
         component={HomeStackNavigator}
         options={{
           tabBarLabel: 'Accueil',
           title: 'Accueil',
         }}
       />
-      <BottomTab.Screen 
-        name="Products" 
-        component={Products}
+
+      {/* PRODUCTS */}
+      <BottomTab.Screen
+        name="Products"
+        component={ProductsWithNav}
         options={{
           tabBarLabel: 'Produits',
           title: 'Produits',
         }}
       />
-      <BottomTab.Screen 
-        name="Sellers" 
-        component={Sellers}
+
+      {/* SELLERS */}
+      <BottomTab.Screen
+        name="Sellers"
+        component={SellersWithNav}
         options={{
           tabBarLabel: 'Vendeurs',
           title: 'Vendeurs',
         }}
       />
-      <BottomTab.Screen 
-        name="Profile" 
-        component={UserProfile}
+
+      {/* SETTINGS */}
+      <BottomTab.Screen
+        name="Settings"
+        component={SettingsWithNav}
         options={{
-          tabBarLabel: 'Profil',
-          title: 'Mon profil',
+          tabBarLabel: 'Paramètres',
+          title: 'Paramètres',
         }}
       />
     </BottomTab.Navigator>
+  );
+};
+
+// =====================
+// Main Stack Navigator (BottomTab + écrans TopNavigation)
+// =====================
+const MainStackNavigator = () => {
+  return (
+    <MainStack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <MainStack.Screen
+        name="MainTab"
+        component={MainTabNavigator}
+      />
+      <MainStack.Group
+        screenOptions={{
+          presentation: 'modal',
+          headerShown: false,
+        }}
+      >
+        <MainStack.Screen
+          name="Favorites"
+          component={FavoritesWithNav}
+        />
+        <MainStack.Screen
+          name="Notifications"
+          component={NotificationsWithNav}
+        />
+        <MainStack.Screen
+          name="UserProfile"
+          component={UserProfileWithNav}
+        />
+      </MainStack.Group>
+    </MainStack.Navigator>
   );
 };
 
@@ -209,20 +277,11 @@ export const RootNavigator = () => {
         }}
       >
         {!isOnboardingComplete ? (
-          <RootStack.Screen 
-            name="Onboarding" 
-            component={Onboarding}
-          />
+          <RootStack.Screen name="Onboarding" component={Onboarding} />
         ) : !isUserLoggedIn ? (
-          <RootStack.Screen 
-            name="Auth" 
-            component={AuthNavigator}
-          />
+          <RootStack.Screen name="Auth" component={AuthNavigator} />
         ) : (
-          <RootStack.Screen 
-            name="Main" 
-            component={MainTabNavigator}
-          />
+          <RootStack.Screen name="Main" component={MainStackNavigator} />
         )}
       </RootStack.Navigator>
     </NavigationContainer>
