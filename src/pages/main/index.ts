@@ -1,0 +1,10 @@
+// Export all main pages for cleaner imports
+export { default as Home } from './Home';
+export { default as Products } from './Products';
+export { default as ProductDetails } from './ProductDetails';
+export { default as Sellers } from './Sellers';
+export { default as SellerDetails } from './SellerDetails';
+export { default as UserProfile } from './UserProfile';
+export { default as Favorites } from './Favorites';
+export { default as Notifications } from './Notifications';
+export { default as Settings } from './Setting';

@@ -29,8 +29,10 @@ function AppContent() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <AuthProvider>
-        <StatusBar style="dark" />
-        <RootNavigator />
+        <ThemeProvider>
+          <StatusBar style="dark" />
+          <RootNavigator />
+        </ThemeProvider>
       </AuthProvider>
     </GestureHandlerRootView>
   );
