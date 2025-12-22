@@ -23,10 +23,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const initializeAuth = async () => {
       setIsLoading(true);
       try {
-        const onboardingDone = await authService.isOnboardingComplete();
-        const loggedIn = await authService.isUserLoggedIn();
+        // Onboarding est TOUJOURS false - ne pas sauvegarder l'état
+        setIsOnboardingComplete(false);
         
-        setIsOnboardingComplete(onboardingDone);
+        // Vérifier si l'utilisateur est connecté (pour la démo uniquement)
+        // En production, cela pourrait être lié à un token valide
+        const loggedIn = await authService.isUserLoggedIn();
         setIsUserLoggedIn(loggedIn);
       } catch (error) {
         console.error('Erreur lors de l\'initialisation de l\'authentification:', error);
@@ -40,7 +42,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const completeOnboarding = useCallback(async () => {
     try {
-      await authService.markOnboardingComplete();
+      // Ne pas sauvegarder le onboarding - toujours recommencer au démarrage
+      // await authService.markOnboardingComplete();
+      
+      // Réinitialiser l'état de connexion - forcer Auth après onboarding
+      setIsUserLoggedIn(false);
       setIsOnboardingComplete(true);
     } catch (error) {
       console.error('Erreur lors de la finalisation du onboarding:', error);
