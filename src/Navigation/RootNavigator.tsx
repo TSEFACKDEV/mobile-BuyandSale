@@ -23,6 +23,7 @@ import UserProfile from '../pages/main/UserProfile';
 import Favorites from '../pages/main/Favorites/index';
 import Notifications from '../pages/main/Notifications';
 import Settings from '../pages/main/Setting/index';
+import PostAds from '../pages/main/PostAds/index';
 
 // Components
 import TopNavigation from '../components/TopNavigation/TopNavigation';
@@ -158,6 +159,12 @@ const SettingsWithNav = () => (
   </View>
 );
 
+const PostAdsWithNav = () => (
+  <View style={{ flex: 1 }}>
+    <PostAds />
+  </View>
+);
+
 // =====================
 // Bottom Tab Navigator (optimisé)
 // =====================
@@ -169,7 +176,7 @@ const MainTabNavigator = () => {
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color }) => {
           let iconName: string = 'home';
-          const iconSize = 24;
+          let iconSize = 24;
 
           switch (route.name) {
             case 'HomeTab':
@@ -177,6 +184,10 @@ const MainTabNavigator = () => {
               break;
             case 'Products':
               iconName = focused ? 'grid' : 'grid-outline';
+              break;
+            case 'PostAd':
+              iconName = focused ? 'add-circle' : 'add-circle-outline';
+              iconSize = 28;
               break;
             case 'Sellers':
               iconName = focused ? 'people' : 'people-outline';
@@ -213,6 +224,16 @@ const MainTabNavigator = () => {
         options={{
           tabBarLabel: 'Produits',
           title: 'Produits',
+        }}
+      />
+
+      {/* POST AD */}
+      <BottomTab.Screen
+        name="PostAd"
+        component={PostAdsWithNav}
+        options={{
+          tabBarLabel: 'Publier',
+          title: 'Publier',
         }}
       />
 

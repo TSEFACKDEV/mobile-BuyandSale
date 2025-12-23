@@ -40,6 +40,12 @@ export interface Product {
     avatar?: string | null;
     phone?: string;
   };
+  productForfaits?: Array<{
+    id: string;
+    forfait: { type: string };
+    isActive: boolean;
+    expiresAt: string;
+  }>;
 }
 
 export interface ProductListResponse {

@@ -22,6 +22,7 @@ export type HomeStackParamList = {
 export type BottomTabParamList = {
   HomeTab: undefined;
   Products: undefined;
+  PostAd: undefined; // Nouveau tab pour poster une annonce
   Sellers: undefined;
   Settings: undefined;
 };

@@ -20,6 +20,7 @@ export interface AuthUser {
   }
   status?: 'ACTIVE' | 'PENDING' | 'SUSPENDED'
   slug?: string
+  isVerified?: boolean
   createdAt: string
   updatedAt: string
   // Statistiques vendeur

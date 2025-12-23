@@ -31,6 +31,9 @@ export interface ThemeColors {
   border: string;
   borderLight: string;
 
+  // Surface
+  surface: string;
+
   // Status
   success: string;
   warning: string;
@@ -77,6 +80,8 @@ const LIGHT_THEME: ThemeColors = {
   border: '#E0E0E0',
   borderLight: '#F0F0F0',
 
+  surface: '#FFFFFF',
+
   success: '#27AE60',
   warning: '#F39C12',
   error: '#E74C3C',
@@ -104,6 +109,8 @@ const DARK_THEME: ThemeColors = {
 
   border: '#404040',
   borderLight: '#333333',
+
+  surface: '#2D2D2D',
 
   success: '#2ECC71',
   warning: '#F1C40F',

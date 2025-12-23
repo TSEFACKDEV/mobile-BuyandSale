@@ -1,0 +1,47 @@
+{
+  "hero": {
+    "title": "Trouvez tout ce que vous cherchez",
+    "subtitle": "Le plus grand marché en ligne du Cameroun"
+  },
+  "home": {
+    "greeting": {
+      "morning": "Hey ! Bonjour !",
+      "afternoon": "Hey ! Bon après-midi !",
+      "evening": "Hey ! Bonsoir !"
+    },
+    "deliverTo": "Livrer à",
+    "allCities": "Toutes les villes",
+    "searchPlaceholder": "Rechercher des produits, restaurants...",
+    "allCategories": "Toutes les Catégories",
+    "seeAll": "Voir tout",
+    "featuredAds": "Annonces à la Une",
+    "topSellers": "Vendeurs à la Une",
+    "loading": "Chargement...",
+    "loadingCategories": "Chargement des catégories...",
+    "loadingProducts": "Chargement des annonces...",
+    "noProducts": "Aucune annonce disponible",
+    "noCategories": "Aucune catégorie disponible"
+  },
+  "common": {
+    "views": "vues",
+    "products": "annonces",
+    "reviews": "avis",
+    "rating": "Note"
+  },
+  "howItWorks": {
+    "title": "Comment ça marche ?",
+    "subtitle": "Vendre et acheter n'a jamais été aussi simple",
+    "step1": {
+      "title": "Créez votre compte",
+      "description": "Inscrivez-vous gratuitement et rejoignez notre communauté"
+    },
+    "step2": {
+      "title": "Publiez vos annonces",
+      "description": "Ajoutez vos produits avec photos et descriptions détaillées"
+    },
+    "step3": {
+      "title": "Vendez en toute sécurité",
+      "description": "Profitez de nos outils de protection et de notre support"
+    }
+  }
+}
