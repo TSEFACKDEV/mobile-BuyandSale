@@ -2,6 +2,16 @@ import { configureStore } from '@reduxjs/toolkit';
 import authentificationSlice from './authentification/slice';
 import registerReducer from './register/slice';
 import passwordReducer from './password/slice';
+import citySlice from './city/slice';
+import categorySlice from './category/slice';
+import userSlice from './user/slice';
+import reviewSlice from './review/slice';
+import notificationSlice from './notification/slice';
+import contactSlice from './contact/slice';
+import favoriteSlice from './favorite/slice';
+import productSlice from './product/slice';
+import forfaitSlice from './forfait/slice';
+import paymentSlice from './payment/slice';
 import type { PersistConfig } from 'redux-persist';
 import { persistStore, persistReducer } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -28,6 +38,16 @@ export const store = configureStore({
     [authentificationSlice.name]: persistedAuthReducer,
     register: registerReducer,
     password: passwordReducer,
+    city: citySlice.reducer,
+    category: categorySlice.reducer,
+    user: userSlice.reducer,
+    review: reviewSlice,
+    notification: notificationSlice,
+    contact: contactSlice,
+    favorite: favoriteSlice,
+    product: productSlice,
+    forfait: forfaitSlice,
+    payment: paymentSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

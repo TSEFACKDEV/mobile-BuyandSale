@@ -114,7 +114,7 @@ const Settings = () => {
             <View style={styles.settingLeft}>
               <View style={styles.settingIcon}>
                 <Icon
-                  name="palette-outline"
+                  name="color-palette-outline"
                   size={20}
                   color={colors.primary}
                 />

@@ -5,13 +5,13 @@ import {
   StyleSheet, 
   Pressable,
   StatusBar,
-  SafeAreaView,
   Dimensions,
   FlatList,
   Image,
   Animated,
   ImageSourcePropType
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Button from '../../components/Button';
 import styles, { COLORS } from './style';
