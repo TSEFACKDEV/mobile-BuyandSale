@@ -29,7 +29,7 @@ const SellerCard: React.FC<SellerCardProps> = ({ seller, onPress }) => {
     if (onPress) {
       onPress();
     } else {
-      (navigation as any).navigate('SellerProfile', { sellerId: seller.id });
+      (navigation as any).navigate('SellerDetails', { sellerId: seller.id });
     }
   };
 

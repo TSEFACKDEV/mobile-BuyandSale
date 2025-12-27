@@ -25,6 +25,9 @@ import Notifications from '../pages/main/Notifications';
 import Settings from '../pages/main/Setting/index';
 import PostAds from '../pages/main/PostAds/index';
 
+// Guards
+import Authenticated from '../Guards/Authenticated';
+
 // Components
 import TopNavigation from '../components/TopNavigation/TopNavigation';
 
@@ -99,18 +102,28 @@ const HomeStackNavigator = () => {
       <HomeStack.Screen name="Home" component={Home} />
       <HomeStack.Screen
         name="ProductDetails"
-        component={ProductDetails}
         options={{
           title: 'Détails du produit',
         }}
-      />
+      >
+        {() => (
+          <Authenticated>
+            <ProductDetails />
+          </Authenticated>
+        )}
+      </HomeStack.Screen>
       <HomeStack.Screen
         name="SellerDetails"
-        component={SellerDetails}
         options={{
           title: 'Profil du vendeur',
         }}
-      />
+      >
+        {() => (
+          <Authenticated>
+            <SellerDetails />
+          </Authenticated>
+        )}
+      </HomeStack.Screen>
     </HomeStack.Navigator>
   );
 };
@@ -134,22 +147,28 @@ const SellersWithNav = () => (
 
 const FavoritesWithNav = () => (
   <View style={{ flex: 1 }}>
-    <TopNavigation showBackButton title="Favoris" />
-    <Favorites />
+    <Authenticated>
+      <TopNavigation showBackButton title="Favoris" />
+      <Favorites />
+    </Authenticated>
   </View>
 );
 
 const NotificationsWithNav = () => (
   <View style={{ flex: 1 }}>
-    <TopNavigation showBackButton title="Notifications" />
-    <Notifications />
+    <Authenticated>
+      <TopNavigation showBackButton title="Notifications" />
+      <Notifications />
+    </Authenticated>
   </View>
 );
 
 const UserProfileWithNav = () => (
   <View style={{ flex: 1 }}>
-    <TopNavigation showBackButton title="Mon profil" />
-    <UserProfile />
+    <Authenticated>
+      <TopNavigation showBackButton title="Mon profil" />
+      <UserProfile />
+    </Authenticated>
   </View>
 );
 
@@ -161,7 +180,9 @@ const SettingsWithNav = () => (
 
 const PostAdsWithNav = () => (
   <View style={{ flex: 1 }}>
-    <PostAds />
+    <Authenticated>
+      <PostAds />
+    </Authenticated>
   </View>
 );
 
@@ -193,7 +214,7 @@ const MainTabNavigator = () => {
               iconName = focused ? 'people' : 'people-outline';
               break;
             case 'Settings':
-              iconName = focused ? 'settings' : 'settings-outline';
+              iconName = focused ? 'search' : 'search-outline';
               break;
             default:
               break;
@@ -247,13 +268,13 @@ const MainTabNavigator = () => {
         }}
       />
 
-      {/* SETTINGS */}
+      {/* SEARCH (redirect to Products) */}
       <BottomTab.Screen
         name="Settings"
-        component={SettingsWithNav}
+        component={ProductsWithNav}
         options={{
-          tabBarLabel: 'Paramètres',
-          title: 'Paramètres',
+          tabBarLabel: 'Rechercher',
+          title: 'Recherche',
         }}
       />
     </BottomTab.Navigator>
@@ -362,11 +383,15 @@ export const RootNavigator = () => {
         }}
       >
         {!isOnboardingComplete ? (
+          // Onboarding uniquement au premier lancement
           <RootStack.Screen name="Onboarding" component={Onboarding} />
-        ) : !isUserLoggedIn ? (
-          <RootStack.Screen name="Auth" component={AuthNavigator} />
         ) : (
-          <RootStack.Screen name="Main" component={MainStackNavigator} />
+          // Après onboarding, toujours accès à Main (comme le web)
+          // L'authentification sera vérifiée page par page avec le Guard
+          <>
+            <RootStack.Screen name="Main" component={MainStackNavigator} />
+            <RootStack.Screen name="Auth" component={AuthNavigator} />
+          </>
         )}
       </RootStack.Navigator>
     </NavigationContainer>

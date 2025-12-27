@@ -26,8 +26,9 @@ import { fetchPublicSellersAction } from '../../../store/user/actions';
 // Components
 import TopNavigation from '../../../components/TopNavigation/TopNavigation';
 import CategoryCard from '../../../components/CategoryCard';
-import ProductCard from '../../../components/ProductCard';
-import SellerCard from '../../../components/SellerCard';
+import ProductCard from '../../../components/ProductHomeCard';
+import SellerCard from '../../../components/SellerHomeCard';
+import createStyles from './style';
 
 const Home = () => {
   const { theme } = useTheme();
@@ -51,16 +52,22 @@ const Home = () => {
     loadInitialData();
   }, []);
 
-  const loadInitialData = async () => {
+  const loadInitialData = async (retryCount = 2) => {
     try {
       await Promise.all([
-        dispatch(getAllCategoriesAction()).unwrap(),
+        dispatch(getAllCategoriesAction({ limit: 20 })).unwrap(),
         dispatch(getValidatedProductsAction({ page: 1, limit: 12 })).unwrap(),
         dispatch(fetchCitiesAction()).unwrap(),
         dispatch(fetchPublicSellersAction({ page: 1, limit: 10 })).unwrap(),
       ]);
-    } catch (error) {
-      // Erreur silencieuse
+    } catch (error: any) {
+      console.error('❌ Erreur chargement données Home:', error);
+      
+      // Retry automatique en cas d'erreur réseau (max 2 tentatives)
+      if (error?.message?.includes('Network') && retryCount < 2) {
+        console.log(`🔄 Nouvelle tentative (${retryCount + 1}/2) dans 1 seconde...`);
+        setTimeout(() => loadInitialData(retryCount + 1), 1000);
+      }
     }
   };
 
@@ -87,145 +94,10 @@ const Home = () => {
   // Enrichir les catégories avec les icônes
   const enrichedCategories = useMemo(() => {
     if (!categories || categories.length === 0) return [];
-    return enrichCategoriesWithIcons(categories).slice(0, 10);
+    return enrichCategoriesWithIcons(categories).slice(0, 20);
   }, [categories]);
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    scrollContent: {
-      paddingBottom: 80,
-    },
-    // Hero Section - Comme la version web
-    heroSection: {
-      backgroundColor: theme.colors.primary,
-      paddingHorizontal: 20,
-      paddingTop: 16,
-      paddingBottom: 20,
-      alignItems: 'center',
-    },
-    heroTitle: {
-      fontSize: 22,
-      fontWeight: '700',
-      color: '#FFFFFF',
-      textAlign: 'center',
-      marginBottom: 8,
-      lineHeight: 28,
-    },
-    heroSubtitle: {
-      fontSize: 13,
-      color: 'rgba(255, 255, 255, 0.9)',
-      textAlign: 'center',
-      marginBottom: 16,
-      lineHeight: 18,
-    },
-    section: {
-      marginTop: 20,
-      paddingHorizontal: 16,
-    },
-    sectionHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 12,
-    },
-    sectionTitle: {
-      fontSize: 16,
-      fontWeight: '700',
-      color: theme.colors.text,
-    },
-    seeAllButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 4,
-    },
-    seeAllText: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: theme.colors.primary,
-    },
-    categoriesContainer: {
-      paddingLeft: 16,
-    },
-    productsContainer: {
-      paddingLeft: 16,
-    },
-    sellersContainer: {
-      paddingLeft: 16,
-    },
-    loadingContainer: {
-      padding: 40,
-      alignItems: 'center',
-    },
-    loadingText: {
-      marginTop: 12,
-      fontSize: 14,
-      color: theme.colors.textSecondary,
-    },
-    emptyContainer: {
-      padding: 40,
-      alignItems: 'center',
-    },
-    emptyText: {
-      fontSize: 14,
-      color: theme.colors.textSecondary,
-      textAlign: 'center',
-    },
-    howItWorksSection: {
-      marginTop: 20,
-      paddingHorizontal: 16,
-      paddingVertical: 16,
-      backgroundColor: theme.colors.surface,
-    },
-    howItWorksHeader: {
-      alignItems: 'center',
-      marginBottom: 16,
-    },
-    howItWorksTitle: {
-      fontSize: 16,
-      fontWeight: '700',
-      color: theme.colors.text,
-      marginBottom: 4,
-      textAlign: 'center',
-    },
-    howItWorksSubtitle: {
-      fontSize: 12,
-      color: theme.colors.textSecondary,
-      textAlign: 'center',
-    },
-    stepsContainer: {
-      gap: 12,
-    },
-    stepCard: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      gap: 12,
-    },
-    stepIconContainer: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      backgroundColor: theme.colors.primary,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    stepContent: {
-      flex: 1,
-    },
-    stepTitle: {
-      fontSize: 13,
-      fontWeight: '600',
-      color: theme.colors.text,
-      marginBottom: 2,
-    },
-    stepDescription: {
-      fontSize: 11,
-      color: theme.colors.textSecondary,
-      lineHeight: 15,
-    },
-  });
+  const styles = createStyles(theme);
 
   return (
     <View style={styles.container}>
@@ -249,13 +121,6 @@ const Home = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{t('home.allCategories')}</Text>
-            <TouchableOpacity 
-              style={styles.seeAllButton}
-              onPress={() => (navigation as any).navigate('Categories')}
-            >
-              <Text style={styles.seeAllText}>{t('home.seeAll')}</Text>
-              <Icon name="chevron-forward" size={16} color={theme.colors.primary} />
-            </TouchableOpacity>
           </View>
 
           {categoriesLoading ? (
