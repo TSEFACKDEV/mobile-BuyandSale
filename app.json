@@ -13,10 +13,6 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "extra": {
-      "apiUrl": "http://192.168.1.173:3001/api/buyandsale",
-      "prodApiUrl": "https://your-production-api.com/api/buyandsale"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.buyandsale.app",
@@ -27,7 +23,7 @@
             "localhost": {
               "NSExceptionAllowsInsecureHTTPLoads": true
             },
-            "192.168.1.173": {
+            "192.168.1.28": {
               "NSExceptionAllowsInsecureHTTPLoads": true
             }
           }
@@ -41,8 +37,7 @@
       },
       "package": "com.buyandsale.app",
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "usesCleartextTraffic": true
+      "predictiveBackGestureEnabled": false
     },
     "web": {
       "favicon": "./assets/favicon.png"
