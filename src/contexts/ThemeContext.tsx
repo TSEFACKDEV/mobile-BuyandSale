@@ -181,7 +181,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       setThemeMode(newMode);
       await AsyncStorage.setItem('themeMode', newMode);
     } catch (error) {
-      console.error('Erreur lors du changement du thème:', error);
+      // Erreur silencieuse
     }
   };
 
@@ -191,7 +191,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       setThemeMode(mode);
       await AsyncStorage.setItem('themeMode', mode);
     } catch (error) {
-      console.error('Erreur lors du changement du mode du thème:', error);
+      // Erreur silencieuse
     }
   };
 

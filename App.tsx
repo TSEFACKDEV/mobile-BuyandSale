@@ -9,6 +9,7 @@ import { store, persistor } from './src/store';
 import { AuthProvider } from './src/contexts/AuthContext';
 import RootNavigator from './src/Navigation/RootNavigator';
 import { ThemeProvider } from './src/contexts/ThemeContext';
+import { LanguageProvider } from './src/contexts/LanguageContext';
 
 
 // Composant interne qui a accès au store
@@ -35,8 +36,10 @@ function AppContent() {
     <GestureHandlerRootView style={styles.container}>
       <AuthProvider>
         <ThemeProvider>
-          <StatusBar style="dark" />
-          <RootNavigator />
+          <LanguageProvider>
+            <StatusBar style="dark" />
+            <RootNavigator />
+          </LanguageProvider>
         </ThemeProvider>
       </AuthProvider>
     </GestureHandlerRootView>

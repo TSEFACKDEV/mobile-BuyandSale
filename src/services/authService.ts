@@ -10,7 +10,7 @@ export const authService = {
     try {
       await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
     } catch (error) {
-      console.error('Erreur lors du marquage de onboarding:', error);
+      // Erreur silencieuse
     }
   },
 
@@ -19,7 +19,7 @@ export const authService = {
       const value = await AsyncStorage.getItem(ONBOARDING_KEY);
       return value === 'true';
     } catch (error) {
-      console.error('Erreur lors de la vérification du onboarding:', error);
+      // Erreur silencieuse
       return false;
     }
   },
@@ -44,7 +44,7 @@ export const authService = {
         message: 'Connexion réussie',
       };
     } catch (error) {
-      console.error('Erreur lors de la connexion:', error);
+      throw error;
       return {
         success: false,
         message: 'Erreur de connexion',
@@ -65,14 +65,12 @@ export const authService = {
       //   body: JSON.stringify(data),
       // });
       
-      console.log('Inscription avec:', data);
-      
       return {
         success: true,
         message: 'Inscription réussie. Veuillez vérifier votre email.',
       };
     } catch (error) {
-      console.error('Erreur lors de l\'inscription:', error);
+      throw error;
       return {
         success: false,
         message: 'Erreur lors de l\'inscription',
@@ -85,7 +83,7 @@ export const authService = {
       await AsyncStorage.removeItem(AUTH_TOKEN_KEY);
       await AsyncStorage.removeItem(USER_DATA_KEY);
     } catch (error) {
-      console.error('Erreur lors de la déconnexion:', error);
+      // Erreur silencieuse
     }
   },
 
@@ -94,7 +92,7 @@ export const authService = {
       const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
       return token;
     } catch (error) {
-      console.error('Erreur lors de la récupération du token:', error);
+      return null;
       return null;
     }
   },
@@ -104,7 +102,7 @@ export const authService = {
       const token = await AsyncStorage.getItem(AUTH_TOKEN_KEY);
       return !!token;
     } catch (error) {
-      console.error('Erreur lors de la vérification de connexion:', error);
+      return false;
       return false;
     }
   },
@@ -114,7 +112,7 @@ export const authService = {
     try {
       await AsyncStorage.setItem(USER_DATA_KEY, JSON.stringify(userData));
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde des données utilisateur:', error);
+      // Erreur silencieuse
     }
   },
 
@@ -123,7 +121,7 @@ export const authService = {
       const data = await AsyncStorage.getItem(USER_DATA_KEY);
       return data ? JSON.parse(data) : null;
     } catch (error) {
-      console.error('Erreur lors de la récupération des données utilisateur:', error);
+      return null;
       return null;
     }
   },

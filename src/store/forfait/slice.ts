@@ -142,4 +142,17 @@ export const {
   resetForfaitStore,
 } = forfaitSlice.actions;
 
+// Selectors
+export const selectForfaits = (state: any) => state.forfait.forfaits;
+export const selectForfaitStatus = (state: any) => {
+  if (state.forfait.forfaitsLoading) return 'loading';
+  if (state.forfait.forfaits?.length > 0) return 'succeeded';
+  return 'idle';
+};
+export const selectForfaitError = (state: any) => state.forfait.forfaitsError;
+export const selectProductForfaits = (state: any) => state.forfait.productForfaits;
+export const selectEligibility = (state: any) => state.forfait.eligibility;
+export const selectPaymentDetails = (state: any) => state.forfait.paymentDetails;
+export const selectAssignLoading = (state: any) => state.forfait.assignLoading;
+
 export default forfaitSlice.reducer;

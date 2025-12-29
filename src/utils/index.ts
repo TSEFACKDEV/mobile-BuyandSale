@@ -19,7 +19,7 @@ class Utils {
       const state = store.getState();
       return state.authentification?.auth?.entities?.token?.refreshToken || null;
     } catch (error) {
-      console.error('Erreur lors de la récupération du refresh token:', error);
+      // Erreur silencieuse
       return null;
     }
   }
