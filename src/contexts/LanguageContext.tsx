@@ -46,10 +46,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     await setLanguage(newLang);
   };
 
-  if (!isInitialized) {
-    return <>{children}</>;
-  }
-
+  // Toujours fournir le Provider, même pendant l'initialisation
   return (
     <LanguageContext.Provider value={{ language, setLanguage, toggleLanguage }}>
       {children}
