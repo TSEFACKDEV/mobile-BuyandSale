@@ -1,9 +1,9 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { useThemeColors } from '../../contexts/ThemeContext';
-import COLORS from '../../pages/colors';
+import createStyles from './style';
 
 interface TopNavigationProps {
   showBackButton?: boolean;
@@ -39,59 +39,7 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
     navigation.navigate('UserProfile' as never);
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      backgroundColor: colors.background,
-      borderBottomColor: colors.border,
-      borderBottomWidth: 1,
-      paddingTop: 40,
-      paddingBottom: 12,
-      paddingHorizontal: 16,
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    leftSection: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      flex: 1,
-    },
-    backButton: {
-      marginRight: 12,
-      padding: 8,
-    },
-    titleSection: {
-      flex: 1,
-    },
-    appTitle: {
-      fontSize: 18,
-      fontWeight: '700',
-      letterSpacing: 0.5,
-      fontStyle: 'italic',
-
-    },
-    titleText: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: colors.text,
-    },
-    rightSection: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      gap: 16,
-    },
-    iconButton: {
-      padding: 8,
-      borderRadius: 8,
-    },
-    orangeText: {
-      color: COLORS.primary,
-    },
-    darkBlueText: {
-      color: COLORS.secondary,
-    },
-  });
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <View style={styles.container}>

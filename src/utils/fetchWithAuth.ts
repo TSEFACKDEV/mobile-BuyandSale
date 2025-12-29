@@ -7,7 +7,7 @@ export const fetchWithAuth = async (
   url: string,
   options: RequestInit = {}
 ): Promise<Response> => {
-  const token = await Utils.getAccessToken();
+  const token = Utils.getAccessToken(); // Synchrone maintenant
 
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string> || {}),
@@ -33,11 +33,10 @@ export const fetchWithAuth = async (
 
   // Token refresh on 401 (EXACTEMENT comme React)
   if (response.status === 401) {
-    const refreshToken = await Utils.getRefreshToken();
+    const refreshToken = Utils.getRefreshToken(); // Synchrone maintenant
     
     if (!refreshToken) {
-      // Pas de refresh token - logout
-      await Utils.clearTokens();
+      // Pas de refresh token - retourner 401 (l'appelant gère le logout)
       return response;
     }
 
@@ -56,13 +55,17 @@ export const fetchWithAuth = async (
       const data = await refreshResponse.json();
 
       if (data.data?.token?.AccessToken) {
-        await Utils.setAccessToken(data.data.token.AccessToken);
+        // Utiliser l'import dynamique pour éviter le cycle
+        const { store } = require('../store');
+        const { setAccessToken: setAccessTokenAction } = require('../store/authentification/slice');
         
-        // Sauvegarder le nouveau refresh token si fourni (backend peut renvoyer RefreshToken ou refreshToken)
-        const newRefreshToken = data.data?.token?.RefreshToken || data.data?.token?.refreshToken;
-        if (newRefreshToken) {
-          await Utils.setRefreshToken(newRefreshToken);
-        }
+        // Utiliser Redux pour sauvegarder le nouveau token
+        const newToken = {
+          AccessToken: data.data.token.AccessToken,
+          refreshToken: data.data?.token?.RefreshToken || data.data?.token?.refreshToken || refreshToken,
+        };
+        
+        store.dispatch(setAccessTokenAction(newToken));
 
         headers['Authorization'] = `Bearer ${data.data.token.AccessToken}`;
 
@@ -79,10 +82,10 @@ export const fetchWithAuth = async (
           headers,
         });
       }
-    } else {
-      // Logout si refresh échoue (comme React dispatch(logoutAction()))
-      await Utils.clearTokens();
     }
+    
+    // Si refresh échoue, retourner la réponse (l'appelant gère le logout)
+    return response;
   }
 
   return response;

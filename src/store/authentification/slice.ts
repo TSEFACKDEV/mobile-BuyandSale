@@ -2,7 +2,6 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { LoadingType, type AsyncState } from '../../models/store';
 import type { AuthUser, Token } from '../../models/user';
 import { loginAction, logoutAction, getUserProfileAction, handleSocialAuthCallback } from './actions';
-import Utils from '../../utils';
 import { getErrorMessage } from '../../utils/errorHelpers';
 
 // Type spécial pour la réponse BuyAndSale
@@ -38,10 +37,6 @@ const authentificationSlice = createSlice({
     resetAuthStatus: (state) => {
       state.auth.status = LoadingType.IDLE;
     },
-    // Hydrater l'état depuis le storage
-    hydrateAuth: (state, action: PayloadAction<AuthUser | null>) => {
-      state.auth.entities = action.payload;
-    },
   },
   extraReducers: (builder) => {
     builder
@@ -64,11 +59,10 @@ const authentificationSlice = createSlice({
             };
 
             state.auth.entities = authUser;
-            Utils.saveInLocalStorage(authUser);
+            // Redux Persist va automatiquement sauvegarder - pas besoin de Utils.saveInLocalStorage
           } else {
             // Fallback au format direct
             state.auth.entities = action.payload.data as AuthUser;
-            Utils.saveInLocalStorage(action.payload.data as AuthUser);
           }
         }
         state.auth.error = null;
@@ -90,7 +84,7 @@ const authentificationSlice = createSlice({
         state.auth.entities = null;
         state.auth.status = LoadingType.IDLE;
         state.auth.error = null;
-        Utils.clearTokens();
+        // Redux Persist va automatiquement sauvegarder l'état vide
       })
 
       // === GET PROFILE ===
@@ -114,8 +108,7 @@ const authentificationSlice = createSlice({
               ...state.auth.entities,
               ...userWithProducts,
             };
-            // Mettre à jour aussi dans le storage
-            Utils.saveInLocalStorage(state.auth.entities);
+            // Redux Persist va automatiquement sauvegarder
           }
         }
       })
@@ -141,11 +134,10 @@ const authentificationSlice = createSlice({
             };
 
             state.auth.entities = authUser;
-            Utils.saveInLocalStorage(authUser);
+            // Redux Persist va automatiquement sauvegarder
           } else {
             // Fallback au format direct
             state.auth.entities = action.payload.data as AuthUser;
-            Utils.saveInLocalStorage(action.payload.data as AuthUser);
           }
         }
         state.auth.error = null;
@@ -167,6 +159,6 @@ const authentificationSlice = createSlice({
 export const selectUserAuthenticated = (state: { authentification: AuthentificationState }) =>
   state.authentification.auth;
 
-export const { resetAuthStatus, setAccessToken, hydrateAuth } =
+export const { resetAuthStatus, setAccessToken } =
   authentificationSlice.actions;
 export default authentificationSlice;

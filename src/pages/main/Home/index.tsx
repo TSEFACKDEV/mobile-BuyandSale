@@ -107,6 +107,7 @@ const Home = () => {
         ...seller,
         totalReviews,
         averageRating,
+        
       };
     });
   }, [publicSellers]);

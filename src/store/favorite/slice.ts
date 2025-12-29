@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
 import {
   getUserFavoritesAction,
   addToFavoritesAction,
@@ -160,6 +160,19 @@ const favoriteSlice = createSlice({
       });
   },
 });
+
+// ===============================
+// SELECTORS
+// ===============================
+
+// Selector pour obtenir les données favorites brutes
+const selectFavoriteData = (state: { favorite: FavoriteState }) => state.favorite.data;
+
+// Selector mémorisé pour obtenir uniquement les favoris valides (avec produit)
+export const selectValidFavorites = createSelector(
+  [selectFavoriteData],
+  (favorites) => favorites.filter((fav) => fav.productId && fav.product)
+);
 
 export const { resetError, resetToggleStatus, clearFavorites } = favoriteSlice.actions;
 

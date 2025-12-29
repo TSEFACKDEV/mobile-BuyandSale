@@ -47,6 +47,7 @@ import { useThemeColors } from '../contexts/ThemeContext';
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
+const ProductsStack = createNativeStackNavigator<HomeStackParamList>(); // Réutilise le même type
 const BottomTab = createBottomTabNavigator<BottomTabParamList>();
 const MainStack = createNativeStackNavigator();
 
@@ -129,15 +130,47 @@ const HomeStackNavigator = () => {
 };
 
 // =====================
+// Products Stack Navigator
+// =====================
+const ProductsStackNavigator = () => {
+  return (
+    <ProductsStack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <ProductsStack.Screen name="ProductsList" component={Products} />
+      <ProductsStack.Screen
+        name="ProductDetails"
+        options={{
+          title: 'Détails du produit',
+        }}
+      >
+        {() => (
+          <Authenticated>
+            <ProductDetails />
+          </Authenticated>
+        )}
+      </ProductsStack.Screen>
+      <ProductsStack.Screen
+        name="SellerDetails"
+        options={{
+          title: 'Profil du vendeur',
+        }}
+      >
+        {() => (
+          <Authenticated>
+            <SellerDetails />
+          </Authenticated>
+        )}
+      </ProductsStack.Screen>
+    </ProductsStack.Navigator>
+  );
+};
+
+// =====================
 // Wrapper components for screens with TopNavigation
 // =====================
-const ProductsWithNav = () => (
-  <View style={{ flex: 1 }}>
-    <TopNavigation showBackButton title="Produits" />
-    <Products />
-  </View>
-);
-
 const SellersWithNav = () => (
   <View style={{ flex: 1 }}>
     <TopNavigation showBackButton title="Vendeurs" />
@@ -241,7 +274,7 @@ const MainTabNavigator = () => {
       {/* PRODUCTS */}
       <BottomTab.Screen
         name="Products"
-        component={ProductsWithNav}
+        component={ProductsStackNavigator}
         options={{
           tabBarLabel: 'Produits',
           title: 'Produits',
@@ -271,7 +304,7 @@ const MainTabNavigator = () => {
       {/* SEARCH (redirect to Products) */}
       <BottomTab.Screen
         name="Settings"
-        component={ProductsWithNav}
+        component={ProductsStackNavigator}
         options={{
           tabBarLabel: 'Rechercher',
           title: 'Recherche',
