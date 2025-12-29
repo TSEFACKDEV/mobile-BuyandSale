@@ -26,8 +26,15 @@ export const loginAction = createAsyncThunk<
       throw new Error("Format d'identifiant invalide");
     }
 
+    const loginUrl = `${API_CONFIG.BASE_URL}/${API_ENDPOINTS.USER_LOGIN}`;
+    console.log('\n🔐 === TENTATIVE DE CONNEXION ===');
+    console.log('📡 URL complète:', loginUrl);
+    console.log('📦 Données envoyées:', { identifiant: args.identifiant, password: '***' });
+    console.log('🌐 BASE_URL:', API_CONFIG.BASE_URL);
+    console.log('🔗 ENDPOINT:', API_ENDPOINTS.USER_LOGIN);
+    
     const response = await fetch(
-      `${API_CONFIG.BASE_URL}/${API_ENDPOINTS.USER_LOGIN}`,
+      loginUrl,
       {
         method: 'POST',
         headers: {
@@ -36,6 +43,8 @@ export const loginAction = createAsyncThunk<
         body: JSON.stringify(args),
       }
     );
+    
+    console.log('📥 Réponse HTTP status:', response.status);
 
     let data;
     try {
@@ -65,6 +74,11 @@ export const loginAction = createAsyncThunk<
 
     return data;
   } catch (error: unknown) {
+    console.error('\n❌ === ERREUR DE CONNEXION ===');
+    console.error('Type d\'erreur:', error);
+    console.error('Message:', error instanceof Error ? error.message : 'Erreur inconnue');
+    console.error('URL utilisée:', `${API_CONFIG.BASE_URL}/${API_ENDPOINTS.USER_LOGIN}`);
+    
     const errorMessage =
       error instanceof Error ? error.message : 'Erreur de connexion inconnue';
 
