@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import API_CONFIG from '../../config/api.config';
+import fetchWithAuth from '../../utils/fetchWithAuth';
 
 // ===============================
 // TYPES ET INTERFACES
@@ -40,20 +40,10 @@ export const fetchNotificationsAction = createAsyncThunk<
   'notification/fetchAll',
   async (_, { rejectWithValue }) => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${API_CONFIG.BASE_URL}/notification`,
         {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
         }
       );
 
@@ -84,20 +74,10 @@ export const markAsReadAction = createAsyncThunk<
   'notification/markAsRead',
   async (notificationId, { rejectWithValue }) => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${API_CONFIG.BASE_URL}/notification/${notificationId}/read`,
         {
           method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
         }
       );
 
@@ -128,20 +108,10 @@ export const markAllAsReadAction = createAsyncThunk<
   'notification/markAllAsRead',
   async (_, { rejectWithValue }) => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${API_CONFIG.BASE_URL}/notification/mark-all-read`,
         {
           method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
         }
       );
 

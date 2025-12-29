@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import API_CONFIG from '../../config/api.config';
+import fetchWithAuth from '../../utils/fetchWithAuth';
 
 // ===============================
 // TYPES ET INTERFACES
@@ -264,20 +264,10 @@ export const getProductByIdAction = createAsyncThunk<
   'product/getById',
   async (productId, { rejectWithValue }) => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${API_CONFIG.BASE_URL}/product/${productId}`,
         {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
         }
       );
 
@@ -308,12 +298,6 @@ export const getSellerProductsAction = createAsyncThunk<
   'product/getBySeller',
   async ({ sellerId, search, page = 1, limit = 10 }, { rejectWithValue }) => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
       const params = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
@@ -321,14 +305,10 @@ export const getSellerProductsAction = createAsyncThunk<
 
       if (search) params.append('search', search);
 
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${API_CONFIG.BASE_URL}/product/seller/${sellerId}?${params}`,
         {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
         }
       );
 
@@ -359,12 +339,6 @@ export const getUserProductsAction = createAsyncThunk<
   'product/getByUser',
   async ({ userId, search, page = 1, limit = 10 }, { rejectWithValue }) => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
       const params = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
@@ -372,14 +346,10 @@ export const getUserProductsAction = createAsyncThunk<
 
       if (search) params.append('search', search);
 
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${API_CONFIG.BASE_URL}/product/user/${userId}?${params}`,
         {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
         }
       );
 
@@ -410,20 +380,10 @@ export const getMyPendingProductsAction = createAsyncThunk<
   'product/getMyPending',
   async (_, { rejectWithValue }) => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${API_CONFIG.BASE_URL}/product/my-pending`,
         {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
         }
       );
 
@@ -455,12 +415,6 @@ export const createProductAction = createAsyncThunk<
   'product/create',
   async (payload, { rejectWithValue }) => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
       // Création du FormData pour l'upload d'images
       const formData = new FormData();
       formData.append('name', payload.name);
@@ -483,14 +437,10 @@ export const createProductAction = createAsyncThunk<
         } as any);
       });
 
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${API_CONFIG.BASE_URL}/product`,
         {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            // Ne pas définir Content-Type, laissez fetch le définir automatiquement pour FormData
-          },
           body: formData,
         }
       );
@@ -522,19 +472,10 @@ export const updateProductAction = createAsyncThunk<
   'product/update',
   async (payload, { rejectWithValue }) => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
       const { id, ...updateData } = payload;
 
       // Création du FormData si des images sont fournies
       let body: any;
-      let headers: any = {
-        'Authorization': `Bearer ${token}`,
-      };
 
       if (updateData.images && updateData.images.length > 0) {
         const formData = new FormData();
@@ -556,15 +497,13 @@ export const updateProductAction = createAsyncThunk<
 
         body = formData;
       } else {
-        headers['Content-Type'] = 'application/json';
         body = JSON.stringify(updateData);
       }
 
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${API_CONFIG.BASE_URL}/product/${id}`,
         {
           method: 'PUT',
-          headers,
           body,
         }
       );
@@ -596,20 +535,10 @@ export const deleteProductAction = createAsyncThunk<
   'product/delete',
   async (productId, { rejectWithValue }) => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${API_CONFIG.BASE_URL}/product/${productId}`,
         {
           method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
         }
       );
 
@@ -640,20 +569,10 @@ export const recordProductViewAction = createAsyncThunk<
   'product/recordView',
   async (productId, { rejectWithValue }) => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${API_CONFIG.BASE_URL}/product/${productId}/view`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
         }
       );
 

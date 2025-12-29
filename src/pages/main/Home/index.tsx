@@ -20,6 +20,10 @@ import { enrichCategoriesWithIcons } from '../../../utils/categoryHelpers';
 // Actions
 import { getAllCategoriesAction } from '../../../store/category/actions';
 import { getValidatedProductsAction } from '../../../store/product/actions';
+import { 
+  selectValidatedProducts, 
+  selectValidatedProductsStatus 
+} from '../../../store/product/slice';
 import { fetchCitiesAction } from '../../../store/city/actions';
 import { fetchPublicSellersAction } from '../../../store/user/actions';
 
@@ -39,7 +43,8 @@ const Home = () => {
   // State from Redux
   const { data: categories, status: categoryStatus } = useAppSelector(state => state.category);
   const categoriesLoading = categoryStatus === 'PENDING';
-  const { validatedProducts, validatedProductsStatus } = useAppSelector(state => state.product);
+  const validatedProducts = useAppSelector(selectValidatedProducts);
+  const validatedProductsStatus = useAppSelector(selectValidatedProductsStatus);
   const productsLoading = validatedProductsStatus === 'loading';
   const { data: cities, status: cityStatus } = useAppSelector(state => state.city);
   const citiesLoading = cityStatus === 'PENDING';
@@ -86,9 +91,24 @@ const Home = () => {
     return validatedProducts.slice(0, 12);
   }, [validatedProducts]);
 
-  // Top vendeurs (limiter à 10)
+  // Top vendeurs (limiter à 10) avec calcul des statistiques de reviews
   const topSellers = useMemo(() => {
-    return publicSellers?.slice(0, 10) || [];
+    if (!publicSellers || publicSellers.length === 0) return [];
+    
+    // Calculer les stats de reviews pour chaque vendeur (comme le fait le backend pour le web)
+    return publicSellers.slice(0, 10).map((seller: any) => {
+      const reviews = seller.reviewsReceived || [];
+      const totalReviews = reviews.length;
+      const averageRating = totalReviews > 0
+        ? Math.round((reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / totalReviews) * 10) / 10
+        : 0;
+      
+      return {
+        ...seller,
+        totalReviews,
+        averageRating,
+      };
+    });
   }, [publicSellers]);
 
   // Enrichir les catégories avec les icônes

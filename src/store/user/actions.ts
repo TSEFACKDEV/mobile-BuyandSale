@@ -1,6 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import type { ThunkApi } from '../../models/store'
 import API_CONFIG from '../../config/api.config'
+import fetchWithAuth from '../../utils/fetchWithAuth'
 
 // Interface pour un utilisateur
 export interface AuthUser {
@@ -155,22 +156,10 @@ export const reportUserAction = createAsyncThunk<
   ThunkApi
 >('user/report', async ({ id, reason, details }, { rejectWithValue }) => {
   try {
-    // Récupérer le token depuis AsyncStorage
-    const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default
-    const token = await AsyncStorage.getItem('authToken')
-
-    if (!token) {
-      throw new Error('Authentification requise')
-    }
-
     const url = `${API_CONFIG.BASE_URL}/user/report/${id}`
 
-    const response = await fetch(url, {
+    const response = await fetchWithAuth(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
       body: JSON.stringify({ reason, details }),
     })
 

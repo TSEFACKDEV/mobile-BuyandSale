@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import API_CONFIG from '../../config/api.config';
+import fetchWithAuth from '../../utils/fetchWithAuth';
 
 // ===============================
 // TYPES ET INTERFACES
@@ -50,7 +50,7 @@ export interface SellerReviewsResponse {
 }
 
 export interface CreateReviewPayload {
-  userId: string;
+  sellerId: string;
   rating: number;
 }
 
@@ -159,21 +159,8 @@ export const getMyReviewsAction = createAsyncThunk<
   'review/getMy',
   async (_, { rejectWithValue }) => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}/review/my-reviews`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-        }
+      const response = await fetchWithAuth(
+        `${API_CONFIG.BASE_URL}/review/my-reviews`
       );
 
       const data = await response.json();
@@ -203,20 +190,10 @@ export const createReviewAction = createAsyncThunk<
   'review/create',
   async (reviewData, { rejectWithValue }) => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${API_CONFIG.BASE_URL}/review`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
           body: JSON.stringify(reviewData),
         }
       );
@@ -248,20 +225,10 @@ export const updateReviewAction = createAsyncThunk<
   'review/update',
   async ({ id, rating }, { rejectWithValue }) => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${API_CONFIG.BASE_URL}/review/${id}`,
         {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
           body: JSON.stringify({ rating }),
         }
       );
@@ -293,20 +260,10 @@ export const deleteReviewAction = createAsyncThunk<
   'review/delete',
   async (reviewId, { rejectWithValue }) => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${API_CONFIG.BASE_URL}/review/${reviewId}`,
         {
           method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
         }
       );
 

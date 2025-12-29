@@ -463,4 +463,56 @@ export const {
   clearUpdateProductError,
 } = productSlice.actions;
 
+// ===============================
+// SELECTORS
+// ===============================
+
+// Produits validés
+export const selectValidatedProducts = (state: any) => state.product.validatedProducts;
+export const selectValidatedProductsStatus = (state: any) => state.product.validatedProductsStatus;
+export const selectValidatedProductsError = (state: any) => state.product.validatedProductsError;
+export const selectValidatedProductsPagination = (state: any) => state.product.validatedProductsPagination;
+
+// Produits par catégorie
+export const selectCategoryProducts = (state: any) => state.product.categoryProducts;
+export const selectCategoryProductsStatus = (state: any) => state.product.categoryProductsStatus;
+export const selectCurrentCategory = (state: any) => state.product.currentCategory;
+
+// Produit actuel
+export const selectCurrentProduct = (state: any) => state.product.currentProduct;
+export const selectCurrentProductStatus = (state: any) => state.product.currentProductStatus;
+export const selectCurrentProductError = (state: any) => state.product.currentProductError;
+
+// Produits du vendeur
+export const selectSellerProducts = (state: any) => state.product.sellerProducts;
+export const selectSellerProductsStatus = (state: any) => state.product.sellerProductsStatus;
+export const selectSellerProductsError = (state: any) => state.product.sellerProductsError;
+export const selectSellerPagination = (state: any) => state.product.sellerProductsPagination;
+export const selectCurrentSeller = (state: any) => state.product.currentSeller;
+
+// Produits de l'utilisateur
+export const selectUserProducts = (state: any) => state.product.userProducts;
+export const selectUserProductsStatus = (state: any) => state.product.userProductsStatus;
+export const selectUserPagination = (state: any) => state.product.userProductsPagination;
+
+// Mes produits en attente
+export const selectMyPendingProducts = (state: any) => state.product.myPendingProducts;
+export const selectMyPendingProductsStatus = (state: any) => state.product.myPendingProductsStatus;
+
+// Status de création/mise à jour/suppression
+export const selectProductCreateStatus = (state: any) => state.product.createProductStatus;
+export const selectProductUpdateStatus = (state: any) => state.product.updateProductStatus;
+export const selectProductDeleteStatus = (state: any) => state.product.deleteProductStatus;
+
+// Erreurs
+export const selectProductsError = (state: any) => 
+  state.product.validatedProductsError || 
+  state.product.currentProductError || 
+  state.product.createProductError || 
+  state.product.updateProductError;
+
+// Statistiques
+export const selectProductStats = (state: any) => state.product.productStats;
+export const selectProductStatsStatus = (state: any) => state.product.productStatsStatus;
+
 export default productSlice.reducer;

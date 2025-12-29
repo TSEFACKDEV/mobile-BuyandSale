@@ -14,6 +14,9 @@ class Utils {
       await AsyncStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(user));
       if (user.token) {
         await AsyncStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, user.token.AccessToken);
+        if (user.token.refreshToken) {
+          await AsyncStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, user.token.refreshToken);
+        }
       }
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
@@ -51,6 +54,34 @@ class Utils {
     } catch (error) {
       console.error('Erreur lors de la récupération du token:', error);
       return null;
+    }
+  }
+
+  // Mettre à jour le token d'accès (comme React setJWT)
+  static async setAccessToken(token: string): Promise<void> {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du token:', error);
+    }
+  }
+
+  // Récupérer le refresh token
+  static async getRefreshToken(): Promise<string | null> {
+    try {
+      return await AsyncStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+    } catch (error) {
+      console.error('Erreur lors de la récupération du refresh token:', error);
+      return null;
+    }
+  }
+
+  // Mettre à jour le refresh token
+  static async setRefreshToken(token: string): Promise<void> {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, token);
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du refresh token:', error);
     }
   }
 }

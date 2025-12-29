@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
 import {
   getSellerReviewsAction,
   getReviewByIdAction,
@@ -246,5 +246,44 @@ export const {
   clearSellerReviews,
   clearSelectedReview,
 } = reviewSlice.actions;
+
+// ===============================
+// SELECTORS
+// ===============================
+
+export const selectMyReviews = (state: any) => state.review.myReviews;
+export const selectSellerReviews = (state: any) => state.review.sellerReviews;
+export const selectSelectedReview = (state: any) => state.review.selectedReview;
+export const selectReviewsError = (state: any) => state.review.error;
+export const selectReviewCreateStatus = (state: any) => state.review.createStatus;
+export const selectReviewUpdateStatus = (state: any) => state.review.updateStatus;
+export const selectReviewDeleteStatus = (state: any) => state.review.deleteStatus;
+export const selectSellerReviewsStatus = (state: any) => state.review.sellerStatus;
+export const selectMyReviewsStatus = (state: any) => state.review.myReviewsStatus;
+
+// Sélecteurs utiles
+export const selectHasUserReviewedSeller = (state: any, sellerId: string) =>
+  state.review.myReviews.some((review: Review) => review.authorId === sellerId);
+
+export const selectUserReviewForSeller = (state: any, sellerId: string) =>
+  state.review.myReviews.find((review: Review) => review.authorId === sellerId);
+
+// Constante par défaut pour éviter la création d'un nouvel objet à chaque fois
+const DEFAULT_RATING_STATS = {
+  totalReviews: 0,
+  averageRating: 0,
+  ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+};
+
+// Sélecteur mémorisé pour les statistiques de rating (comme React)
+export const selectUserRatingStats = createSelector(
+  [(state: any) => state.review.sellerReviews],
+  (sellerReviews) => {
+    if (!sellerReviews || !sellerReviews.statistics) {
+      return DEFAULT_RATING_STATS;
+    }
+    return sellerReviews.statistics;
+  }
+);
 
 export default reviewSlice.reducer;

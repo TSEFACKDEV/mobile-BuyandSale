@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import API_CONFIG from '../../config/api.config';
+import fetchWithAuth from '../../utils/fetchWithAuth';
 
 // ===============================
 // TYPES ET INTERFACES
@@ -51,20 +51,10 @@ export const getUserFavoritesAction = createAsyncThunk<
   'favorite/getUserFavorites',
   async (_, { rejectWithValue }) => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${API_CONFIG.BASE_URL}/favorite`,
         {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
         }
       );
 
@@ -95,20 +85,10 @@ export const addToFavoritesAction = createAsyncThunk<
   'favorite/addToFavorites',
   async ({ productId }, { rejectWithValue }) => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${API_CONFIG.BASE_URL}/favorite/add`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
           body: JSON.stringify({ productId }),
         }
       );
@@ -140,20 +120,10 @@ export const removeFromFavoritesAction = createAsyncThunk<
   'favorite/removeFromFavorites',
   async ({ productId }, { rejectWithValue }) => {
     try {
-      const token = await AsyncStorage.getItem('authToken');
-      
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${API_CONFIG.BASE_URL}/favorite/remove`,
         {
           method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
           body: JSON.stringify({ productId }),
         }
       );

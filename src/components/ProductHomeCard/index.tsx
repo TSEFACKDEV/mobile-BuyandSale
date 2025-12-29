@@ -6,7 +6,7 @@ import { useThemeColors } from '../../contexts/ThemeContext';
 import type { Product } from '../../store/product/actions';
 
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = 130; // Largeur légèrement agrandie
+const CARD_WIDTH = 120; // Largeur légèrement agrandie
 
 interface ProductCardProps {
   product: Product;

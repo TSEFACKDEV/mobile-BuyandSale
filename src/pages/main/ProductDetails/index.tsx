@@ -18,7 +18,15 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useAppDispatch, useAppSelector } from '../../../hooks/store';
 import { toggleFavoriteAction } from '../../../store/favorite/actions';
-import { recordProductViewAction } from '../../../store/product/actions';
+import { 
+  recordProductViewAction, 
+  getProductByIdAction 
+} from '../../../store/product/actions';
+import { 
+  selectCurrentProduct, 
+  selectCurrentProductStatus,
+  clearCurrentProduct 
+} from '../../../store/product/slice';
 import { getImageUrl } from '../../../utils/imageUtils';
 import { HomeStackParamList } from '../../../types/navigation';
 import createStyles from './style';
@@ -47,14 +55,24 @@ const ProductDetails = () => {
   const modalCarouselRef = useRef<ScrollView>(null);
 
   // Récupérer le produit depuis le store
-  const product = useAppSelector((state) =>
-    state.product.validatedProducts?.find((p) => p.id === productId)
-  );
+  const product = useAppSelector(selectCurrentProduct);
+  const productStatus = useAppSelector(selectCurrentProductStatus);
   const allFavorites = useAppSelector((state) => state.favorite.data || []);
 
   const isFavorite = product?.id
     ? allFavorites.some((fav) => fav.productId === product.id)
     : false;
+
+  // Charger le produit au montage
+  useEffect(() => {
+    if (productId) {
+      dispatch(getProductByIdAction(productId));
+    }
+
+    return () => {
+      dispatch(clearCurrentProduct());
+    };
+  }, [productId]);
 
   // Helpers
   const formatPrice = (price: number) => {
@@ -150,60 +168,54 @@ const ProductDetails = () => {
     return () => clearTimeout(timer);
   }, [dispatch, product?.id]);
 
+  // Affichage du chargement
+  if (productStatus === 'loading') {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={['top']}>
+        <View style={styles.errorContainer}>
+          <View style={styles.errorHeader}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
+              <Icon name="arrow-back" size={24} color={theme.colors.text} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.errorContent}>
+            <Icon name="time-outline" size={64} color={theme.colors.primary} />
+            <Text style={styles.errorText}>Chargement du produit...</Text>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   // Si produit introuvable
   if (!product) {
     return (
-      <View style={styles.errorContainer}>
-        <View style={styles.errorHeader}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
-            <Icon name="arrow-back" size={24} color={theme.colors.text} />
-          </TouchableOpacity>
+      <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={['top']}>
+        <View style={styles.errorContainer}>
+          <View style={styles.errorHeader}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
+              <Icon name="arrow-back" size={24} color={theme.colors.text} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.errorContent}>
+            <Icon name="alert-circle-outline" size={64} color={theme.colors.textTertiary} />
+            <Text style={styles.errorText}>Produit introuvable</Text>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.errorButton}>
+              <Text style={styles.errorButtonText}>Retour</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-        <View style={styles.errorContent}>
-          <Icon name="alert-circle-outline" size={64} color={theme.colors.textTertiary} />
-          <Text style={styles.errorText}>
-            Produit introuvable
-          </Text>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.errorButton}>
-            <Text style={styles.errorButtonText}>Retour</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.surface }} edges={['top']}>
-      <StatusBar barStyle="dark-content" backgroundColor={theme.colors.surface} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={['top']}>
+      <StatusBar barStyle="dark-content" backgroundColor={theme.colors.background} />
       <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
-            <Icon name="arrow-back" size={24} color={theme.colors.text} />
-          </TouchableOpacity>
-
-          <View style={styles.headerActions}>
-            <TouchableOpacity onPress={handleShare} style={styles.headerButton}>
-              <Icon name="share-outline" size={24} color={theme.colors.text} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={handleToggleFavorite}
-              style={styles.headerButton}
-              disabled={isTogglingFavorite}
-            >
-              <Icon
-                name={isFavorite ? 'heart' : 'heart-outline'}
-                size={24}
-                color={isFavorite ? '#EF4444' : theme.colors.text}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Images carousel - Plus compact */}
-        <View style={styles.carouselContainer}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Images carousel avec boutons overlay */}
+          <View style={styles.carouselContainer}>
           {product.images && product.images.length > 0 ? (
             <>
               <ScrollView
@@ -218,7 +230,7 @@ const ProductDetails = () => {
                 scrollEventThrottle={16}
                 style={styles.carouselScrollView}
               >
-                {product.images.map((imagePath, index) => {
+                {product.images.map((imagePath: string, index: number) => {
                   const imageUrl = getImageUrl(imagePath, 'product');
                   return (
                     <TouchableOpacity
@@ -247,7 +259,7 @@ const ProductDetails = () => {
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ gap: 8 }}
                   >
-                    {product.images.map((imagePath, index) => {
+                    {product.images.map((imagePath: string, index: number) => {
                       const thumbnailUrl = getImageUrl(imagePath, 'product');
                       return (
                         <TouchableOpacity
@@ -279,6 +291,31 @@ const ProductDetails = () => {
               <Text style={styles.placeholderText}>Aucune image</Text>
             </View>
           )}
+
+          {/* Boutons overlay sur l'image */}
+          <View style={styles.headerOverlay}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.overlayButton}>
+              <Icon name="arrow-back" size={24} color="#1F2937" />
+            </TouchableOpacity>
+
+            <View style={styles.overlayActions}>
+              <TouchableOpacity onPress={handleShare} style={styles.overlayButton}>
+                <Icon name="share-outline" size={24} color="#1F2937" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleToggleFavorite}
+                style={styles.overlayButton}
+                disabled={isTogglingFavorite}
+              >
+                <Icon
+                  name={isFavorite ? 'heart' : 'heart-outline'}
+                  size={24}
+                  color={isFavorite ? '#EF4444' : '#1F2937'}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
 
         {/* Contenu */}
@@ -496,7 +533,7 @@ const ProductDetails = () => {
                 scrollEventThrottle={16}
                 contentOffset={{ x: modalImageIndex * width, y: 0 }}
               >
-                {product.images?.map((imagePath, index) => {
+                {product.images?.map((imagePath: string, index: number) => {
                   const imageUrl = getImageUrl(imagePath, 'product');
                   return (
                     <View key={index} style={styles.modalImageWrapper}>
@@ -513,7 +550,7 @@ const ProductDetails = () => {
               {/* Indicateurs */}
               {product.images && product.images.length > 1 && (
                 <View style={styles.modalIndicators}>
-                  {product.images.map((_, index) => (
+                  {product.images.map((_: string, index: number) => (
                     <View
                       key={index}
                       style={[

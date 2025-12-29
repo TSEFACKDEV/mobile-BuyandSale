@@ -31,14 +31,47 @@ const createStyles = (theme: any) => StyleSheet.create({
   // Carousel
   carouselContainer: {
     backgroundColor: '#F3F4F6',
+    position: 'relative',
   },
   carouselScrollView: {
     width,
-    height: 250,
+    height: 350,
   },
   carouselImage: {
     width,
-    height: 250,
+    height: 350,
+  },
+  
+  // Boutons overlay sur l'image
+  headerOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 12,
+    zIndex: 10,
+  },
+  overlayButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  overlayActions: {
+    flexDirection: 'row',
+    gap: 12,
   },
   thumbnailsContainer: {
     paddingHorizontal: 12,
@@ -58,7 +91,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   placeholderContainer: {
     width,
-    height: 250,
+    height: 350,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#E5E7EB',

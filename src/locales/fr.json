@@ -28,6 +28,16 @@
     "reviews": "avis",
     "rating": "Note"
   },
+  "sellerProfile": {
+    "locationNotSpecified": "Localisation non spécifiée",
+    "memberSinceRecently": "Membre depuis récemment",
+    "reportModal": {
+      "reasonFraud": "Fraude ou arnaque",
+      "reasonSpam": "Spam ou publicité",
+      "reasonAbuse": "Comportement abusif",
+      "reasonOther": "Autre raison"
+    }
+  },
   "howItWorks": {
     "title": "Comment ça marche ?",
     "subtitle": "Vendre et acheter n'a jamais été aussi simple",
