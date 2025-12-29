@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+  Configuration de sécurité réseau pour Android
+  Permet les connexions HTTP (non HTTPS) vers le serveur de développement local
+  
+  IMPORTANT: À RETIRER EN PRODUCTION !
+-->
+<network-security-config>
+    <!-- Autoriser HTTP pour le développement local -->
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- IP locale du serveur de développement -->
+        <domain includeSubdomains="true">192.168.4.55</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+    </domain-config>
+    
+    <!-- En production, forcer HTTPS pour tout le reste -->
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>
