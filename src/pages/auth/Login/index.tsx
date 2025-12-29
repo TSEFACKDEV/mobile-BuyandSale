@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Switch, Alert, Linking } from 'react-native'
+import { View, Text, Pressable, ScrollView, Alert, Linking, TouchableOpacity, BackHandler } from 'react-native'
 import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -7,13 +7,13 @@ import { useNavigation } from '@react-navigation/native'
 import TextInput from '../../../components/TextImput'
 import Button from '../../../components/Button'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import Ionicons from '@expo/vector-icons/Ionicons'
 import styles from './style'
 import COLORS from '../../colors'
 import { useAppDispatch, useAppSelector } from '../../../hooks/store'
 import { loginAction } from '../../../store/authentification/actions'
 import { selectUserAuthenticated } from '../../../store/authentification/slice'
 import { LoadingType } from '../../../models/store'
-import type { UserLoginForm } from '../../../models/user'
 import API_CONFIG from '../../../config/api.config'
 
 type LoginNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>
@@ -22,63 +22,36 @@ const Login = () => {
   const navigation = useNavigation<LoginNavigationProp>()
   const dispatch = useAppDispatch()
   
-  // ✅ Pattern Redux standardisé avec hooks typés
   const authState = useAppSelector(selectUserAuthenticated)
   const isLoading = authState.status === LoadingType.PENDING
   
-  const [identifier, setIdentifier] = React.useState<string>('')
+  const [identifier, setIdentifier] = React.useState('')
   const [password, setPassword] = React.useState('')
-  const [rememberMe, setRememberMe] = React.useState(false)
   const [identifierError, setIdentifierError] = React.useState('')
   const [passwordError, setPasswordError] = React.useState('')
 
-  // Déterminer si c'est un email ou un téléphone
-  const getIdentifierType = (value: string): 'email' | 'phone' | 'invalid' => {
-    const trimmed = value.trim()
-    if (!trimmed) return 'invalid'
+  // Gérer le bouton retour Android
+  React.useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      navigation.navigate('Main' as any, { screen: 'HomeTab' });
+      return true;
+    });
+    return () => backHandler.remove();
+  }, [navigation]);
 
-    // Vérifier si c'est un email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (emailRegex.test(trimmed)) return 'email'
-
-    // Vérifier si c'est un téléphone camerounais (+237 ou 237)
-    const phoneRegex = /^(\+237|237)\s?[0-9]{8,9}$|^[0-9]{8,9}$/
-    if (phoneRegex.test(trimmed.replace(/\s/g, ''))) return 'phone'
-
-    return 'invalid'
-  }
-
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
-  }
-
-  const validatePhone = (phone: string) => {
-    // Accepte: +237XXXXXXXXX, 237XXXXXXXXX ou XXXXXXXXX
-    const cleanPhone = phone.replace(/\s/g, '')
-    const phoneRegex = /^(\+237|237)\d{8,9}$|^\d{8,9}$/
-    return phoneRegex.test(cleanPhone) && cleanPhone.replace(/\D/g, '').length >= 8
-  }
-
+  // Validation simplifiée
   const validateIdentifier = (value: string): { isValid: boolean; error: string } => {
-    const type = getIdentifierType(value)
+    const trimmed = value.trim()
+    if (!trimmed) return { isValid: false, error: 'Email ou téléphone requis' }
 
-    if (type === 'email') {
-      return validateEmail(value)
-        ? { isValid: true, error: '' }
-        : { isValid: false, error: 'Email invalide' }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const phoneRegex = /^(\+237|237)?\s?\d{8,9}$/
+    
+    if (emailRegex.test(trimmed) || phoneRegex.test(trimmed.replace(/\s/g, ''))) {
+      return { isValid: true, error: '' }
     }
-
-    if (type === 'phone') {
-      return validatePhone(value)
-        ? { isValid: true, error: '' }
-        : { isValid: false, error: 'Numéro invalide (ex: +237 6XX XXX XXX)' }
-    }
-
-    return {
-      isValid: false,
-      error: 'Entrez un email valide ou un numéro Camerounais',
-    }
+    
+    return { isValid: false, error: 'Email invalide ou numéro Camerounais invalide' }
   }
 
   const handleGoogleLogin = async () => {
@@ -118,85 +91,54 @@ const Login = () => {
     setIdentifierError('')
     setPasswordError('')
 
-    let isValid = true
-
-    if (!identifier.trim()) {
-      setIdentifierError('Email ou téléphone requis')
-      isValid = false
-    } else {
-      const validation = validateIdentifier(identifier)
-      if (!validation.isValid) {
-        setIdentifierError(validation.error)
-        isValid = false
-      }
+    const identifierValidation = validateIdentifier(identifier)
+    if (!identifierValidation.isValid) {
+      setIdentifierError(identifierValidation.error)
+      return
     }
 
     if (!password.trim()) {
       setPasswordError('Mot de passe requis')
-      isValid = false
-    } else if (password.length < 6) {
-      setPasswordError('Minimum 6 caractères')
-      isValid = false
+      return
     }
 
-    if (isValid) {
-      try {
-        // ✅ Dispatch de l'action Redux loginAction
-        await dispatch(
-          loginAction({
-            identifiant: identifier.trim(),
-            password: password,
-          })
-        ).unwrap()
+    if (password.length < 6) {
+      setPasswordError('Minimum 6 caractères')
+      return
+    }
 
-        // 🎉 Connexion réussie - La navigation se fait automatiquement
-        // car le store Redux est surveillé par le RootNavigator
-        Alert.alert('Succès', 'Connexion réussie !', [{ text: 'OK' }])
-      } catch (error: unknown) {
-        // 🚨 Gestion d'erreurs améliorée
-        let errorMessage = 'Erreur de connexion'
+    try {
+      await dispatch(loginAction({
+        identifiant: identifier.trim(),
+        password: password,
+      })).unwrap()
 
-        if (error instanceof Error) {
-          errorMessage = error.message
-        } else if (typeof error === 'object' && error !== null) {
-          const wrappedError = error as {
-            message?: string
-            error?: { message?: string }
-          }
-          if (wrappedError.message) {
-            errorMessage = wrappedError.message
-          } else if (wrappedError.error?.message) {
-            errorMessage = wrappedError.error.message
-          }
-        }
+      Alert.alert('Succès', 'Connexion réussie !', [{ text: 'OK' }])
+    } catch (error: any) {
+      const errorMessage = error?.message || error?.error?.message || 'Erreur de connexion'
 
-        // Messages d'erreur spécifiques
-        if (errorMessage.includes('Email ou mot de passe incorrect')) {
-          setIdentifierError('Identifiants incorrects')
-        } else if (errorMessage.includes('non vérifié')) {
-          Alert.alert(
-            'Compte non vérifié',
-            'Veuillez vérifier votre email ou SMS.',
-            [{ text: 'OK' }]
-          )
-        } else if (
-          errorMessage.includes('suspendu') ||
-          errorMessage === 'ACCOUNT_SUSPENDED'
-        ) {
-          Alert.alert(
-            'Compte suspendu',
-            'Votre compte a été temporairement suspendu. Contactez le support.',
-            [{ text: 'OK' }]
-          )
-        } else {
-          Alert.alert('Erreur', errorMessage, [{ text: 'OK' }])
-        }
+      if (errorMessage.includes('Email ou mot de passe incorrect')) {
+        setIdentifierError('Identifiants incorrects')
+      } else if (errorMessage.includes('non vérifié')) {
+        Alert.alert('Compte non vérifié', 'Veuillez vérifier votre email ou SMS.', [{ text: 'OK' }])
+      } else if (errorMessage.includes('suspendu') || errorMessage === 'ACCOUNT_SUSPENDED') {
+        Alert.alert('Compte suspendu', 'Votre compte a été temporairement suspendu. Contactez le support.', [{ text: 'OK' }])
+      } else {
+        Alert.alert('Erreur', errorMessage, [{ text: 'OK' }])
       }
     }
   }
 
   return (
     <LinearGradient colors={[COLORS.white, '#FFF9F0']} style={styles.container}>
+      {/* Bouton retour */}
+      <TouchableOpacity 
+        style={styles.backButton}
+        onPress={() => navigation.navigate('Main' as any, { screen: 'HomeTab' })}
+      >
+        <Ionicons name="arrow-back" size={24} color={COLORS.primary} />
+      </TouchableOpacity>
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -246,28 +188,14 @@ const Login = () => {
             required
           />
 
-          {/* Remember Me & Forgot Password */}
-          <View style={styles.optionsContainer}>
-            <View style={styles.rememberMeContainer}>
-              <Switch
-                value={rememberMe}
-                onValueChange={setRememberMe}
-                trackColor={{
-                  false: COLORS.border,
-                  true: COLORS.primary + '40',
-                }}
-                thumbColor={rememberMe ? COLORS.primary : COLORS.textLight}
-              />
-              <Text style={styles.rememberMeText}>Se souvenir</Text>
-            </View>
-
-            <Pressable
-              onPress={() => navigation.navigate('ForgotPassword')}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              <Text style={styles.forgotPasswordLink}>Mot de passe oublié ?</Text>
-            </Pressable>
-          </View>
+          {/* Forgot Password */}
+          <Pressable
+            onPress={() => navigation.navigate('ForgotPassword')}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            style={{ alignSelf: 'flex-end', marginBottom: 16, marginTop: 4 }}
+          >
+            <Text style={styles.forgotPasswordLink}>Mot de passe oublié ?</Text>
+          </Pressable>
 
           {/* Login Button */}
           <Button

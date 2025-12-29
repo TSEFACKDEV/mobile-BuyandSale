@@ -16,7 +16,7 @@ export interface Product {
   status: 'PENDING' | 'VALIDATED' | 'REJECTED';
   etat: 'NEUF' | 'OCCASION' | 'CORRECT';
   quartier?: string;
-  telephone?: string;
+  telephone: string;
   slug?: string;
   viewCount?: number;
   categoryId: string;
