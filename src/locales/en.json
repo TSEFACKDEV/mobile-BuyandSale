@@ -1,0 +1,121 @@
+{
+  "hero": {
+    "title": "Find everything you're looking for",
+    "subtitle": "Cameroon's largest online marketplace"
+  },
+  "home": {
+    "greeting": {
+      "morning": "Hey! Good morning!",
+      "afternoon": "Hey! Good afternoon!",
+      "evening": "Hey! Good evening!"
+    },
+    "deliverTo": "Deliver to",
+    "allCities": "All cities",
+    "searchPlaceholder": "Search products, restaurants...",
+    "allCategories": "All Categories",
+    "seeAll": "See all",
+    "featuredAds": "Featured Ads",
+    "topSellers": "Top Sellers",
+    "loading": "Loading...",
+    "loadingCategories": "Loading categories...",
+    "loadingProducts": "Loading ads...",
+    "noProducts": "No ads available",
+    "noCategories": "No categories available"
+  },
+  "common": {
+    "views": "views",
+    "products": "ads",
+    "reviews": "reviews",
+    "rating": "Rating"
+  },
+  "userProfile": {
+    "title": "My Profile",
+    "tabs": {
+      "activeProducts": "Active Ads",
+      "pendingProducts": "Pending Ads",
+      "profile": "Profile",
+      "settings": "Settings"
+    },
+    "stats": {
+      "products": "Ads",
+      "reviews": "Reviews",
+      "rating": "Rating"
+    },
+    "actions": {
+      "editProfile": "Edit Profile",
+      "logout": "Logout",
+      "dashboard": "Dashboard",
+      "createAd": "Create Ad",
+      "saveProfile": "Save",
+      "cancel": "Cancel",
+      "boostAd": "Boost",
+      "edit": "Edit",
+      "delete": "Delete",
+      "view": "View"
+    },
+    "profile": {
+      "memberSince": "Member since",
+      "personalInfo": "Personal Information",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "location": "Location"
+    },
+    "settings": {
+      "title": "Settings",
+      "theme": "Theme",
+      "themeLight": "Light",
+      "themeDark": "Dark",
+      "themeSystem": "System",
+      "language": "Language",
+      "languageFr": "Français",
+      "languageEn": "English",
+      "notifications": "Notifications",
+      "privacy": "Privacy"
+    },
+    "messages": {
+      "loading": "Loading...",
+      "noProducts": "No ads yet",
+      "noPendingProducts": "No pending ads",
+      "profileUpdateSuccess": "Profile updated successfully",
+      "profileUpdateError": "Error updating profile",
+      "avatarUpdateSuccess": "Avatar updated successfully",
+      "avatarUpdateError": "Error updating avatar",
+      "deleteConfirm": "Delete this ad?",
+      "deleteSuccess": "Ad deleted successfully",
+      "deleteError": "Error deleting ad",
+      "logoutConfirm": "Do you want to logout?",
+      "constraintError": "Cannot delete ad with dependencies",
+      "productNotFound": "Ad not found",
+      "permissionDenied": "Permission denied",
+      "networkError": "Network error"
+    }
+  },
+  "sellerProfile": {
+    "locationNotSpecified": "Location not specified",
+    "memberSinceRecently": "Member since recently",
+    "reportModal": {
+      "reasonFraud": "Fraud or scam",
+      "reasonSpam": "Spam or advertising",
+      "reasonAbuse": "Abusive behavior",
+      "reasonOther": "Other reason"
+    }
+  },
+  "howItWorks": {
+    "title": "How it works?",
+    "subtitle": "Buying and selling has never been easier",
+    "step1": {
+      "title": "Create your account",
+      "description": "Sign up for free and join our community"
+    },
+    "step2": {
+      "title": "Post your ads",
+      "description": "Add your products with photos and detailed descriptions"
+    },
+    "step3": {
+      "title": "Sell safely",
+      "description": "Enjoy our protection tools and support"
+    }
+  }
+}

@@ -1,17 +1,17 @@
 
 const COLORS = {
-  primary: '#FF8C00',
+  primary: '#FF6B35',
   secondary: '#001F3F',
-  accent: '#FFA500',
-  light: '#F5F5F5',
+  accent: '#FF8C42',
+  light: '#F8FAFC',
   white: '#FFFFFF',
-  text: '#333333',
-  textLight: '#666666',
-  border: '#E0E0E0',
-  gradient1: '#FF8C00',
-  gradient2: '#FFB347',
-  error: '#FF4C4C',
-  success: '#28A745',
+  text: '#1F2937',
+  textLight: '#6B7280',
+  border: '#E5E7EB',
+  gradient1: '#FF6B35',
+  gradient2: '#FF8C42',
+  error: '#EF4444',
+  success: '#10B981',
 };
 
 export default COLORS;

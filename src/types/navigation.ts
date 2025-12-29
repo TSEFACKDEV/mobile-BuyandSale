@@ -1,4 +1,5 @@
 // types/navigation.ts
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 // Auth Stack
 export type AuthStackParamList = {
@@ -41,6 +42,9 @@ export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
 };
+
+// Navigation Props
+export type RootNavigationProp = NativeStackNavigationProp<MainStackParamList & BottomTabParamList>;
 
 // Déclaration globale pour useNavigation
 declare global {

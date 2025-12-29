@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { getTranslation } from '../locales';
 import type { TranslationKeys } from '../locales';
+import { useLanguage } from '../contexts/LanguageContext';
 
 type NestedKeyOf<T> = T extends object
   ? {
@@ -15,7 +16,8 @@ type NestedKeyOf<T> = T extends object
 type TranslationPath = NestedKeyOf<TranslationKeys>;
 
 export const useTranslation = () => {
-  const translations = useMemo(() => getTranslation('fr'), []);
+  const { language } = useLanguage();
+  const translations = useMemo(() => getTranslation(language), [language]);
 
   const t = (key: string): string => {
     const keys = key.split('.');
@@ -33,5 +35,5 @@ export const useTranslation = () => {
     return typeof value === 'string' ? value : key;
   };
 
-  return { t };
+  return { t, language };
 };

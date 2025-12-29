@@ -28,6 +28,70 @@
     "reviews": "avis",
     "rating": "Note"
   },
+  "userProfile": {
+    "title": "Mon Profil",
+    "tabs": {
+      "activeProducts": "Annonces Actives",
+      "pendingProducts": "Annonces en Attente",
+      "profile": "Profil",
+      "settings": "Paramètres"
+    },
+    "stats": {
+      "products": "Annonces",
+      "reviews": "Avis",
+      "rating": "Note"
+    },
+    "actions": {
+      "editProfile": "Modifier le Profil",
+      "logout": "Déconnexion",
+      "dashboard": "Tableau de bord",
+      "createAd": "Créer une annonce",
+      "saveProfile": "Enregistrer",
+      "cancel": "Annuler",
+      "boostAd": "Booster",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "view": "Voir"
+    },
+    "profile": {
+      "memberSince": "Membre depuis",
+      "personalInfo": "Informations Personnelles",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "email": "Email",
+      "phone": "Téléphone",
+      "location": "Localisation"
+    },
+    "settings": {
+      "title": "Paramètres",
+      "theme": "Thème",
+      "themeLight": "Clair",
+      "themeDark": "Sombre",
+      "themeSystem": "Système",
+      "language": "Langue",
+      "languageFr": "Français",
+      "languageEn": "English",
+      "notifications": "Notifications",
+      "privacy": "Confidentialité"
+    },
+    "messages": {
+      "loading": "Chargement...",
+      "noProducts": "Aucune annonce pour le moment",
+      "noPendingProducts": "Aucune annonce en attente",
+      "profileUpdateSuccess": "Profil mis à jour avec succès",
+      "profileUpdateError": "Erreur lors de la mise à jour du profil",
+      "avatarUpdateSuccess": "Avatar mis à jour avec succès",
+      "avatarUpdateError": "Erreur lors de la mise à jour de l'avatar",
+      "deleteConfirm": "Supprimer cette annonce ?",
+      "deleteSuccess": "Annonce supprimée avec succès",
+      "deleteError": "Erreur lors de la suppression",
+      "logoutConfirm": "Voulez-vous vous déconnecter ?",
+      "constraintError": "Impossible de supprimer l'annonce avec des dépendances",
+      "productNotFound": "Annonce non trouvée",
+      "permissionDenied": "Permission refusée",
+      "networkError": "Erreur réseau"
+    }
+  },
   "sellerProfile": {
     "locationNotSpecified": "Localisation non spécifiée",
     "memberSinceRecently": "Membre depuis récemment",

@@ -19,7 +19,7 @@ class Utils {
         }
       }
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
+      // Erreur silencieuse
     }
   }
 
@@ -29,7 +29,7 @@ class Utils {
       const userString = await AsyncStorage.getItem(STORAGE_KEYS.AUTH_USER);
       return userString ? JSON.parse(userString) : null;
     } catch (error) {
-      console.error('Erreur lors de la récupération:', error);
+      // Erreur silencieuse
       return null;
     }
   }
@@ -43,7 +43,7 @@ class Utils {
         STORAGE_KEYS.REFRESH_TOKEN,
       ]);
     } catch (error) {
-      console.error('Erreur lors du nettoyage:', error);
+      // Erreur silencieuse
     }
   }
 
@@ -52,7 +52,7 @@ class Utils {
     try {
       return await AsyncStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
     } catch (error) {
-      console.error('Erreur lors de la récupération du token:', error);
+      // Erreur silencieuse
       return null;
     }
   }
@@ -62,7 +62,7 @@ class Utils {
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
     } catch (error) {
-      console.error('Erreur lors de la mise à jour du token:', error);
+      // Erreur silencieuse
     }
   }
 
@@ -71,7 +71,7 @@ class Utils {
     try {
       return await AsyncStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
     } catch (error) {
-      console.error('Erreur lors de la récupération du refresh token:', error);
+      // Erreur silencieuse
       return null;
     }
   }
@@ -81,7 +81,7 @@ class Utils {
     try {
       await AsyncStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, token);
     } catch (error) {
-      console.error('Erreur lors de la mise à jour du refresh token:', error);
+      // Erreur silencieuse
     }
   }
 }
