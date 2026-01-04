@@ -28,7 +28,8 @@
             }
           }
         }
-      }
+      },
+      "associatedDomains": ["applinks:auth.expo.io"]
     },
     "android": {
       "adaptiveIcon": {
@@ -37,10 +38,14 @@
       },
       "package": "com.buyandsale.app",
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-web-browser"
+    ]
   }
 }
