@@ -95,24 +95,26 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
             <Icon name="notifications-outline" size={24} color={colors.text} />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={handleProfilePress}
-            activeOpacity={0.7}
-          >
-            {user && user.avatar && user.avatar !== 'undefined' && user.avatar !== 'null' ? (
-              <Image
-                source={{ uri: getImageUrl(user.avatar, 'avatar') }}
-                style={styles.avatarImage}
-              />
-            ) : (
-              <View style={styles.avatarPlaceholder}>
-                <Text style={styles.avatarText}>
-                  {user ? `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}` : ''}
-                </Text>
-              </View>
-            )}
-          </TouchableOpacity>
+          {user && (
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={handleProfilePress}
+              activeOpacity={0.7}
+            >
+              {user.avatar && user.avatar !== 'undefined' && user.avatar !== 'null' ? (
+                <Image
+                  source={{ uri: getImageUrl(user.avatar, 'avatar') }}
+                  style={styles.avatarImage}
+                />
+              ) : (
+                <View style={styles.avatarPlaceholder}>
+                  <Text style={styles.avatarText}>
+                    {`${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          )}
         </View>
       )}
     </View>
