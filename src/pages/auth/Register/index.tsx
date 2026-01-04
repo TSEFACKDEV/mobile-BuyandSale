@@ -14,6 +14,7 @@ import { registerAction } from '../../../store/register/actions'
 import { selectUserRegisted } from '../../../store/register/slice'
 import { LoadingType } from '../../../models/store'
 import type { UserRegisterForm } from '../../../models/user'
+import { Loading } from '../../../components/LoadingVariants'
 
 type RegisterNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Register'>
 type AuthNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Auth'>
@@ -188,6 +189,10 @@ const Register = () => {
         }
       }
     }
+  }
+
+  if (isLoading) {
+    return <Loading fullScreen message="Inscription en cours..." />;
   }
 
   return (

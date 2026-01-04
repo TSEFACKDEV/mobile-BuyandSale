@@ -1,8 +1,10 @@
 import React, { useMemo } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { useThemeColors } from '../../contexts/ThemeContext';
+import { useAppSelector } from '../../hooks/store';
+import { getImageUrl } from '../../utils/imageUtils';
 import createStyles from './style';
 
 interface TopNavigationProps {
@@ -18,6 +20,9 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
 }) => {
   const colors = useThemeColors();
   const navigation = useNavigation();
+  
+  const authState = useAppSelector((state) => state.authentification);
+  const user = authState.auth.entities;
 
   const handleBackPress = () => {
     if (onBackPress) {
@@ -36,7 +41,9 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
   };
 
   const handleProfilePress = () => {
-    navigation.navigate('UserProfile' as never);
+    (navigation as any).navigate('HomeTab', {
+      screen: 'UserProfile'
+    });
   };
 
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -93,7 +100,18 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
             onPress={handleProfilePress}
             activeOpacity={0.7}
           >
-            <Icon name="person-circle-outline" size={24} color={colors.text} />
+            {user && user.avatar && user.avatar !== 'undefined' && user.avatar !== 'null' ? (
+              <Image
+                source={{ uri: getImageUrl(user.avatar, 'avatar') }}
+                style={styles.avatarImage}
+              />
+            ) : (
+              <View style={styles.avatarPlaceholder}>
+                <Text style={styles.avatarText}>
+                  {user ? `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}` : ''}
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
       )}

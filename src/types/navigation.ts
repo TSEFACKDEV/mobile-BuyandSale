@@ -17,6 +17,14 @@ export type HomeStackParamList = {
   Home: undefined;
   ProductDetails: { productId: string };
   SellerDetails: { sellerId: string };
+  UserProfile: undefined;
+};
+
+// Products Stack (écrans de produits)
+export type ProductsStackParamList = {
+  ProductsList: undefined;
+  ProductDetails: { productId: string };
+  SellerDetails: { sellerId: string };
 };
 
 // Bottom Tab Navigator (navigation principale optimisée)
@@ -25,15 +33,14 @@ export type BottomTabParamList = {
   Products: undefined;
   PostAd: undefined; // Nouveau tab pour poster une annonce
   Sellers: undefined;
-  Settings: undefined;
+  SettingsTab: undefined;
 };
 
-// Main Stack Navigator (BottomTab + écrans TopNavigation)
+// Main Stack Navigator (BottomTab + Modals)
 export type MainStackParamList = {
   MainTab: undefined;
   Favorites: undefined;
   Notifications: undefined;
-  UserProfile: undefined;
 };
 
 // Root Stack (contrôle le flux : Onboarding -> Auth -> Main)

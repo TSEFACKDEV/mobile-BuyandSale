@@ -262,16 +262,21 @@ export const getProductByIdAction = createAsyncThunk<
   ThunkApi
 >(
   'product/getById',
-  async (productId, { rejectWithValue }) => {
+  async (productId, { rejectWithValue, dispatch }) => {
     try {
-      const response = await fetchWithAuth(
-        `${API_CONFIG.BASE_URL}/product/${productId}`,
-        {
-          method: 'GET',
-        }
-      );
+      const url = `${API_CONFIG.BASE_URL}/product/${productId}`;
+      
+      const response = await fetchWithAuth(url, {
+        method: 'GET',
+      });
 
       const data = await response.json();
+
+      if (response.status === 401) {
+        const { logoutAction } = require('../authentification/actions');
+        dispatch(logoutAction());
+        throw new Error('Votre session a expiré. Veuillez vous reconnecter.');
+      }
 
       if (!response.ok) {
         throw new Error(data.meta?.message || 'Erreur lors de la récupération du produit');

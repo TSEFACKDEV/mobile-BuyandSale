@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from '../../../hooks/store'
 import { resetPasswordAction } from '../../../store/password/actions'
 import { selectResetPassword } from '../../../store/password/slice'
 import { LoadingType } from '../../../models/store'
+import { Loading } from '../../../components/LoadingVariants'
 
 type ResetPasswordNavigationProp = NativeStackNavigationProp<
   AuthStackParamList,
@@ -130,6 +131,10 @@ const ResetPassword = () => {
         }
       }
     }
+  }
+
+  if (isLoading) {
+    return <Loading fullScreen message="Réinitialisation en cours..." />;
   }
 
   return (

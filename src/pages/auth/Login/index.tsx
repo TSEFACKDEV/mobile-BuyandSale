@@ -15,6 +15,7 @@ import { loginAction } from '../../../store/authentification/actions'
 import { selectUserAuthenticated } from '../../../store/authentification/slice'
 import { LoadingType } from '../../../models/store'
 import API_CONFIG from '../../../config/api.config'
+import { Loading } from '../../../components/LoadingVariants'
 
 type LoginNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>
 
@@ -113,7 +114,11 @@ const Login = () => {
         password: password,
       })).unwrap()
 
-      Alert.alert('Succès', 'Connexion réussie !', [{ text: 'OK' }])
+      // Redirection automatique vers la page principale
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Main' as any, params: { screen: 'HomeTab' } }],
+      })
     } catch (error: any) {
       const errorMessage = error?.message || error?.error?.message || 'Erreur de connexion'
 
@@ -127,6 +132,10 @@ const Login = () => {
         Alert.alert('Erreur', errorMessage, [{ text: 'OK' }])
       }
     }
+  }
+
+  if (isLoading) {
+    return <Loading fullScreen message="Connexion en cours..." />;
   }
 
   return (

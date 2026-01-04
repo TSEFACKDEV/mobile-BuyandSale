@@ -59,6 +59,27 @@ const ProductDetails = () => {
   const productStatus = useAppSelector(selectCurrentProductStatus);
   const allFavorites = useAppSelector((state) => state.favorite.data || []);
 
+  // Si erreur d'authentification, rediriger vers login
+  useEffect(() => {
+    if (productStatus === 'failed' && !product) {
+      Alert.alert(
+        'Session expirée',
+        'Votre session a expiré. Veuillez vous reconnecter.',
+        [
+          {
+            text: 'Se reconnecter',
+            onPress: () => {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Auth' as never }],
+              });
+            }
+          }
+        ]
+      );
+    }
+  }, [productStatus, product, navigation]);
+
   const isFavorite = product?.id
     ? allFavorites.some((fav) => fav.productId === product.id)
     : false;
@@ -72,7 +93,7 @@ const ProductDetails = () => {
     return () => {
       dispatch(clearCurrentProduct());
     };
-  }, [productId]);
+  }, [productId, dispatch]);
 
   // Helpers
   const formatPrice = (price: number) => {

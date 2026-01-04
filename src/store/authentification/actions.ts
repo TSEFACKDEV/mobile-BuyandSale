@@ -182,3 +182,38 @@ export const handleSocialAuthCallback = createAsyncThunk<
     });
   }
 });
+
+// Action pour mettre à jour le profil utilisateur
+export const updateUserAction = createAsyncThunk<
+  ApiResponse<AuthUser>,
+  {
+    id: string;
+    updates: Partial<AuthUser>;
+  },
+  ThunkApi
+>('auth/updateUser', async ({ id, updates }, apiThunk) => {
+  try {
+    const response = await fetchWithAuth(
+      `${API_CONFIG.BASE_URL}/${API_ENDPOINTS.USER_UPDATE.replace(':id', id)}`,
+      {
+        method: 'PUT',
+        headers: { 'Content-type': 'application/json' },
+        body: JSON.stringify(updates),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.meta?.message || 'Échec de la mise à jour du profil');
+    }
+
+    return data;
+  } catch (error: unknown) {
+    return apiThunk.rejectWithValue({
+      message:
+        (error as Error).message ||
+        'Une erreur est survenue lors de la mise à jour du profil',
+    });
+  }
+});

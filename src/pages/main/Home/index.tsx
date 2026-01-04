@@ -4,10 +4,6 @@ import {
   Text, 
   ScrollView, 
   TouchableOpacity, 
-  StyleSheet, 
-  FlatList,
-  TextInput,
-  ActivityIndicator,
   RefreshControl
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -32,6 +28,7 @@ import TopNavigation from '../../../components/TopNavigation/TopNavigation';
 import CategoryCard from '../../../components/CategoryCard';
 import ProductCard from '../../../components/ProductHomeCard';
 import SellerCard from '../../../components/SellerHomeCard';
+import { Skeleton } from '../../../components/LoadingVariants';
 import createStyles from './style';
 
 const Home = () => {
@@ -107,7 +104,7 @@ const Home = () => {
         ...seller,
         totalReviews,
         averageRating,
-        
+
       };
     });
   }, [publicSellers]);
@@ -145,10 +142,18 @@ const Home = () => {
           </View>
 
           {categoriesLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={theme.colors.primary} />
-              <Text style={styles.loadingText}>{t('home.loadingCategories')}</Text>
-            </View>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.categoriesContainer}
+            >
+              {Array.from({ length: 8 }).map((_, index) => (
+                <View key={index} style={{ marginRight: 12 }}>
+                  <Skeleton width={80} height={80} borderRadius={12} />
+                  <Skeleton width={80} height={14} borderRadius={4} style={{ marginTop: 8 }} />
+                </View>
+              ))}
+            </ScrollView>
           ) : (
             <ScrollView 
               horizontal 
@@ -176,10 +181,20 @@ const Home = () => {
           </View>
 
           {productsLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={theme.colors.primary} />
-              <Text style={styles.loadingText}>{t('home.loadingProducts')}</Text>
-            </View>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.productsContainer}
+            >
+              {Array.from({ length: 4 }).map((_, index) => (
+                <View key={index} style={{ marginRight: 12, width: 180 }}>
+                  <Skeleton width={180} height={180} borderRadius={12} />
+                  <Skeleton width={150} height={16} borderRadius={4} style={{ marginTop: 8 }} />
+                  <Skeleton width={100} height={14} borderRadius={4} style={{ marginTop: 6 }} />
+                  <Skeleton width={80} height={20} borderRadius={4} style={{ marginTop: 6 }} />
+                </View>
+              ))}
+            </ScrollView>
           ) : featuredProducts.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Icon name="cube-outline" size={48} color={theme.colors.textSecondary} />
@@ -212,10 +227,19 @@ const Home = () => {
           </View>
 
           {sellersLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={theme.colors.primary} />
-              <Text style={styles.loadingText}>{t('home.loading')}</Text>
-            </View>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.sellersContainer}
+            >
+              {Array.from({ length: 4 }).map((_, index) => (
+                <View key={index} style={{ marginRight: 12, width: 160 }}>
+                  <Skeleton width={160} height={200} borderRadius={12} />
+                  <Skeleton width={120} height={16} borderRadius={4} style={{ marginTop: 8 }} />
+                  <Skeleton width={80} height={14} borderRadius={4} style={{ marginTop: 6 }} />
+                </View>
+              ))}
+            </ScrollView>
           ) : topSellers.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Icon name="people-outline" size={48} color={theme.colors.textSecondary} />

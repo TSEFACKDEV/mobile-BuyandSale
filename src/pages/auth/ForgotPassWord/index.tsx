@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from '../../../hooks/store'
 import { forgotPasswordAction } from '../../../store/password/actions'
 import { selectForgotPassword } from '../../../store/password/slice'
 import { LoadingType } from '../../../models/store'
+import { Loading } from '../../../components/LoadingVariants'
 
 type ForgotPasswordNavigationProp = NativeStackNavigationProp<
   AuthStackParamList,
@@ -95,6 +96,10 @@ const ForgotPassword = () => {
         Alert.alert('Erreur', errorMessage, [{ text: 'OK' }])
       }
     }
+  }
+
+  if (isLoading) {
+    return <Loading fullScreen message="Envoi en cours..." />;
   }
 
   return (

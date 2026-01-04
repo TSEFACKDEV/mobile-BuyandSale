@@ -1,13 +1,32 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import React from 'react';
+import { View, Text, StyleSheet, ScrollView, Switch } from 'react-native';
+import React, { useState } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme, useThemeMode } from '../../../contexts/ThemeContext';
+import { useLanguage } from '../../../contexts/LanguageContext';
 import TopNavigation from '../../../components/TopNavigation/TopNavigation';
 
 const Settings = () => {
   const { theme } = useTheme();
   const { mode, setMode } = useThemeMode();
+  const { language, setLanguage } = useLanguage();
   const colors = theme.colors;
+
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+  const isDarkMode = mode === 'dark' || (mode === 'system' && theme.isDark);
+
+  const toggleTheme = () => {
+    setMode(isDarkMode ? 'light' : 'dark');
+  };
+
+  const toggleLanguage = async () => {
+    await setLanguage(language === 'fr' ? 'en' : 'fr');
+  };
+
+  const toggleNotifications = () => {
+    setNotificationsEnabled(!notificationsEnabled);
+    // TODO: Implémenter la logique de sauvegarde des préférences de notifications
+  };
 
   const styles = StyleSheet.create({
     container: {
@@ -67,33 +86,6 @@ const Settings = () => {
       fontSize: 13,
       color: colors.textSecondary,
     },
-    themeOptionContainer: {
-      flexDirection: 'row',
-      gap: 8,
-      marginTop: 8,
-    },
-    themeOption: {
-      flex: 1,
-      paddingVertical: 8,
-      paddingHorizontal: 12,
-      borderRadius: 6,
-      borderColor: colors.border,
-      borderWidth: 1.5,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    themeOptionActive: {
-      borderColor: colors.primary,
-      backgroundColor: colors.primary + '15',
-    },
-    themeOptionText: {
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.text,
-    },
-    themeOptionIcon: {
-      marginBottom: 4,
-    },
   });
 
   return (
@@ -105,159 +97,73 @@ const Settings = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 24 }}
       >
-        {/* THEME SECTION */}
+        {/* THEME SWITCH */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Apparence</Text>
-
-          {/* Theme Mode Selection */}
+          
           <View style={styles.settingItem}>
             <View style={styles.settingLeft}>
               <View style={styles.settingIcon}>
                 <Icon
-                  name="color-palette-outline"
+                  name={isDarkMode ? "moon" : "sunny"}
                   size={20}
                   color={colors.primary}
                 />
               </View>
               <View style={styles.settingTextContainer}>
-                <Text style={styles.settingLabel}>Thème</Text>
+                <Text style={styles.settingLabel}>Mode sombre</Text>
                 <Text style={styles.settingDescription}>
-                  {mode === 'light'
-                    ? 'Clair'
-                    : mode === 'dark'
-                      ? 'Sombre'
-                      : 'Système'}
+                  {isDarkMode ? 'Activé' : 'Désactivé'}
                 </Text>
               </View>
             </View>
-          </View>
-
-          {/* Theme Options */}
-          <View style={styles.themeOptionContainer}>
-            <TouchableOpacity
-              style={[
-                styles.themeOption,
-                mode === 'light' && styles.themeOptionActive,
-              ]}
-              onPress={() => setMode('light')}
-              activeOpacity={0.7}
-            >
-              <View style={styles.themeOptionIcon}>
-                <Icon
-                  name="sunny"
-                  size={18}
-                  color={mode === 'light' ? colors.primary : colors.textSecondary}
-                />
-              </View>
-              <Text
-                style={[
-                  styles.themeOptionText,
-                  { color: mode === 'light' ? colors.primary : colors.textSecondary },
-                ]}
-              >
-                Clair
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.themeOption,
-                mode === 'dark' && styles.themeOptionActive,
-              ]}
-              onPress={() => setMode('dark')}
-              activeOpacity={0.7}
-            >
-              <View style={styles.themeOptionIcon}>
-                <Icon
-                  name="moon"
-                  size={18}
-                  color={mode === 'dark' ? colors.primary : colors.textSecondary}
-                />
-              </View>
-              <Text
-                style={[
-                  styles.themeOptionText,
-                  { color: mode === 'dark' ? colors.primary : colors.textSecondary },
-                ]}
-              >
-                Sombre
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.themeOption,
-                mode === 'system' && styles.themeOptionActive,
-              ]}
-              onPress={() => setMode('system')}
-              activeOpacity={0.7}
-            >
-              <View style={styles.themeOptionIcon}>
-                <Icon
-                  name="settings"
-                  size={18}
-                  color={mode === 'system' ? colors.primary : colors.textSecondary}
-                />
-              </View>
-              <Text
-                style={[
-                  styles.themeOptionText,
-                  { color: mode === 'system' ? colors.primary : colors.textSecondary },
-                ]}
-              >
-                Système
-              </Text>
-            </TouchableOpacity>
+            <Switch
+              value={isDarkMode}
+              onValueChange={toggleTheme}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor="#FFFFFF"
+            />
           </View>
         </View>
 
-        {/* ACCOUNT SECTION */}
+        {/* LANGUAGE SWITCH */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Compte</Text>
-
-          <TouchableOpacity style={styles.settingItem} activeOpacity={0.7}>
+          <Text style={styles.sectionTitle}>Langue</Text>
+          
+          <View style={styles.settingItem}>
             <View style={styles.settingLeft}>
               <View style={styles.settingIcon}>
                 <Icon
-                  name="person-outline"
+                  name="language-outline"
                   size={20}
                   color={colors.primary}
                 />
               </View>
               <View style={styles.settingTextContainer}>
-                <Text style={styles.settingLabel}>Profil</Text>
+                <Text style={styles.settingLabel}>Langue</Text>
                 <Text style={styles.settingDescription}>
-                  Gérer vos informations
+                  {language === 'fr' ? 'Français' : 'English'}
                 </Text>
               </View>
             </View>
-            <Icon name="chevron-forward" size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
+            <Switch
+              value={language === 'en'}
+              onValueChange={toggleLanguage}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor="#FFFFFF"
+            />
+          </View>
+        </View>
 
-          <TouchableOpacity style={styles.settingItem} activeOpacity={0.7}>
+        {/* NOTIFICATIONS SWITCH */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Notifications</Text>
+          
+          <View style={styles.settingItem}>
             <View style={styles.settingLeft}>
               <View style={styles.settingIcon}>
                 <Icon
-                  name="lock-closed-outline"
-                  size={20}
-                  color={colors.primary}
-                />
-              </View>
-              <View style={styles.settingTextContainer}>
-                <Text style={styles.settingLabel}>Sécurité</Text>
-                <Text style={styles.settingDescription}>
-                  Mot de passe et authentification
-                </Text>
-              </View>
-            </View>
-            <Icon name="chevron-forward" size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.settingItem} activeOpacity={0.7}>
-            <View style={styles.settingLeft}>
-              <View style={styles.settingIcon}>
-                <Icon
-                  name="notifications-outline"
+                  name={notificationsEnabled ? "notifications" : "notifications-off"}
                   size={20}
                   color={colors.primary}
                 />
@@ -265,96 +171,17 @@ const Settings = () => {
               <View style={styles.settingTextContainer}>
                 <Text style={styles.settingLabel}>Notifications</Text>
                 <Text style={styles.settingDescription}>
-                  Préférences des notifications
+                  {notificationsEnabled ? 'Activées' : 'Désactivées'}
                 </Text>
               </View>
             </View>
-            <Icon name="chevron-forward" size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
-        </View>
-
-        {/* ABOUT SECTION */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>À propos</Text>
-
-          <TouchableOpacity style={styles.settingItem} activeOpacity={0.7}>
-            <View style={styles.settingLeft}>
-              <View style={styles.settingIcon}>
-                <Icon
-                  name="information-circle-outline"
-                  size={20}
-                  color={colors.primary}
-                />
-              </View>
-              <View style={styles.settingTextContainer}>
-                <Text style={styles.settingLabel}>À propos de Buy&Sale</Text>
-                <Text style={styles.settingDescription}>
-                  Version 1.0.0
-                </Text>
-              </View>
-            </View>
-            <Icon name="chevron-forward" size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.settingItem} activeOpacity={0.7}>
-            <View style={styles.settingLeft}>
-              <View style={styles.settingIcon}>
-                <Icon
-                  name="help-circle-outline"
-                  size={20}
-                  color={colors.primary}
-                />
-              </View>
-              <View style={styles.settingTextContainer}>
-                <Text style={styles.settingLabel}>Aide et support</Text>
-                <Text style={styles.settingDescription}>
-                  FAQ et support client
-                </Text>
-              </View>
-            </View>
-            <Icon name="chevron-forward" size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.settingItem} activeOpacity={0.7}>
-            <View style={styles.settingLeft}>
-              <View style={styles.settingIcon}>
-                <Icon
-                  name="document-text-outline"
-                  size={20}
-                  color={colors.primary}
-                />
-              </View>
-              <View style={styles.settingTextContainer}>
-                <Text style={styles.settingLabel}>Conditions légales</Text>
-                <Text style={styles.settingDescription}>
-                  Politique de confidentialité
-                </Text>
-              </View>
-            </View>
-            <Icon name="chevron-forward" size={20} color={colors.textSecondary} />
-          </TouchableOpacity>
-        </View>
-
-        {/* DANGER ZONE */}
-        <View style={styles.section}>
-          <TouchableOpacity style={[styles.settingItem, {
-            backgroundColor: colors.error + '15',
-            borderColor: colors.error,
-          }]} activeOpacity={0.7}>
-            <View style={styles.settingLeft}>
-              <View style={[styles.settingIcon, { backgroundColor: colors.error + '20' }]}>
-                <Icon name="log-out-outline" size={20} color={colors.error} />
-              </View>
-              <View style={styles.settingTextContainer}>
-                <Text style={[styles.settingLabel, { color: colors.error }]}>
-                  Déconnexion
-                </Text>
-                <Text style={styles.settingDescription}>
-                  Quitter votre compte
-                </Text>
-              </View>
-            </View>
-          </TouchableOpacity>
+            <Switch
+              value={notificationsEnabled}
+              onValueChange={toggleNotifications}
+              trackColor={{ false: colors.border, true: colors.primary }}
+              thumbColor="#FFFFFF"
+            />
+          </View>
         </View>
       </ScrollView>
     </View>

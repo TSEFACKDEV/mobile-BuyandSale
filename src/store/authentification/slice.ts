@@ -1,7 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { LoadingType, type AsyncState } from '../../models/store';
 import type { AuthUser, Token } from '../../models/user';
-import { loginAction, logoutAction, getUserProfileAction, handleSocialAuthCallback } from './actions';
+import { loginAction, logoutAction, getUserProfileAction, handleSocialAuthCallback, updateUserAction } from './actions';
 import { getErrorMessage } from '../../utils/errorHelpers';
 
 // Type spécial pour la réponse BuyAndSale
@@ -80,11 +80,21 @@ const authentificationSlice = createSlice({
       })
 
       // === LOGOUT ===
+      .addCase(logoutAction.pending, (state) => {
+        state.auth.status = LoadingType.PENDING;
+        state.auth.error = null;
+      })
       .addCase(logoutAction.fulfilled, (state) => {
         state.auth.entities = null;
         state.auth.status = LoadingType.IDLE;
         state.auth.error = null;
         // Redux Persist va automatiquement sauvegarder l'état vide
+      })
+      .addCase(logoutAction.rejected, (state, action) => {
+        // Même en cas d'erreur, on déconnecte l'utilisateur localement
+        state.auth.entities = null;
+        state.auth.status = LoadingType.IDLE;
+        state.auth.error = null;
       })
 
       // === GET PROFILE ===
@@ -143,6 +153,33 @@ const authentificationSlice = createSlice({
         state.auth.error = null;
       })
       .addCase(handleSocialAuthCallback.rejected, (state, action) => {
+        const errorMessage = getErrorMessage(action);
+        state.auth.error = {
+          meta: {
+            status: 500,
+            message: errorMessage,
+          },
+          error: null,
+        };
+        state.auth.status = LoadingType.FAILED;
+      })
+
+      // === UPDATE USER ===
+      .addCase(updateUserAction.pending, (state) => {
+        state.auth.status = LoadingType.PENDING;
+      })
+      .addCase(updateUserAction.fulfilled, (state, action) => {
+        state.auth.status = LoadingType.SUCCESS;
+        if (action.payload && action.payload.data && state.auth.entities) {
+          // Mettre à jour les informations de l'utilisateur connecté
+          state.auth.entities = {
+            ...state.auth.entities,
+            ...action.payload.data,
+          };
+        }
+        state.auth.error = null;
+      })
+      .addCase(updateUserAction.rejected, (state, action) => {
         const errorMessage = getErrorMessage(action);
         state.auth.error = {
           meta: {
