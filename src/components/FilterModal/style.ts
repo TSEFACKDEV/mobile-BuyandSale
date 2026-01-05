@@ -146,6 +146,50 @@ const createStyles = (theme: any) =>
     categoriesScroll: {
       maxHeight: 200,
     },
+    picker: {
+      height: 48,
+      borderWidth: 1,
+      borderColor: theme.border,
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: theme.surface,
+    },
+    pickerText: {
+      fontSize: 14,
+      color: theme.text,
+    },
+    pickerModal: {
+      maxHeight: '70%',
+      marginHorizontal: 20,
+      marginBottom: 40,
+      borderRadius: 12,
+      overflow: 'hidden',
+    },
+    pickerHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: 16,
+      borderBottomWidth: 1,
+    },
+    pickerHeaderTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    pickerItem: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.border,
+    },
+    pickerItemText: {
+      fontSize: 14,
+    },
   });
 
 export default createStyles;

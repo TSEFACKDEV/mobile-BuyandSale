@@ -29,7 +29,7 @@ import PostAds from '../pages/main/PostAds/index';
 import Authenticated from '../Guards/Authenticated';
 
 // Components
-import TopNavigation from '../components/TopNavigation/TopNavigation';
+import TopNavigation from '../components/TopNavigation';
 
 // Types
 import {
@@ -49,7 +49,7 @@ const RootStack = createNativeStackNavigator<RootStackParamList>();
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
 const ProductsStack = createNativeStackNavigator<ProductsStackParamList>();
-const SettingsStack = createNativeStackNavigator();
+const SellersStack = createNativeStackNavigator();
 const BottomTab = createBottomTabNavigator<BottomTabParamList>();
 const MainStack = createNativeStackNavigator();
 
@@ -184,29 +184,35 @@ const ProductsStackNavigator = () => {
 };
 
 // =====================
-// Settings Stack Navigator
+// Sellers Stack Navigator
 // =====================
-const SettingsStackNavigator = () => {
+const SellersStackNavigator = () => {
   return (
-    <SettingsStack.Navigator
+    <SellersStack.Navigator
       screenOptions={{
         headerShown: false,
       }}
     >
-      <SettingsStack.Screen name="Settings" component={Settings} />
-    </SettingsStack.Navigator>
+      <SellersStack.Screen name="SellersList" component={Sellers} />
+      <SellersStack.Screen
+        name="SellerDetails"
+        options={{
+          title: 'Profil du vendeur',
+        }}
+      >
+        {() => (
+          <Authenticated>
+            <SellerDetails />
+          </Authenticated>
+        )}
+      </SellersStack.Screen>
+    </SellersStack.Navigator>
   );
 };
 
 // =====================
 // Wrapper components for screens with TopNavigation
 // =====================
-const SellersWithNav = () => (
-  <View style={{ flex: 1 }}>
-    <TopNavigation showBackButton title="Vendeurs" />
-    <Sellers />
-  </View>
-);
 
 const FavoritesWithNav = () => (
   <View style={{ flex: 1 }}>
@@ -228,7 +234,10 @@ const NotificationsWithNav = () => (
 
 const SettingsWithNav = () => (
   <View style={{ flex: 1 }}>
-    <Settings />
+    <Authenticated>
+      <TopNavigation showBackButton title="Paramètres" />
+      <Settings />
+    </Authenticated>
   </View>
 );
 
@@ -267,7 +276,7 @@ const MainTabNavigator = () => {
             case 'Sellers':
               iconName = focused ? 'people' : 'people-outline';
               break;
-            case 'SettingsTab':
+            case 'SearchTab':
               iconName = focused ? 'search' : 'search-outline';
               break;
             default:
@@ -315,7 +324,7 @@ const MainTabNavigator = () => {
       {/* SELLERS */}
       <BottomTab.Screen
         name="Sellers"
-        component={SellersWithNav}
+        component={SellersStackNavigator}
         options={{
           tabBarLabel: 'Vendeurs',
           title: 'Vendeurs',
@@ -324,12 +333,21 @@ const MainTabNavigator = () => {
 
       {/* SEARCH (redirect to Products) */}
       <BottomTab.Screen
-        name="SettingsTab"
-        component={SettingsStackNavigator}
+        name="SearchTab"
+        component={Products}
         options={{
           tabBarLabel: 'Rechercher',
           title: 'Recherche',
         }}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            (navigation as any).navigate('Products', {
+              screen: 'ProductsList',
+              params: { focusSearch: true },
+            });
+          },
+        })}
       />
     </BottomTab.Navigator>
   );
@@ -361,6 +379,10 @@ const MainStackNavigator = () => (
       <MainStack.Screen
         name="Notifications"
         component={NotificationsWithNav}
+      />
+      <MainStack.Screen
+        name="Settings"
+        component={SettingsWithNav}
       />
     </MainStack.Group>
   </MainStack.Navigator>

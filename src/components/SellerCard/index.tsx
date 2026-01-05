@@ -3,47 +3,39 @@ import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useThemeColors } from '../../contexts/ThemeContext';
-import type { AuthUser } from '../../store/user/actions';
+import type { AuthUser } from '../../models/user';
 import { getImageUrl, PLACEHOLDER_IMAGE } from '../../utils/imageUtils';
 import createStyles from './style';
 
 interface SellerCardProps {
-  seller: AuthUser & {
-    _count?: {
-      products?: number;
-      reviewsReceived?: number;
-    };
-    averageRating?: number;
-  };
-  onPress?: () => void;
+  seller: AuthUser;
+  index?: number;
 }
 
-const SellerCard: React.FC<SellerCardProps> = ({ seller, onPress }) => {
+const SellerCard: React.FC<SellerCardProps> = ({ seller, index }) => {
   const colors = useThemeColors();
   const navigation = useNavigation();
-
-  const productCount = seller._count?.products || 0;
-  const reviewsCount = seller._count?.reviewsReceived || 0;
-  const averageRating = seller.averageRating || 0;
-
-  const handlePress = () => {
-    if (onPress) {
-      onPress();
-    } else {
-      (navigation as any).navigate('SellerDetails', { sellerId: seller.id });
-    }
-  };
-
   const styles = useMemo(() => createStyles(colors), [colors]);
 
-  // Utiliser la même logique que le web pour générer l'URL de l'avatar
+  const handleViewProfile = () => {
+    const sellerId = seller.slug || seller.id;
+    (navigation as any).navigate('SellerDetails', { sellerId });
+  };
+
+  // Statistiques (comme la version web React)
+  const productCount = seller._count?.products || 0;
+  const reviewsCount = seller._count?.reviewsReceived || 0;
+  const averageRating = seller.reviewsReceived?.length
+    ? seller.reviewsReceived.reduce((sum, review) => sum + review.rating, 0) /
+      seller.reviewsReceived.length
+    : 0;
+
   const avatarUrl = getImageUrl(seller.avatar, 'avatar');
   const hasAvatar = avatarUrl && avatarUrl !== PLACEHOLDER_IMAGE;
 
   return (
-    <TouchableOpacity onPress={handlePress} activeOpacity={0.7}>
+    <TouchableOpacity onPress={handleViewProfile} activeOpacity={0.7}>
       <View style={styles.container}>
-        {/* Avatar avec badge vérifié */}
         <View style={styles.avatarWrapper}>
           <View style={styles.avatarContainer}>
             {hasAvatar ? (
@@ -53,25 +45,23 @@ const SellerCard: React.FC<SellerCardProps> = ({ seller, onPress }) => {
                 resizeMode="cover"
               />
             ) : (
-              <Icon name="person" size={20} color="#FFFFFF" />
+              <Icon name="person" size={24} color="#FFFFFF" />
             )}
             {seller.isVerified && (
               <View style={styles.verifiedBadge}>
-                <Text style={{ fontSize: 10, color: '#FFFFFF' }}>✓</Text>
+                <Text style={styles.verifiedText}>✓</Text>
               </View>
             )}
           </View>
         </View>
 
-        {/* Nom */}
         <Text style={styles.name} numberOfLines={2}>
           {seller.firstName} {seller.lastName}
         </Text>
 
-        {/* Stats */}
         <View style={styles.statsContainer}>
           <View style={styles.stat}>
-            <Icon name="cube-outline" size={10} color={colors.textSecondary} />
+            <Icon name="cube-outline" size={14} color={colors.textSecondary} />
             <Text style={styles.statText}>
               {productCount} annonce{productCount !== 1 ? 's' : ''}
             </Text>
@@ -80,7 +70,7 @@ const SellerCard: React.FC<SellerCardProps> = ({ seller, onPress }) => {
           {reviewsCount > 0 ? (
             <View style={styles.stat}>
               <View style={styles.ratingBadge}>
-                <Icon name="star" size={10} color="#FFD700" />
+                <Icon name="star" size={12} color="#FFD700" />
                 <Text style={styles.ratingValue}>{averageRating.toFixed(1)}</Text>
               </View>
               <Text style={styles.reviewCount}>
@@ -89,14 +79,13 @@ const SellerCard: React.FC<SellerCardProps> = ({ seller, onPress }) => {
             </View>
           ) : (
             <View style={styles.stat}>
-              <Icon name="star-outline" size={10} color={colors.textSecondary} />
+              <Icon name="star-outline" size={14} color={colors.textSecondary} />
               <Text style={styles.statText}>Nouveau</Text>
             </View>
           )}
         </View>
 
-        {/* Bouton voir profil */}
-        <TouchableOpacity style={styles.button} onPress={handlePress}>
+        <TouchableOpacity style={styles.button} onPress={handleViewProfile}>
           <Text style={styles.buttonText}>Voir profil</Text>
         </TouchableOpacity>
       </View>

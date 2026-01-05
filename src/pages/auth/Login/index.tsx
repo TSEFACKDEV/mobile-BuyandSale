@@ -16,6 +16,7 @@ import { selectUserAuthenticated } from '../../../store/authentification/slice'
 import { LoadingType } from '../../../models/store'
 import API_CONFIG from '../../../config/api.config'
 import { Loading } from '../../../components/LoadingVariants'
+import { normalizePhoneNumber, validateCameroonPhone } from '../../../utils/phoneUtils'
 
 type LoginNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>
 
@@ -40,19 +41,24 @@ const Login = () => {
     return () => backHandler.remove();
   }, [navigation]);
 
-  // Validation simplifiée
+  // Validation avec phoneUtils (comme web)
   const validateIdentifier = (value: string): { isValid: boolean; error: string } => {
     const trimmed = value.trim()
     if (!trimmed) return { isValid: false, error: 'Email ou téléphone requis' }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    const phoneRegex = /^(\+237|237)?\s?\d{8,9}$/
     
-    if (emailRegex.test(trimmed) || phoneRegex.test(trimmed.replace(/\s/g, ''))) {
+    // Tester d'abord l'email
+    if (emailRegex.test(trimmed)) {
       return { isValid: true, error: '' }
     }
     
-    return { isValid: false, error: 'Email invalide ou numéro Camerounais invalide' }
+    // Puis tester le téléphone avec phoneUtils
+    if (validateCameroonPhone(trimmed)) {
+      return { isValid: true, error: '' }
+    }
+    
+    return { isValid: false, error: 'Email invalide ou numéro Camerounais invalide (format: 6XX XX XX XX)' }
   }
 
   const handleGoogleLogin = async () => {
@@ -109,8 +115,13 @@ const Login = () => {
     }
 
     try {
+      // Normaliser si c'est un téléphone (comme web)
+      const normalizedIdentifier = validateCameroonPhone(identifier) 
+        ? normalizePhoneNumber(identifier)
+        : identifier.trim();
+      
       await dispatch(loginAction({
-        identifiant: identifier.trim(),
+        identifiant: normalizedIdentifier,
         password: password,
       })).unwrap()
 

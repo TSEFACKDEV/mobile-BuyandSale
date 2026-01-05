@@ -22,7 +22,7 @@ export type HomeStackParamList = {
 
 // Products Stack (écrans de produits)
 export type ProductsStackParamList = {
-  ProductsList: undefined;
+  ProductsList: { focusSearch?: boolean } | undefined;
   ProductDetails: { productId: string };
   SellerDetails: { sellerId: string };
 };
@@ -30,10 +30,10 @@ export type ProductsStackParamList = {
 // Bottom Tab Navigator (navigation principale optimisée)
 export type BottomTabParamList = {
   HomeTab: undefined;
-  Products: undefined;
+  Products: { focusSearch?: boolean } | undefined;
   PostAd: undefined; // Nouveau tab pour poster une annonce
   Sellers: undefined;
-  SettingsTab: undefined;
+  SearchTab: undefined;
 };
 
 // Main Stack Navigator (BottomTab + Modals)

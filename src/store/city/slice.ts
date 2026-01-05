@@ -7,6 +7,7 @@ import type { RootState } from '../index'
 export interface City {
   id: string
   name: string
+  slug?: string // Slug SEO-friendly
   userCount?: number
   productCount?: number
   createdAt: string

@@ -24,6 +24,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { logoutAction, getUserProfileAction, updateUserAction } from '../../../store/authentification/actions';
 import { LoadingType } from '../../../models/store';
 import { getImageUrl, PLACEHOLDER_IMAGE } from '../../../utils/imageUtils';
+import { normalizePhoneNumber } from '../../../utils/phoneUtils';
 import EditProductModal from '../../../components/EditProductModal';
 import { Loading, ProductCardSkeleton } from '../../../components/LoadingVariants';
 import { styles } from './styles';
@@ -625,7 +626,7 @@ const UserProfile: React.FC = () => {
                     <TextInput
                       style={[styles.profileInput, isDark && styles.profileInputDark]}
                       value={profileData.phone}
-                      onChangeText={(text) => setProfileData({ ...profileData, phone: text })}
+                      onChangeText={(text) => setProfileData({ ...profileData, phone: normalizePhoneNumber(text) })}
                       placeholder="6XX XX XX XX"
                       placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
                       keyboardType="phone-pad"
@@ -690,7 +691,7 @@ const UserProfile: React.FC = () => {
                   <View style={[styles.settingsSection, isDark && styles.settingsSectionDark]}>
                     <TouchableOpacity 
                       style={[styles.settingsButton, { backgroundColor: colors.primary }]} 
-                      onPress={() => (navigation as any).navigate('MainTab', { screen: 'SettingsTab' })}
+                      onPress={() => navigation.navigate('Settings' as never)}
                     >
                       <Icon name="settings-outline" size={20} color="#FFFFFF" />
                       <Text style={styles.profileButtonText}>Paramètres</Text>

@@ -15,9 +15,9 @@ import { useAppDispatch, useAppSelector } from '../../../hooks/store';
 import { getValidatedProductsAction } from '../../../store/product/actions';
 import { getUserFavoritesAction } from '../../../store/favorite/actions';
 import { selectUserAuthenticated } from '../../../store/authentification/slice';
-import ProductCard from '../../../components/ProductCard/ProductCard';
-import FilterModal from '../../../components/FilterModal/FilterModal';
-import TopNavigation from '../../../components/TopNavigation/TopNavigation';
+import ProductCard from '../../../components/ProductCard';
+import FilterModal from '../../../components/FilterModal';
+import TopNavigation from '../../../components/TopNavigation';
 import { useThemeColors } from '../../../contexts/ThemeContext';
 import { getAllCategoriesAction } from '../../../store/category/actions';
 import { fetchCitiesAction } from '../../../store/city/actions';
@@ -68,15 +68,14 @@ const Products = () => {
     }
   }, [currentPage, filters]);
 
-  // Focus automatique sur la barre de recherche quand on vient de Settings (bouton recherche)
+  // Focus automatique sur la barre de recherche quand on clique sur le bouton recherche
   useFocusEffect(
     React.useCallback(() => {
-      if (route.name === 'Settings') {
-        setTimeout(() => {
-          searchInputRef.current?.focus();
-        }, 300);
+      const params = route.params as { focusSearch?: boolean } | undefined;
+      if (params?.focusSearch) {
+        setTimeout(() => searchInputRef.current?.focus(), 100);
       }
-    }, [route.name])
+    }, [route.params])
   );
 
   const loadProducts = async () => {
@@ -138,7 +137,7 @@ const Products = () => {
       (product) =>
         product.name?.toLowerCase().includes(query) ||
         product.description?.toLowerCase().includes(query) ||
-        product.category?.name?.toLowerCase().includes(query)
+        product.category.name.toLowerCase().includes(query)
     );
   }, [sortedProducts, searchQuery]);
 

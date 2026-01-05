@@ -15,6 +15,7 @@ import { selectUserRegisted } from '../../../store/register/slice'
 import { LoadingType } from '../../../models/store'
 import type { UserRegisterForm } from '../../../models/user'
 import { Loading } from '../../../components/LoadingVariants'
+import { normalizePhoneNumber, validateCameroonPhone } from '../../../utils/phoneUtils'
 
 type RegisterNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Register'>
 type AuthNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Auth'>
@@ -47,12 +48,6 @@ const Register = () => {
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     return emailRegex.test(email)
-  }
-
-  const validatePhone = (phone: string) => {
-    const cleanPhone = phone.replace(/\s/g, '')
-    const phoneRegex = /^(\+237|237)\d{8,9}$|^\d{8,9}$/
-    return phoneRegex.test(cleanPhone) && cleanPhone.replace(/\D/g, '').length >= 8
   }
 
   const handleRegister = async () => {
@@ -94,11 +89,11 @@ const Register = () => {
     }
 
     // Validation Téléphone
-    if (!phone.trim()) {
+    if (!phone) {
       setPhoneError('Téléphone requis')
       isValid = false
-    } else if (!validatePhone(phone)) {
-      setPhoneError('Numéro invalide (ex: +237 6XX XXX XXX)')
+    } else if (!validateCameroonPhone(phone)) {
+      setPhoneError('Numéro de téléphone camerounais invalide (format: 6XX XX XX XX)')
       isValid = false
     }
 
@@ -137,7 +132,7 @@ const Register = () => {
             firstName: firstName.trim(),
             lastName: lastName.trim(),
             email: email.trim(),
-            phone: phone.trim(),
+            phone: normalizePhoneNumber(phone),
             password: password,
           })
         ).unwrap()

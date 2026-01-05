@@ -7,6 +7,7 @@ import type { RootState } from '../index'
 export interface Category {
   id: string
   name: string
+  slug?: string // Slug SEO-friendly
   description?: string | null
   productCount?: number
   createdAt: string

@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 import type { ThemeColors } from '../../../contexts/ThemeContext';
 
-export const createStyles = (theme: ThemeColors) =>
+const createStyles = (theme: ThemeColors) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -255,3 +255,5 @@ export const createStyles = (theme: ThemeColors) =>
       marginTop: 12,
     },
   });
+
+export default createStyles;

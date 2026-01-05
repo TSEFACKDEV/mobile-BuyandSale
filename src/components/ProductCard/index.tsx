@@ -228,7 +228,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <View style={styles.footer}>
           <View style={[styles.categoryBadge, { backgroundColor: theme.backgroundSecondary }]}>
             <Text style={[styles.categoryText, { color: theme.textSecondary }]} numberOfLines={1}>
-              {product.category?.name || 'Catégorie'}
+              {product.category.name}
             </Text>
           </View>
 

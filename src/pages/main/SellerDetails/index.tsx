@@ -25,42 +25,10 @@ import SellerRatings from '../../../components/SellerRatings';
 import RatingModal from '../../../components/RatingModal';
 import ReportModal from '../../../components/ReportModal';
 import { getImageUrl } from '../../../utils/imageUtils';
-import { createStyles } from './style';
+import { normalizePhoneForWhatsApp, formatPhoneForDisplay } from '../../../utils/phoneUtils';
+import createStyles from './style';
 import type { HomeStackParamList } from '../../../types/navigation';
 import type { Product } from '../../../store/product/actions';
-
-// Phone processing function for Cameroon numbers
-const processPhone = (
-  phone: string,
-  action: 'validate' | 'normalize' | 'display' | 'call'
-): string | boolean => {
-  if (!phone) return action === 'validate' ? false : '';
-
-  // Clean and extract local part (9 digits without country prefix)
-  const cleaned = phone.replace(/\D/g, '');
-  const localNumber = cleaned.startsWith('237') ? cleaned.slice(3) : cleaned;
-  const isValid = /^6\d{8}$/.test(localNumber);
-
-  if (action === 'validate') return isValid;
-  if (!isValid) return phone;
-
-  switch (action) {
-    case 'normalize':
-      return `+237${localNumber}`;
-
-    case 'display':
-      return `+237 ${localNumber[0]} ${localNumber.slice(1, 3)} ${localNumber.slice(
-        3,
-        5
-      )} ${localNumber.slice(5, 7)} ${localNumber.slice(7, 9)}`;
-
-    case 'call':
-      return `+237${localNumber}`;
-
-    default:
-      return phone;
-  }
-};
 
 // Dummy translation function for now
 const t = (key: string, params?: any): string => {
@@ -132,8 +100,15 @@ const SellerDetails: React.FC = () => {
       Alert.alert(t('sellerProfile.noPhone'));
       return;
     }
-    const phoneNumber = processPhone(seller.phone, 'call');
-    Linking.openURL(`tel:${phoneNumber}`);
+    
+    const normalizedPhone = normalizePhoneForWhatsApp(seller.phone);
+    const message = encodeURIComponent(
+      `Bonjour ${seller.firstName || ''}, je souhaite vous contacter.`
+    );
+    const whatsappUrl = `https://wa.me/${normalizedPhone}?text=${message}`;
+
+    Linking.openURL(whatsappUrl)
+      .catch(() => Alert.alert('Erreur', 'Impossible d\'ouvrir WhatsApp'));
   };
 
   const handleShareProfile = async () => {
@@ -296,7 +271,7 @@ const SellerDetails: React.FC = () => {
                 <View style={styles.contactItem}>
                   <Icon name="call-outline" size={20} color={theme.primary} />
                   <Text style={styles.contactText}>
-                    {processPhone(seller.phone, 'display')}
+                    {formatPhoneForDisplay(seller.phone)}
                   </Text>
                 </View>
                 <View style={styles.contactItem}>

@@ -8,6 +8,7 @@ import fetchWithAuth from '../../utils/fetchWithAuth';
 
 export interface Product {
   id: string;
+  slug?: string; // Slug SEO-friendly
   name: string;
   description: string;
   price: number;
@@ -17,29 +18,33 @@ export interface Product {
   etat: 'NEUF' | 'OCCASION' | 'CORRECT';
   quartier?: string;
   telephone: string;
-  slug?: string;
   viewCount?: number;
   categoryId: string;
   cityId: string;
   userId: string;
   createdAt: string;
   updatedAt: string;
-  category?: {
+  // Relations incluses par les includes backend
+  category: {
     id: string;
     name: string;
+    slug?: string;
     description?: string;
   };
-  city?: {
+  city: {
     id: string;
     name: string;
+    slug?: string;
   };
-  user?: {
+  user: {
     id: string;
     firstName: string;
     lastName: string;
     avatar?: string | null;
     phone?: string;
+    isVerified?: boolean;
   };
+  // Relations forfaits
   productForfaits?: Array<{
     id: string;
     forfait: { type: string };
