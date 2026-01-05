@@ -70,27 +70,23 @@ cd mobile-BuyandSale/android
 
 ---
 
-## 🔐 Configurer Redirect URIs
+## 🔐 Redirect URIs - Information Importante
 
-### Pour Expo Go (Développement)
+### ✅ Pour Android et iOS (Clients natifs)
 
-Pour **chaque** Client ID (iOS et Android):
-1. Cliquer sur le Client ID
-2. **Authorized redirect URIs** → **ADD URI**
-3. Ajouter:
-   ```
-   https://auth.expo.io/@YOUR_EXPO_USERNAME/buy_and_sale
-   ```
-   > Remplacer `YOUR_EXPO_USERNAME` par votre username Expo
+**AUCUNE configuration de Redirect URIs n'est nécessaire !**
 
-4. **SAVE**
+Les Client IDs Android et iOS n'ont **pas** de section "Authorized redirect URIs" dans Google Console - c'est **normal** et **attendu**.
 
-### Pour Standalone App (Production)
+Expo AuthSession gère automatiquement les redirections via:
+- iOS: URL Schemes natifs
+- Android: Intent Filters natifs
 
-Ajouter aussi:
-```
-com.buyandsale.app:/oauthredirect
-```
+**Vous n'avez rien à faire !** Passez directement à l'étape suivante. ✅
+
+### ℹ️ Note sur les Redirect URIs
+
+Les Redirect URIs (`https://auth.expo.io/@username/...`) sont uniquement nécessaires si vous créez un **Client ID Web** supplémentaire pour d'autres usages. Pour notre implémentation mobile avec Expo AuthSession, ils ne sont **pas utilisés**.
 
 ---
 
@@ -113,9 +109,9 @@ com.buyandsale.app:/oauthredirect
 - [ ] OAuth Consent Screen configuré
 - [ ] iOS Client ID créé
 - [ ] Android Client ID créé (avec SHA-1)
-- [ ] Redirect URIs ajoutés pour les 2 Client IDs
-- [ ] Fichier `.env` mis à jour
-- [ ] Expo redémarré (`npx expo start`)
+- [ ] ~~Redirect URIs ajoutés~~ ❌ **Pas nécessaire pour mobile natif**
+- [ ] Fichier `.env` mis à jour avec les 3 Client IDs
+- [ ] Expo redémarré (`npx expo start --clear`)
 
 ---
 
@@ -140,11 +136,11 @@ npx expo start
 
 ## ⚠️ Problèmes Fréquents
 
+### "Je ne vois pas les Redirect URIs dans Google Console"
+✅ **C'est normal !** Les Client IDs Android et iOS n'ont pas de Redirect URIs. Cette section n'existe que pour les clients Web.
+
 ### "Redirect URI mismatch"
-✅ Vérifier que l'URI dans Google Console est exactement:
-```
-https://auth.expo.io/@YOUR_USERNAME/buy_and_sale
-```
+✅ Si vous voyez cette erreur malgré tout, cela signifie que vous utilisez peut-être le mauvais Client ID. Vérifiez que vous utilisez bien les Client IDs **Android** et **iOS** (pas Web) dans votre `.env`.
 
 ### "Client ID non configuré"
 ✅ Redémarrer Expo après modification du `.env`:
