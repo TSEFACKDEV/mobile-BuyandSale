@@ -147,6 +147,28 @@ const PostAds: React.FC = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      description: '',
+      price: '',
+      quantity: '1',
+      categoryId: '',
+      cityId: '',
+      etat: 'OCCASION',
+      images: [],
+      quartier: '',
+      telephone: '',
+      isNegotiable: false,
+    });
+    setCurrentStep(1);
+    setCreatedProductId(null);
+    setSelectedForfaitId(null);
+    setSelectedForfaitType(null);
+    setSelectedForfaitPrice(0);
+    setCurrentPaymentId(null);
+  };
+
   const getCategoryName = () => {
     const category = categories.find(c => c.id === formData.categoryId);
     return category?.name || 'Sélectionner une catégorie';
@@ -379,6 +401,7 @@ if (!validateCameroonPhone(formData.telephone)) {
   const handleDeclineBoost = () => {
     if (!isMountedRef.current) return;
     setShowBoostOffer(false);
+    resetForm();
 
     Alert.alert('Succès', 'Annonce créée avec succès !', [
       {
@@ -420,6 +443,7 @@ if (!validateCameroonPhone(formData.telephone)) {
 
     setShowForfaitSelector(false);
     setShowBoostOffer(false);
+    resetForm();
 
     Alert.alert('Info', 'Annonce publiée sans forfait. Vous pourrez en ajouter un plus tard.', [
       {
@@ -446,6 +470,7 @@ if (!validateCameroonPhone(formData.telephone)) {
     setShowPaymentModal(false);
     setShowForfaitSelector(false);
     setShowBoostOffer(false);
+    resetForm();
 
     Alert.alert('Parfait !', 'Votre annonce est maintenant boostée !', [
       {
@@ -462,6 +487,7 @@ if (!validateCameroonPhone(formData.telephone)) {
     setShowPaymentModal(false);
     setShowForfaitSelector(false);
     setShowBoostOffer(false);
+    resetForm();
 
     Alert.alert('Erreur', 'Le paiement a échoué. Vous pourrez booster votre annonce plus tard.', [
       {

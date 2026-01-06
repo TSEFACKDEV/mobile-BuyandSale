@@ -2,7 +2,7 @@ import React from 'react';
 import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { ActivityIndicator, View, Linking } from 'react-native';
+import { ActivityIndicator, View, Linking, Image, Text, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 // Pages
@@ -43,6 +43,8 @@ import {
 // Context
 import { useAuth } from '../contexts/AuthContext';
 import { useThemeColors } from '../contexts/ThemeContext';
+import { useAppSelector } from '../hooks/store';
+import { getImageUrl } from '../utils/imageUtils';
 
 // Créer les navigateurs
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -140,6 +142,19 @@ const HomeStackNavigator = () => {
           </Authenticated>
         )}
       </HomeStack.Screen>
+      <HomeStack.Screen
+        name="Favorites"
+        options={{
+          title: 'Favoris',
+        }}
+      >
+        {() => (
+          <Authenticated>
+            <TopNavigation showBackButton title="Favoris" />
+            <Favorites />
+          </Authenticated>
+        )}
+      </HomeStack.Screen>
     </HomeStack.Navigator>
   );
 };
@@ -155,30 +170,6 @@ const ProductsStackNavigator = () => {
       }}
     >
       <ProductsStack.Screen name="ProductsList" component={Products} />
-      <ProductsStack.Screen
-        name="ProductDetails"
-        options={{
-          title: 'Détails du produit',
-        }}
-      >
-        {() => (
-          <Authenticated>
-            <ProductDetails />
-          </Authenticated>
-        )}
-      </ProductsStack.Screen>
-      <ProductsStack.Screen
-        name="SellerDetails"
-        options={{
-          title: 'Profil du vendeur',
-        }}
-      >
-        {() => (
-          <Authenticated>
-            <SellerDetails />
-          </Authenticated>
-        )}
-      </ProductsStack.Screen>
     </ProductsStack.Navigator>
   );
 };
@@ -214,15 +205,6 @@ const SellersStackNavigator = () => {
 // Wrapper components for screens with TopNavigation
 // =====================
 
-const FavoritesWithNav = () => (
-  <View style={{ flex: 1 }}>
-    <Authenticated>
-      <TopNavigation showBackButton title="Favoris" />
-      <Favorites />
-    </Authenticated>
-  </View>
-);
-
 const NotificationsWithNav = () => (
   <View style={{ flex: 1 }}>
     <Authenticated>
@@ -254,6 +236,8 @@ const PostAdsWithNav = () => (
 // =====================
 const MainTabNavigator = () => {
   const colors = useThemeColors();
+  const authState = useAppSelector((state) => state.authentification);
+  const user = authState.auth.entities;
 
   return (
     <BottomTab.Navigator
@@ -261,6 +245,49 @@ const MainTabNavigator = () => {
         tabBarIcon: ({ focused, color }) => {
           let iconName: string = 'home';
           let iconSize = 24;
+
+          // Bouton Profile avec avatar
+          if (route.name === 'Profile') {
+            if (user && user.avatar && user.avatar !== 'undefined' && user.avatar !== 'null') {
+              return (
+                <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 10 }}>
+                  <Image
+                    source={{ uri: getImageUrl(user.avatar, 'avatar') }}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      borderWidth: 2,
+                      borderColor: focused ? '#FF6B35' : colors.textTertiary,
+                    }}
+                  />
+                </View>
+              );
+            } else if (user) {
+              return (
+                <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 10 }}>
+                  <View
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      backgroundColor: focused ? '#FF6B35' : colors.textTertiary,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      borderWidth: 2,
+                      borderColor: focused ? '#FF6B35' : colors.textTertiary,
+                    }}
+                  >
+                    <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '600' }}>
+                      {`${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`}
+                    </Text>
+                  </View>
+                </View>
+              );
+            }
+            iconName = focused ? 'person' : 'person-outline';
+            return <Icon name={iconName} size={iconSize} color={color} />;
+          }
 
           switch (route.name) {
             case 'HomeTab':
@@ -276,9 +303,6 @@ const MainTabNavigator = () => {
             case 'Sellers':
               iconName = focused ? 'people' : 'people-outline';
               break;
-            case 'SearchTab':
-              iconName = focused ? 'search' : 'search-outline';
-              break;
             default:
               break;
           }
@@ -287,6 +311,26 @@ const MainTabNavigator = () => {
         },
         tabBarActiveTintColor: '#FF6B35',
         tabBarInactiveTintColor: colors.textTertiary,
+        tabBarStyle: {
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: Platform.OS === 'ios' ? 85 : 70,
+          paddingBottom: Platform.OS === 'ios' ? 25 : 10,
+          paddingTop: 10,
+          backgroundColor: 'rgba(255, 255, 255, 0.75)',
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(255, 255, 255, 0.2)',
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: -10,
+          },
+          shadowOpacity: 0.25,
+          shadowRadius: 25,
+          elevation: 20,
+        },
         headerShown: false,
         lazy: true,
       })}
@@ -331,24 +375,25 @@ const MainTabNavigator = () => {
         }}
       />
 
-      {/* SEARCH (redirect to Products) */}
-      <BottomTab.Screen
-        name="SearchTab"
-        component={Products}
-        options={{
-          tabBarLabel: 'Rechercher',
-          title: 'Recherche',
-        }}
-        listeners={({ navigation }) => ({
-          tabPress: (e) => {
-            e.preventDefault();
-            (navigation as any).navigate('Products', {
-              screen: 'ProductsList',
-              params: { focusSearch: true },
-            });
-          },
-        })}
-      />
+      {/* PROFILE - Visible uniquement si connecté */}
+      {user && (
+        <BottomTab.Screen
+          name="Profile"
+          component={HomeStackNavigator}
+          options={{
+            tabBarLabel: '',
+            title: 'Profil',
+          }}
+          listeners={({ navigation }) => ({
+            tabPress: (e) => {
+              e.preventDefault();
+              navigation.navigate('HomeTab', {
+                screen: 'UserProfile',
+              } as never);
+            },
+          })}
+        />
+      )}
     </BottomTab.Navigator>
   );
 };
@@ -358,6 +403,7 @@ const MainTabNavigator = () => {
 // =====================
 const MainStackNavigator = () => (
   <MainStack.Navigator
+    id="MainStack"
     screenOptions={{
       headerShown: false,
     }}
@@ -372,10 +418,6 @@ const MainStackNavigator = () => (
         headerShown: false,
       }}
     >
-      <MainStack.Screen
-        name="Favorites"
-        component={FavoritesWithNav}
-      />
       <MainStack.Screen
         name="Notifications"
         component={NotificationsWithNav}

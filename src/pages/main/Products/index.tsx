@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,6 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRoute, useFocusEffect } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../../../hooks/store';
 import { getValidatedProductsAction } from '../../../store/product/actions';
 import { getUserFavoritesAction } from '../../../store/favorite/actions';
@@ -26,8 +25,6 @@ import styles from './style';
 const Products = () => {
   const dispatch = useAppDispatch();
   const theme = useThemeColors();
-  const route = useRoute();
-  const searchInputRef = useRef<TextInput>(null);
 
   // Redux state
   const { validatedProducts, validatedProductsStatus, validatedProductsPagination } = useAppSelector(
@@ -67,16 +64,6 @@ const Products = () => {
       dispatch(getUserFavoritesAction());
     }
   }, [currentPage, filters]);
-
-  // Focus automatique sur la barre de recherche quand on clique sur le bouton recherche
-  useFocusEffect(
-    React.useCallback(() => {
-      const params = route.params as { focusSearch?: boolean } | undefined;
-      if (params?.focusSearch) {
-        setTimeout(() => searchInputRef.current?.focus(), 100);
-      }
-    }, [route.params])
-  );
 
   const loadProducts = async () => {
     try {
@@ -202,7 +189,6 @@ const Products = () => {
       <View style={[styles.searchContainer, { backgroundColor: theme.backgroundSecondary }]}>
         <Ionicons name="search-outline" size={20} color={theme.textSecondary} />
         <TextInput
-          ref={searchInputRef}
           style={[styles.searchInput, { color: theme.text }]}
           placeholder="Rechercher un produit..."
           placeholderTextColor={theme.textSecondary}

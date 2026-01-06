@@ -2,12 +2,12 @@ import Utils from './index';
 import API_CONFIG from '../config/api.config';
 import API_ENDPOINTS from '../helpers/api';
 
-// Fonction pour fetch avec authentification (EXACTEMENT comme React)
+// Fonction pour fetch avec authentification (alignée sur React web)
 export const fetchWithAuth = async (
   url: string,
   options: RequestInit = {}
 ): Promise<Response> => {
-  const token = Utils.getAccessToken(); // Synchrone maintenant
+  const token = Utils.getAccessToken();
 
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string> || {}),
@@ -26,17 +26,17 @@ export const fetchWithAuth = async (
     headers['Content-Type'] = 'application/json';
   }
 
-  let response = await fetch(url, {
+  const response = await fetch(url, {
     ...options,
     headers,
   });
 
-  // Token refresh on 401 (EXACTEMENT comme React)
+  // Token refresh on 401
   if (response.status === 401) {
-    const refreshToken = Utils.getRefreshToken(); // Synchrone maintenant
+    const refreshToken = Utils.getRefreshToken();
     
     if (!refreshToken) {
-      // Pas de refresh token - retourner 401 (l'appelant gère le logout)
+      // Pas de refresh token - retourner 401
       return response;
     }
 
@@ -57,35 +57,37 @@ export const fetchWithAuth = async (
       if (data.data?.token?.AccessToken) {
         // Utiliser l'import dynamique pour éviter le cycle
         const { store } = require('../store');
-        const { setAccessToken: setAccessTokenAction } = require('../store/authentification/slice');
+        const { setAccessToken } = require('../store/authentification/slice');
         
-        // Utiliser Redux pour sauvegarder le nouveau token
-        const newToken = {
-          AccessToken: data.data.token.AccessToken,
-          refreshToken: data.data?.token?.RefreshToken || data.data?.token?.refreshToken || refreshToken,
+        // Sauvegarder le nouveau token dans Redux
+        store.dispatch(setAccessToken(data.data.token));
+
+        // Créer de nouveaux headers avec le nouveau token
+        const newHeaders: Record<string, string> = {
+          ...(options.headers as Record<string, string> || {}),
+          'Authorization': `Bearer ${data.data.token.AccessToken}`,
         };
-        
-        store.dispatch(setAccessTokenAction(newToken));
 
-        headers['Authorization'] = `Bearer ${data.data.token.AccessToken}`;
-
+        // Set Content-Type pour la retry
         if (
           options.body &&
-          !headers['Content-Type'] &&
+          !newHeaders['Content-Type'] &&
           !(options.body instanceof FormData)
         ) {
-          headers['Content-Type'] = 'application/json';
+          newHeaders['Content-Type'] = 'application/json';
         }
 
         return fetch(url, {
           ...options,
-          headers,
+          headers: newHeaders,
         });
       }
     }
-    
-    // Si refresh échoue, retourner la réponse (l'appelant gère le logout)
-    return response;
+
+    // Si le refresh échoue, déconnecter l'utilisateur
+    const { store } = require('../store');
+    const { logoutAction } = require('../store/authentification/actions');
+    store.dispatch(logoutAction());
   }
 
   return response;

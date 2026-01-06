@@ -1,30 +1,17 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import API_CONFIG from '../../config/api.config';
 import fetchWithAuth from '../../utils/fetchWithAuth';
+import type { Product } from '../product/actions';
 
 // ===============================
 // TYPES ET INTERFACES
 // ===============================
 
-// Simplification du type Product pour éviter dépendances circulaires
-export interface ProductBasic {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  images: string[];
-  status: string;
-  categoryId: string;
-  cityId: string;
-  userId: string;
-  createdAt: string;
-}
-
 export interface Favorite {
   id: string;
   userId: string;
   productId: string;
-  product: ProductBasic | null;
+  product: Product | null;
   createdAt: string;
   updatedAt: string;
 }

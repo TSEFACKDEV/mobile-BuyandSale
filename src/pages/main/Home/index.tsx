@@ -183,35 +183,67 @@ const Home = () => {
           </View>
 
           {productsLoading ? (
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.productsContainer}
-            >
-              {Array.from({ length: 4 }).map((_, index) => (
-                <View key={index} style={{ marginRight: 12, width: 180 }}>
-                  <Skeleton width={180} height={180} borderRadius={12} />
-                  <Skeleton width={150} height={16} borderRadius={4} style={{ marginTop: 8 }} />
-                  <Skeleton width={100} height={14} borderRadius={4} style={{ marginTop: 6 }} />
-                  <Skeleton width={80} height={20} borderRadius={4} style={{ marginTop: 6 }} />
-                </View>
-              ))}
-            </ScrollView>
+            <View>
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.productsContainer}
+              >
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <View key={index} style={{ marginRight: 12, width: 180 }}>
+                    <Skeleton width={180} height={180} borderRadius={12} />
+                    <Skeleton width={150} height={16} borderRadius={4} style={{ marginTop: 8 }} />
+                    <Skeleton width={100} height={14} borderRadius={4} style={{ marginTop: 6 }} />
+                    <Skeleton width={80} height={20} borderRadius={4} style={{ marginTop: 6 }} />
+                  </View>
+                ))}
+              </ScrollView>
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={[styles.productsContainer, { marginTop: 12 }]}
+              >
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <View key={index + 6} style={{ marginRight: 12, width: 180 }}>
+                    <Skeleton width={180} height={180} borderRadius={12} />
+                    <Skeleton width={150} height={16} borderRadius={4} style={{ marginTop: 8 }} />
+                    <Skeleton width={100} height={14} borderRadius={4} style={{ marginTop: 6 }} />
+                    <Skeleton width={80} height={20} borderRadius={4} style={{ marginTop: 6 }} />
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
           ) : featuredProducts.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Icon name="cube-outline" size={48} color={theme.colors.textSecondary} />
               <Text style={styles.emptyText}>{t('home.noProducts')}</Text>
             </View>
           ) : (
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.productsContainer}
-            >
-              {featuredProducts.map((product: any) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </ScrollView>
+            <View>
+              {/* Première ligne - 6 premiers produits */}
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.productsContainer}
+              >
+                {featuredProducts.slice(0, 6).map((product: any) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </ScrollView>
+              
+              {/* Deuxième ligne - 6 produits suivants */}
+              {featuredProducts.length > 6 && (
+                <ScrollView 
+                  horizontal 
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={[styles.productsContainer, { marginTop: 12 }]}
+                >
+                  {featuredProducts.slice(6, 12).map((product: any) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </ScrollView>
+              )}
+            </View>
           )}
         </View>
 

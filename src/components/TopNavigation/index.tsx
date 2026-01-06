@@ -1,11 +1,11 @@
-import React, { useMemo } from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import React, { useMemo, useRef, useEffect } from 'react';
+import { View, Text, TouchableOpacity, Animated } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { useThemeColors } from '../../contexts/ThemeContext';
 import { useAppSelector, useAppDispatch } from '../../hooks/store';
 import { fetchNotificationsAction } from '../../store/notification/actions';
-import { getImageUrl } from '../../utils/imageUtils';
+import { selectValidFavoritesCount } from '../../store/favorite/slice';
 import createStyles from './style';
 
 interface TopNavigationProps {
@@ -22,19 +22,39 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
   const colors = useThemeColors();
   const navigation = useNavigation();
   const dispatch = useAppDispatch();
-  
-  const authState = useAppSelector((state) => state.authentification);
-  const user = authState.auth.entities;
 
   // Récupérer le compteur de notifications non lues
   const { unreadCount } = useAppSelector((state) => state.notification);
 
+  // Récupérer le compteur de favoris
+  const favoritesCount = useAppSelector(selectValidFavoritesCount);
+
+  // Animation pour le badge favoris
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (favoritesCount > 0) {
+      Animated.sequence([
+        Animated.spring(scaleAnim, {
+          toValue: 1.3,
+          useNativeDriver: true,
+          speed: 50,
+          bounciness: 20,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          useNativeDriver: true,
+          speed: 50,
+          bounciness: 20,
+        }),
+      ]).start();
+    }
+  }, [favoritesCount, scaleAnim]);
+
   // Charger les notifications au montage
   React.useEffect(() => {
-    if (user) {
-      dispatch(fetchNotificationsAction());
-    }
-  }, [dispatch, user]);
+    dispatch(fetchNotificationsAction());
+  }, [dispatch]);
 
   const handleBackPress = () => {
     if (onBackPress) {
@@ -49,12 +69,8 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
   };
 
   const handleFavoritesPress = () => {
-    navigation.navigate('Favorites' as never);
-  };
-
-  const handleProfilePress = () => {
     (navigation as any).navigate('HomeTab', {
-      screen: 'UserProfile'
+      screen: 'Favorites'
     });
   };
 
@@ -97,6 +113,13 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
             activeOpacity={0.7}
           >
             <Icon name="heart-outline" size={24} color={colors.text} />
+            {favoritesCount > 0 && (
+              <Animated.View style={[styles.notificationBadge, { transform: [{ scale: scaleAnim }] }]}>
+                <Text style={styles.notificationBadgeText}>
+                  {favoritesCount > 9 ? '9+' : favoritesCount}
+                </Text>
+              </Animated.View>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -113,27 +136,6 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
               </View>
             )}
           </TouchableOpacity>
-
-          {user && (
-            <TouchableOpacity
-              style={styles.iconButton}
-              onPress={handleProfilePress}
-              activeOpacity={0.7}
-            >
-              {user.avatar && user.avatar !== 'undefined' && user.avatar !== 'null' ? (
-                <Image
-                  source={{ uri: getImageUrl(user.avatar, 'avatar') }}
-                  style={styles.avatarImage}
-                />
-              ) : (
-                <View style={styles.avatarPlaceholder}>
-                  <Text style={styles.avatarText}>
-                    {`${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`}
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          )}
         </View>
       )}
     </View>

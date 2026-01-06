@@ -63,28 +63,6 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
   },
-  avatarImage: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: colors.primary,
-  },
-  avatarPlaceholder: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: colors.primary,
-  },
-  avatarText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '600',
-  },
   orangeText: {
     color: '#FB923C', // COLORS.primary
   },

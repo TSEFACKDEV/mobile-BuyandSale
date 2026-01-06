@@ -2,6 +2,7 @@ import React, { useMemo, useRef } from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { CommonActions } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../../hooks/store';
 import { toggleFavoriteAction } from '../../store/favorite/actions';
 import { selectValidFavorites } from '../../store/favorite/slice';
@@ -133,7 +134,19 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   // Gérer le clic sur la carte
   const handlePress = () => {
-    navigation.navigate('ProductDetails', { productId: product.id });
+    // Utiliser CommonActions.navigate pour naviguer depuis n'importe quel contexte
+    navigation.dispatch(
+      CommonActions.navigate({
+        name: 'MainTab',
+        params: {
+          screen: 'HomeTab',
+          params: {
+            screen: 'ProductDetails',
+            params: { productId: product.id },
+          },
+        },
+      })
+    );
   };
 
   return (
