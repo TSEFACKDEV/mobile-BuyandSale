@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,9 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
+  ToastAndroid,
+  Platform,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useThemeColors } from '../../contexts/ThemeContext';
@@ -14,6 +17,7 @@ import { useTranslation } from '../../hooks/useTranslation';
 import API_ENDPOINTS from '../../helpers/api';
 import API_CONFIG from '../../config/api.config';
 import { getImageUrl, PLACEHOLDER_IMAGE } from '../../utils/imageUtils';
+import { fetchWithAuth } from '../../utils/fetchWithAuth';
 import { styles } from './styles';
 
 
@@ -47,32 +51,31 @@ interface Payment {
 }
 
 interface PaymentHistoryProps {
-  userId?: string;
+  // Future: Support admin view with userId
 }
 
-const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
+const PaymentHistory: React.FC<PaymentHistoryProps> = () => {
   const colors = useThemeColors();
   const { t } = useTranslation();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   const fetchPayments = useCallback(async (page: number = 1) => {
     try {
       setIsLoading(true);
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}/${API_ENDPOINTS.PAYMENT_GET_USER}?page=${page}&limit=10`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('buyAndSale-token')}`,
-          },
-        }
+      setError(null);
+
+      const response = await fetchWithAuth(
+        `${API_CONFIG.BASE_URL}/${API_ENDPOINTS.PAYMENT_GET_USER}?page=${page}&limit=10`
       );
       
       if (!response.ok) {
-        throw new Error('Failed to fetch payments');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.meta?.message || 'Erreur lors du chargement des paiements');
       }
       
       const data = await response.json();
@@ -84,6 +87,15 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
       }
     } catch (error) {
       console.error('Error fetching payment history:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      setError(errorMessage);
+      
+      // Afficher un message à l'utilisateur
+      if (Platform.OS === 'android') {
+        ToastAndroid.show(errorMessage, ToastAndroid.SHORT);
+      } else {
+        Alert.alert('Erreur', errorMessage);
+      }
     } finally {
       setIsLoading(false);
       setRefreshing(false);
@@ -99,47 +111,54 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
     fetchPayments(1);
   }, [fetchPayments]);
 
-  const getStatusIcon = (status: Payment['status']) => {
-    const icons = {
+  // Mémoisation des configurations pour optimiser les performances
+  const statusConfig = useMemo(() => ({
+    icons: {
       SUCCESS: 'checkmark-circle',
       PENDING: 'time',
       FAILED: 'close-circle',
       CANCELLED: 'close-circle-outline',
       EXPIRED: 'alert-circle',
-    };
-    return icons[status];
-  };
-
-  const getStatusColor = (status: Payment['status']) => {
-    const colorMap = {
+    },
+    colors: {
       SUCCESS: '#10b981',
       PENDING: '#f59e0b',
       FAILED: '#ef4444',
       CANCELLED: '#6b7280',
       EXPIRED: '#f97316',
-    };
-    return colorMap[status];
-  };
+    },
+  }), []);
 
-  const getForfaitTypeLabel = (type: Payment['forfait']['type']) => {
-    const labels = {
+  const forfaitConfig = useMemo(() => ({
+    labels: {
       PREMIUM: 'Premium',
       TOP_ANNONCE: 'Top Annonce',
       URGENT: 'Urgent',
-    };
-    return labels[type];
-  };
-
-  const getForfaitTypeColor = (type: Payment['forfait']['type']) => {
-    const colors = {
+    },
+    colors: {
       PREMIUM: '#9333ea',
       TOP_ANNONCE: '#3b82f6',
       URGENT: '#ef4444',
-    };
-    return colors[type];
-  };
+    },
+  }), []);
 
-  const formatDate = (dateString: string) => {
+  const getStatusIcon = useCallback((status: Payment['status']) => {
+    return statusConfig.icons[status];
+  }, [statusConfig]);
+
+  const getStatusColor = useCallback((status: Payment['status']) => {
+    return statusConfig.colors[status];
+  }, [statusConfig]);
+
+  const getForfaitTypeLabel = useCallback((type: Payment['forfait']['type']) => {
+    return forfaitConfig.labels[type];
+  }, [forfaitConfig]);
+
+  const getForfaitTypeColor = useCallback((type: Payment['forfait']['type']) => {
+    return forfaitConfig.colors[type];
+  }, [forfaitConfig]);
+
+  const formatDate = useCallback((dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('fr-FR', {
       day: '2-digit',
@@ -148,7 +167,7 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
       hour: '2-digit',
       minute: '2-digit',
     });
-  };
+  }, []);
 
   if (isLoading && payments.length === 0) {
     return (
@@ -160,6 +179,39 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
           </Text>
         </View>
       </View>
+    );
+  }
+
+  // Affichage en cas d'erreur persistante
+  if (error && !isLoading && payments.length === 0) {
+    return (
+      <ScrollView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
+        }
+      >
+        <View style={styles.emptyContainer}>
+          <Icon name="alert-circle-outline" size={64} color={colors.error} />
+          <Text style={[styles.emptyTitle, { color: colors.text }]}>
+            Erreur de chargement
+          </Text>
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+            {error}
+          </Text>
+          <TouchableOpacity
+            onPress={() => fetchPayments(1)}
+            style={[
+              styles.paginationButton,
+              { backgroundColor: colors.primary, marginTop: 16, paddingHorizontal: 24 },
+            ]}
+          >
+            <Text style={[styles.paginationButtonText, { color: '#FFFFFF' }]}>
+              Réessayer
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     );
   }
 
@@ -295,22 +347,24 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
                     </View>
 
                     {/* Barre de progression */}
-                    <View style={styles.progressContainer}>
-                      <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
-                        <View
-                          style={[
-                            styles.progressFill,
-                            {
-                              width: `${(payment.remainingDays! / payment.forfait.duration) * 100}%`,
-                              backgroundColor: '#10b981',
-                            },
-                          ]}
-                        />
+                    {payment.remainingDays !== undefined && (
+                      <View style={styles.progressContainer}>
+                        <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
+                          <View
+                            style={[
+                              styles.progressFill,
+                              {
+                                width: `${Math.min(100, Math.max(0, (payment.remainingDays / payment.forfait.duration) * 100))}%`,
+                                backgroundColor: payment.remainingDays < 7 ? '#f59e0b' : '#10b981',
+                              },
+                            ]}
+                          />
+                        </View>
+                        <Text style={[styles.progressText, { color: colors.textSecondary }]}>
+                          {payment.remainingDays}/{payment.forfait.duration} jours
+                        </Text>
                       </View>
-                      <Text style={[styles.progressText, { color: colors.textSecondary }]}>
-                        {payment.remainingDays}/{payment.forfait.duration} jours
-                      </Text>
-                    </View>
+                    )}
                   </>
                 )}
               </View>
@@ -325,6 +379,10 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
           <TouchableOpacity
             onPress={() => fetchPayments(currentPage - 1)}
             disabled={currentPage === 1}
+            accessible={true}
+            accessibilityLabel="Page précédente"
+            accessibilityRole="button"
+            accessibilityState={{ disabled: currentPage === 1 }}
             style={[
               styles.paginationButton,
               {
@@ -339,13 +397,21 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
             </Text>
           </TouchableOpacity>
 
-          <Text style={[styles.paginationText, { color: colors.textSecondary }]}>
+          <Text 
+            style={[styles.paginationText, { color: colors.textSecondary }]}
+            accessible={true}
+            accessibilityLabel={`Page ${currentPage} sur ${totalPages}`}
+          >
             {currentPage} / {totalPages}
           </Text>
 
           <TouchableOpacity
             onPress={() => fetchPayments(currentPage + 1)}
             disabled={currentPage === totalPages}
+            accessible={true}
+            accessibilityLabel="Page suivante"
+            accessibilityRole="button"
+            accessibilityState={{ disabled: currentPage === totalPages }}
             style={[
               styles.paginationButton,
               {

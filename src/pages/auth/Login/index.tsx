@@ -14,16 +14,10 @@ import { useAppDispatch, useAppSelector } from '../../../hooks/store'
 import { loginAction, handleSocialAuthCallback } from '../../../store/authentification/actions'
 import { selectUserAuthenticated } from '../../../store/authentification/slice'
 import { LoadingType } from '../../../models/store'
-<<<<<<< HEAD
 import { GoogleAuthService } from '../../../services/googleAuthService'
-=======
 import API_CONFIG from '../../../config/api.config'
 import { Loading } from '../../../components/LoadingVariants'
-<<<<<<< HEAD
->>>>>>> f22e267a215db3d8c21e6beec5d3112afac0620e
-=======
 import { normalizePhoneNumber, validateCameroonPhone } from '../../../utils/phoneUtils'
->>>>>>> e9e8f2c76c52749a5d24ba7430589a0aeacd2119
 
 type LoginNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>
 
@@ -52,7 +46,6 @@ const Login = () => {
     return () => backHandler.remove();
   }, [navigation]);
 
-<<<<<<< HEAD
   // 🔐 Gérer la réponse de Google OAuth
   useEffect(() => {
     if (response?.type === 'success') {
@@ -138,10 +131,7 @@ const Login = () => {
     }
   };
 
-  // Validation simplifiée
-=======
   // Validation avec phoneUtils (comme web)
->>>>>>> e9e8f2c76c52749a5d24ba7430589a0aeacd2119
   const validateIdentifier = (value: string): { isValid: boolean; error: string } => {
     const trimmed = value.trim()
     if (!trimmed) return { isValid: false, error: 'Email ou téléphone requis' }

@@ -15,15 +15,9 @@ import { handleSocialAuthCallback } from '../../../store/authentification/action
 import { selectUserRegisted } from '../../../store/register/slice'
 import { LoadingType } from '../../../models/store'
 import type { UserRegisterForm } from '../../../models/user'
-<<<<<<< HEAD
 import { GoogleAuthService } from '../../../services/googleAuthService'
-=======
 import { Loading } from '../../../components/LoadingVariants'
-<<<<<<< HEAD
->>>>>>> f22e267a215db3d8c21e6beec5d3112afac0620e
-=======
 import { normalizePhoneNumber, validateCameroonPhone } from '../../../utils/phoneUtils'
->>>>>>> e9e8f2c76c52749a5d24ba7430589a0aeacd2119
 
 type RegisterNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Register'>
 type AuthNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Auth'>

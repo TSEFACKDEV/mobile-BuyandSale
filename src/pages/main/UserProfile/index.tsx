@@ -564,11 +564,11 @@ const UserProfile: React.FC = () => {
               )}
             </View>
           )}
-ayments' && (
+
+          {activeTab === 'payments' && (
             <PaymentHistory userId={user.id} />
           )}
 
-          {activeTab === 'p
           {activeTab === 'profile' && (
             <View>
               <View style={styles.profileHeader}>
