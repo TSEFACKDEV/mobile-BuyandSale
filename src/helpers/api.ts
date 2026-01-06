@@ -61,6 +61,11 @@ const API_ENDPOINTS = {
   NOTIFICATION_GET_ALL: "notification",
   NOTIFICATION_READ: "notification/:id/read",
   NOTIFICATION_MARK_ALL_READ: "notification/mark-all-read",
+
+  // Payments (routes sous /payments au pluriel côté serveur)
+  PAYMENT_INITIATE: "payments/initiate",
+  PAYMENT_STATUS: "payments/:paymentId/status",
+  PAYMENT_GET_USER: "payments/history",
 } as const;
 
 export default API_ENDPOINTS;

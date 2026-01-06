@@ -26,10 +26,11 @@ import { LoadingType } from '../../../models/store';
 import { getImageUrl, PLACEHOLDER_IMAGE } from '../../../utils/imageUtils';
 import { normalizePhoneNumber } from '../../../utils/phoneUtils';
 import EditProductModal from '../../../components/EditProductModal';
+import PaymentHistory from '../../../components/UserProfile/PaymentHistory';
 import { Loading, ProductCardSkeleton } from '../../../components/LoadingVariants';
 import { styles } from './styles';
 
-type TabType = 'active' | 'pending' | 'profile';
+type TabType = 'active' | 'pending' | 'payments' | 'profile';
 
 const UserProfile: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -236,6 +237,7 @@ const UserProfile: React.FC = () => {
   const tabs = [
     { id: 'active' as TabType, label: 'Actifs', icon: 'cube-outline', count: userProducts.length },
     { id: 'pending' as TabType, label: 'En attente', icon: 'time-outline', count: userPendingProducts.length },
+    { id: 'payments' as TabType, label: 'Paiements', icon: 'card-outline', count: null },
     { id: 'profile' as TabType, label: 'Profil', icon: 'person-outline', count: null },
   ];
 
@@ -561,6 +563,10 @@ const UserProfile: React.FC = () => {
                 </View>
               )}
             </View>
+          )}
+
+          {activeTab === 'payments' && (
+            <PaymentHistory userId={user.id} />
           )}
 
           {activeTab === 'profile' && (

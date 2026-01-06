@@ -1,5 +1,5 @@
-import { View, Text, Pressable, ScrollView, Alert, Linking, TouchableOpacity, BackHandler } from 'react-native'
-import React from 'react'
+import { View, Text, Pressable, ScrollView, Alert, TouchableOpacity, BackHandler, ActivityIndicator } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { AuthStackParamList } from '../../../types/navigation'
@@ -11,9 +11,10 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import styles from './style'
 import COLORS from '../../colors'
 import { useAppDispatch, useAppSelector } from '../../../hooks/store'
-import { loginAction } from '../../../store/authentification/actions'
+import { loginAction, handleSocialAuthCallback } from '../../../store/authentification/actions'
 import { selectUserAuthenticated } from '../../../store/authentification/slice'
 import { LoadingType } from '../../../models/store'
+import { GoogleAuthService } from '../../../services/googleAuthService'
 import API_CONFIG from '../../../config/api.config'
 import { Loading } from '../../../components/LoadingVariants'
 import { normalizePhoneNumber, validateCameroonPhone } from '../../../utils/phoneUtils'
@@ -27,19 +28,108 @@ const Login = () => {
   const authState = useAppSelector(selectUserAuthenticated)
   const isLoading = authState.status === LoadingType.PENDING
   
-  const [identifier, setIdentifier] = React.useState('')
-  const [password, setPassword] = React.useState('')
-  const [identifierError, setIdentifierError] = React.useState('')
-  const [passwordError, setPasswordError] = React.useState('')
+  const [identifier, setIdentifier] = useState('')
+  const [password, setPassword] = useState('')
+  const [identifierError, setIdentifierError] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+
+  // Configuration Google Auth avec Expo AuthSession
+  const [request, response, promptAsync] = GoogleAuthService.useGoogleAuth()
 
   // Gérer le bouton retour Android
-  React.useEffect(() => {
+  useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       navigation.navigate('Main' as any, { screen: 'HomeTab' });
       return true;
     });
     return () => backHandler.remove();
   }, [navigation]);
+
+  // 🔐 Gérer la réponse de Google OAuth
+  useEffect(() => {
+    if (response?.type === 'success') {
+      handleGoogleSuccess(response.authentication?.accessToken);
+    } else if (response?.type === 'error') {
+      setIsGoogleLoading(false);
+      Alert.alert('Erreur', 'Échec de l\'authentification Google');
+    } else if (response?.type === 'cancel') {
+      setIsGoogleLoading(false);
+    }
+  }, [response]);
+
+  // 🔐 Traiter le succès de l'authentification Google
+  const handleGoogleSuccess = async (googleAccessToken?: string) => {
+    if (!googleAccessToken) {
+      Alert.alert('Erreur', 'Token Google non reçu');
+      setIsGoogleLoading(false);
+      return;
+    }
+
+    try {
+      console.log('🔐 [Login] Authentification Google en cours...');
+
+      // Échanger le token Google avec notre backend
+      const result = await GoogleAuthService.authenticateWithBackend(
+        googleAccessToken
+      );
+
+      if (result.success && result.accessToken) {
+        // Dispatch l'action Redux pour sauvegarder les données utilisateur
+        const resultAction = await dispatch(
+          handleSocialAuthCallback(result.accessToken)
+        );
+
+        if (handleSocialAuthCallback.fulfilled.match(resultAction)) {
+          Alert.alert('Succès', 'Connexion Google réussie !');
+          // La navigation se fera automatiquement via RootNavigator
+        } else {
+          throw new Error('Échec de récupération du profil utilisateur');
+        }
+      } else {
+        throw new Error(result.error || 'Authentification Google échouée');
+      }
+    } catch (error) {
+      console.error('❌ [Login] Erreur Google Auth:', error);
+      Alert.alert(
+        'Erreur',
+        error instanceof Error ? error.message : 'Erreur d\'authentification Google'
+      );
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
+  // 🔐 Initier l'authentification Google
+  const handleGoogleLogin = async () => {
+    // Vérifier que la configuration Google est présente
+    if (!GoogleAuthService.isConfigured()) {
+      Alert.alert(
+        'Configuration manquante',
+        'L\'authentification Google n\'est pas configurée. Veuillez contacter l\'administrateur.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
+    if (!request) {
+      Alert.alert(
+        'Erreur',
+        'Authentification Google non disponible pour le moment.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
+    setIsGoogleLoading(true);
+    try {
+      await promptAsync();
+    } catch (error) {
+      console.error('❌ [Login] Erreur promptAsync:', error);
+      setIsGoogleLoading(false);
+      Alert.alert('Erreur', 'Impossible d\'initier l\'authentification Google');
+    }
+  };
 
   // Validation avec phoneUtils (comme web)
   const validateIdentifier = (value: string): { isValid: boolean; error: string } => {
@@ -59,39 +149,6 @@ const Login = () => {
     }
     
     return { isValid: false, error: 'Email invalide ou numéro Camerounais invalide (format: 6XX XX XX XX)' }
-  }
-
-  const handleGoogleLogin = async () => {
-    try {
-      // URL du backend pour Google OAuth
-      const googleAuthUrl = `${API_CONFIG.BASE_URL}/auth/google`
-      
-      // Vérifier si l'URL peut être ouverte
-      const supported = await Linking.canOpenURL(googleAuthUrl)
-      
-      if (supported) {
-        await Linking.openURL(googleAuthUrl)
-        
-        Alert.alert(
-          'Authentification Google',
-          'Vous allez être redirigé vers Google pour vous authentifier. Une fois connecté, vous serez redirigé vers l\'application.',
-          [{ text: 'OK' }]
-        )
-      } else {
-        Alert.alert(
-          'Erreur',
-          'Impossible d\'ouvrir le navigateur pour l\'authentification Google.',
-          [{ text: 'OK' }]
-        )
-      }
-    } catch (error) {
-      console.error('Erreur Google Auth:', error)
-      Alert.alert(
-        'Erreur',
-        'Une erreur est survenue lors de l\'authentification Google.',
-        [{ text: 'OK' }]
-      )
-    }
   }
 
   const handleLogin = async () => {
@@ -234,11 +291,24 @@ const Login = () => {
 
           {/* Google Auth Button */}
           <Pressable
-            style={styles.googleButton}
+            style={[
+              styles.googleButton,
+              (!request || isGoogleLoading || isLoading) && styles.buttonDisabled,
+            ]}
             onPress={handleGoogleLogin}
+            disabled={!request || isGoogleLoading || isLoading}
           >
-            <MaterialCommunityIcons name="google" size={20} color="#DB4437" />
-            <Text style={styles.googleButtonText}>Continuer avec Google</Text>
+            {isGoogleLoading ? (
+              <>
+                <ActivityIndicator color="#DB4437" size="small" />
+                <Text style={styles.googleButtonText}>Connexion...</Text>
+              </>
+            ) : (
+              <>
+                <MaterialCommunityIcons name="google" size={20} color="#DB4437" />
+                <Text style={styles.googleButtonText}>Continuer avec Google</Text>
+              </>
+            )}
           </Pressable>
 
           {/* Register Link */}

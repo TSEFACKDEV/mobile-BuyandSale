@@ -145,6 +145,9 @@ const styles = StyleSheet.create({
     color: '#374151',
     marginLeft: 10,
   },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
 
   /* ===== REGISTER SECTION ===== */
   registerContainer: {

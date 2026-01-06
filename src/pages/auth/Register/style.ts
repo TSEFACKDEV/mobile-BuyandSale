@@ -108,6 +108,50 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 
+  /* ===== GOOGLE AUTH SECTION ===== */
+  orDivider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  orLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E0E0E0',
+  },
+  orText: {
+    marginHorizontal: 15,
+    fontSize: 14,
+    color: '#888',
+    fontWeight: '500',
+  },
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 14,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#DADCE0',
+    gap: 10,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    marginBottom: 12,
+  },
+  googleButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#3C4043',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+    backgroundColor: '#F5F5F5',
+  },
+
   /* ===== LOGIN SECTION ===== */
   loginContainer: {
     flexDirection: 'row',

@@ -1,5 +1,5 @@
-import { View, Text, Pressable, ScrollView, Alert } from 'react-native'
-import React from 'react'
+import { View, Text, Pressable, ScrollView, Alert, ActivityIndicator } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { AuthStackParamList, RootStackParamList } from '../../../types/navigation'
@@ -11,9 +11,11 @@ import styles from './style'
 import COLORS from '../../colors'
 import { useAppDispatch, useAppSelector } from '../../../hooks/store'
 import { registerAction } from '../../../store/register/actions'
+import { handleSocialAuthCallback } from '../../../store/authentification/actions'
 import { selectUserRegisted } from '../../../store/register/slice'
 import { LoadingType } from '../../../models/store'
 import type { UserRegisterForm } from '../../../models/user'
+import { GoogleAuthService } from '../../../services/googleAuthService'
 import { Loading } from '../../../components/LoadingVariants'
 import { normalizePhoneNumber, validateCameroonPhone } from '../../../utils/phoneUtils'
 
@@ -29,21 +31,109 @@ const Register = () => {
   const registerState = useAppSelector(selectUserRegisted)
   const isLoading = registerState.status === LoadingType.PENDING
 
-  const [firstName, setFirstName] = React.useState<string>('')
-  const [lastName, setLastName] = React.useState<string>('')
-  const [email, setEmail] = React.useState<string>('')
-  const [phone, setPhone] = React.useState<string>('')
-  const [password, setPassword] = React.useState('')
-  const [confirmPassword, setConfirmPassword] = React.useState('')
-  const [agreedToTerms, setAgreedToTerms] = React.useState(false)
+  const [firstName, setFirstName] = useState<string>('')
+  const [lastName, setLastName] = useState<string>('')
+  const [email, setEmail] = useState<string>('')
+  const [phone, setPhone] = useState<string>('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
 
-  const [firstNameError, setFirstNameError] = React.useState('')
-  const [lastNameError, setLastNameError] = React.useState('')
-  const [emailError, setEmailError] = React.useState('')
-  const [phoneError, setPhoneError] = React.useState('')
-  const [passwordError, setPasswordError] = React.useState('')
-  const [confirmPasswordError, setConfirmPasswordError] = React.useState('')
-  const [termsError, setTermsError] = React.useState('')
+  // Configuration Google Auth
+  const [request, response, promptAsync] = GoogleAuthService.useGoogleAuth()
+
+  const [firstNameError, setFirstNameError] = useState('')
+  const [lastNameError, setLastNameError] = useState('')
+  const [emailError, setEmailError] = useState('')
+  const [phoneError, setPhoneError] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+  const [confirmPasswordError, setConfirmPasswordError] = useState('')
+  const [termsError, setTermsError] = useState('')
+
+  // 🔐 Gérer la réponse de Google OAuth
+  useEffect(() => {
+    if (response?.type === 'success') {
+      handleGoogleSuccess(response.authentication?.accessToken);
+    } else if (response?.type === 'error') {
+      setIsGoogleLoading(false);
+      Alert.alert('Erreur', 'Échec de l\'authentification Google');
+    } else if (response?.type === 'cancel') {
+      setIsGoogleLoading(false);
+    }
+  }, [response]);
+
+  // 🔐 Traiter le succès de l'authentification Google
+  const handleGoogleSuccess = async (googleAccessToken?: string) => {
+    if (!googleAccessToken) {
+      Alert.alert('Erreur', 'Token Google non reçu');
+      setIsGoogleLoading(false);
+      return;
+    }
+
+    try {
+      console.log('🔐 [Register] Authentification Google en cours...');
+
+      // Échanger le token Google avec notre backend
+      const result = await GoogleAuthService.authenticateWithBackend(
+        googleAccessToken
+      );
+
+      if (result.success && result.accessToken) {
+        // Dispatch l'action Redux pour sauvegarder les données utilisateur
+        const resultAction = await dispatch(
+          handleSocialAuthCallback(result.accessToken)
+        );
+
+        if (handleSocialAuthCallback.fulfilled.match(resultAction)) {
+          Alert.alert('Succès', 'Inscription Google réussie !');
+          // La navigation se fera automatiquement via RootNavigator
+        } else {
+          throw new Error('Échec de récupération du profil utilisateur');
+        }
+      } else {
+        throw new Error(result.error || 'Authentification Google échouée');
+      }
+    } catch (error) {
+      console.error('❌ [Register] Erreur Google Auth:', error);
+      Alert.alert(
+        'Erreur',
+        error instanceof Error ? error.message : 'Erreur d\'authentification Google'
+      );
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
+  // 🔐 Initier l'authentification Google
+  const handleGoogleRegister = async () => {
+    if (!GoogleAuthService.isConfigured()) {
+      Alert.alert(
+        'Configuration manquante',
+        'L\'authentification Google n\'est pas configurée.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
+    if (!request) {
+      Alert.alert(
+        'Erreur',
+        'Authentification Google non disponible pour le moment.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
+    setIsGoogleLoading(true);
+    try {
+      await promptAsync();
+    } catch (error) {
+      console.error('❌ [Register] Erreur promptAsync:', error);
+      setIsGoogleLoading(false);
+      Alert.alert('Erreur', 'Impossible d\'initier l\'authentification Google');
+    }
+  };
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -329,9 +419,38 @@ const Register = () => {
           <Button
             title={isLoading ? 'Création en cours...' : 'S\'inscrire'}
             onPress={handleRegister}
-            disabled={isLoading}
+            disabled={isLoading || isGoogleLoading}
             containerStyle={styles.registerButton}
           />
+
+          {/* Divider OR */}
+          <View style={styles.orDivider}>
+            <View style={styles.orLine} />
+            <Text style={styles.orText}>OU</Text>
+            <View style={styles.orLine} />
+          </View>
+
+          {/* Google Auth Button */}
+          <Pressable
+            style={[
+              styles.googleButton,
+              (!request || isGoogleLoading || isLoading) && styles.buttonDisabled,
+            ]}
+            onPress={handleGoogleRegister}
+            disabled={!request || isGoogleLoading || isLoading}
+          >
+            {isGoogleLoading ? (
+              <>
+                <ActivityIndicator color="#DB4437" size="small" />
+                <Text style={styles.googleButtonText}>Inscription...</Text>
+              </>
+            ) : (
+              <>
+                <MaterialCommunityIcons name="google" size={20} color="#DB4437" />
+                <Text style={styles.googleButtonText}>Continuer avec Google</Text>
+              </>
+            )}
+          </Pressable>
 
           {/* Login Link */}
           <View style={styles.loginContainer}>
