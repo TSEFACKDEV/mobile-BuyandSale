@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { normalizePhoneNumber, validateCameroonPhone } from '../../../../utils/phoneUtils';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '../../../../contexts/ThemeContext';
 import { useAppDispatch } from '../../../../hooks/store';
@@ -40,8 +41,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handlePayment = async () => {
-    if (!phoneNumber || phoneNumber.length < 9) {
-      Alert.alert('Erreur', 'Veuillez entrer un numéro de téléphone valide');
+    if (!validateCameroonPhone(phoneNumber)) {
+      Alert.alert('Erreur', 'Numéro de téléphone camerounais invalide (format: 6XX XX XX XX)');
       return;
     }
 
@@ -137,9 +138,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 placeholder="6XX XX XX XX"
                 placeholderTextColor={colors.textSecondary}
                 value={phoneNumber}
-                onChangeText={setPhoneNumber}
+                onChangeText={(text) => setPhoneNumber(normalizePhoneNumber(text))}
                 keyboardType="phone-pad"
-                maxLength={9}
                 editable={!isProcessing}
               />
             </View>

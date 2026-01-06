@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  ActivityIndicator,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
@@ -15,6 +16,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
+import { normalizePhoneNumber, validateCameroonPhone } from '../utils/phoneUtils';
 import { useAppDispatch, useAppSelector } from '../hooks/store';
 import { useThemeColors } from '../contexts/ThemeContext';
 import { getProductByIdAction, updateProductAction } from '../store/product/actions';
@@ -190,8 +192,8 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
       Alert.alert('Erreur', 'Le quartier est requis');
       return;
     }
-    if (!formData.telephone.trim()) {
-      Alert.alert('Erreur', 'Le téléphone est requis');
+    if (!validateCameroonPhone(formData.telephone)) {
+      Alert.alert('Erreur', 'Numéro de téléphone camerounais invalide (format: 6XX XX XX XX)');
       return;
     }
 
@@ -474,7 +476,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
               <TextInput
                 style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                 value={formData.telephone}
-                onChangeText={(value) => handleInputChange('telephone', value)}
+                onChangeText={(value) => handleInputChange('telephone', normalizePhoneNumber(value))}
                 placeholder="6XX XX XX XX"
                 placeholderTextColor={colors.textSecondary}
                 keyboardType="phone-pad"

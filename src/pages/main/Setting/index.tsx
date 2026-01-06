@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme, useThemeMode } from '../../../contexts/ThemeContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
-import TopNavigation from '../../../components/TopNavigation/TopNavigation';
 
 const Settings = () => {
   const { theme } = useTheme();
@@ -90,8 +89,6 @@ const Settings = () => {
 
   return (
     <View style={styles.container}>
-      <TopNavigation showBackButton title="Paramètres" />
-
       <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}

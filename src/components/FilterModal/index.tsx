@@ -37,6 +37,8 @@ const FilterModal: React.FC<FilterModalProps> = ({
 }) => {
   const theme = useThemeColors();
   const [localFilters, setLocalFilters] = useState(filters);
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [showCityPicker, setShowCityPicker] = useState(false);
 
   const handleApply = () => {
     onApplyFilters(localFilters);
@@ -54,6 +56,18 @@ const FilterModal: React.FC<FilterModalProps> = ({
     };
     setLocalFilters(clearedFilters);
     onApplyFilters(clearedFilters);
+  };
+
+  const getCategoryName = () => {
+    if (!localFilters.categoryId) return 'Toutes les catégories';
+    const category = categories.find(c => c.id === localFilters.categoryId);
+    return category?.name || 'Toutes les catégories';
+  };
+
+  const getCityName = () => {
+    if (!localFilters.cityId) return 'Toutes les villes';
+    const city = cities.find(c => c.id === localFilters.cityId);
+    return city?.name || 'Toutes les villes';
   };
 
   const activeFiltersCount = () => {
@@ -103,85 +117,29 @@ const FilterModal: React.FC<FilterModalProps> = ({
               {/* Catégorie */}
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Catégorie</Text>
-                <ScrollView style={styles.categoriesScroll} nestedScrollEnabled>
-                  <TouchableOpacity
-                    style={styles.radioButton}
-                    onPress={() => setLocalFilters({ ...localFilters, categoryId: undefined })}
-                  >
-                    <View
-                      style={[
-                        styles.radioCircle,
-                        !localFilters.categoryId && styles.radioCircleSelected,
-                      ]}
-                    >
-                      {!localFilters.categoryId && <View style={styles.radioCircleInner} />}
-                    </View>
-                    <Text style={styles.radioLabel}>Toutes les catégories</Text>
-                  </TouchableOpacity>
-
-                  {categories.map((category) => (
-                    <TouchableOpacity
-                      key={category.id}
-                      style={styles.radioButton}
-                      onPress={() =>
-                        setLocalFilters({ ...localFilters, categoryId: category.id })
-                      }
-                    >
-                      <View
-                        style={[
-                          styles.radioCircle,
-                          localFilters.categoryId === category.id && styles.radioCircleSelected,
-                        ]}
-                      >
-                        {localFilters.categoryId === category.id && (
-                          <View style={styles.radioCircleInner} />
-                        )}
-                      </View>
-                      <Text style={styles.radioLabel}>{category.name}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
+                <TouchableOpacity
+                  style={styles.picker}
+                  onPress={() => setShowCategoryPicker(true)}
+                >
+                  <Text style={[styles.pickerText, !localFilters.categoryId && { color: theme.textSecondary }]}>
+                    {getCategoryName()}
+                  </Text>
+                  <Ionicons name="chevron-down" size={18} color={theme.textSecondary} />
+                </TouchableOpacity>
               </View>
 
               {/* Ville */}
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Ville</Text>
-                <ScrollView style={styles.categoriesScroll} nestedScrollEnabled>
-                  <TouchableOpacity
-                    style={styles.radioButton}
-                    onPress={() => setLocalFilters({ ...localFilters, cityId: undefined })}
-                  >
-                    <View
-                      style={[
-                        styles.radioCircle,
-                        !localFilters.cityId && styles.radioCircleSelected,
-                      ]}
-                    >
-                      {!localFilters.cityId && <View style={styles.radioCircleInner} />}
-                    </View>
-                    <Text style={styles.radioLabel}>Toutes les villes</Text>
-                  </TouchableOpacity>
-
-                  {cities.map((city) => (
-                    <TouchableOpacity
-                      key={city.id}
-                      style={styles.radioButton}
-                      onPress={() => setLocalFilters({ ...localFilters, cityId: city.id })}
-                    >
-                      <View
-                        style={[
-                          styles.radioCircle,
-                          localFilters.cityId === city.id && styles.radioCircleSelected,
-                        ]}
-                      >
-                        {localFilters.cityId === city.id && (
-                          <View style={styles.radioCircleInner} />
-                        )}
-                      </View>
-                      <Text style={styles.radioLabel}>{city.name}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
+                <TouchableOpacity
+                  style={styles.picker}
+                  onPress={() => setShowCityPicker(true)}
+                >
+                  <Text style={[styles.pickerText, !localFilters.cityId && { color: theme.textSecondary }]}>
+                    {getCityName()}
+                  </Text>
+                  <Ionicons name="chevron-down" size={18} color={theme.textSecondary} />
+                </TouchableOpacity>
               </View>
 
               {/* Prix */}
@@ -287,6 +245,116 @@ const FilterModal: React.FC<FilterModalProps> = ({
           </View>
         </TouchableOpacity>
       </TouchableOpacity>
+
+      {/* Modal de sélection de catégorie */}
+      <Modal visible={showCategoryPicker} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.pickerModal, { backgroundColor: theme.surface }]}>
+            <View style={[styles.pickerHeader, { borderBottomColor: theme.border }]}>
+              <Text style={[styles.pickerHeaderTitle, { color: theme.text }]}>
+                Sélectionner une catégorie
+              </Text>
+              <TouchableOpacity onPress={() => setShowCategoryPicker(false)}>
+                <Ionicons name="close" size={22} color={theme.text} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView>
+              <TouchableOpacity
+                style={[
+                  styles.pickerItem,
+                  { backgroundColor: !localFilters.categoryId ? '#f973161a' : 'transparent' },
+                ]}
+                onPress={() => {
+                  setLocalFilters({ ...localFilters, categoryId: undefined });
+                  setShowCategoryPicker(false);
+                }}
+              >
+                <Text style={[styles.pickerItemText, { color: theme.text }]}>
+                  Toutes les catégories
+                </Text>
+                {!localFilters.categoryId && (
+                  <Ionicons name="checkmark-circle" size={18} color="#f97316" />
+                )}
+              </TouchableOpacity>
+              {categories.map((category) => (
+                <TouchableOpacity
+                  key={category.id}
+                  style={[
+                    styles.pickerItem,
+                    { backgroundColor: localFilters.categoryId === category.id ? '#f973161a' : 'transparent' },
+                  ]}
+                  onPress={() => {
+                    setLocalFilters({ ...localFilters, categoryId: category.id });
+                    setShowCategoryPicker(false);
+                  }}
+                >
+                  <Text style={[styles.pickerItemText, { color: theme.text }]}>
+                    {category.name}
+                  </Text>
+                  {localFilters.categoryId === category.id && (
+                    <Ionicons name="checkmark-circle" size={18} color="#f97316" />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de sélection de ville */}
+      <Modal visible={showCityPicker} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.pickerModal, { backgroundColor: theme.surface }]}>
+            <View style={[styles.pickerHeader, { borderBottomColor: theme.border }]}>
+              <Text style={[styles.pickerHeaderTitle, { color: theme.text }]}>
+                Sélectionner une ville
+              </Text>
+              <TouchableOpacity onPress={() => setShowCityPicker(false)}>
+                <Ionicons name="close" size={22} color={theme.text} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView>
+              <TouchableOpacity
+                style={[
+                  styles.pickerItem,
+                  { backgroundColor: !localFilters.cityId ? '#f973161a' : 'transparent' },
+                ]}
+                onPress={() => {
+                  setLocalFilters({ ...localFilters, cityId: undefined });
+                  setShowCityPicker(false);
+                }}
+              >
+                <Text style={[styles.pickerItemText, { color: theme.text }]}>
+                  Toutes les villes
+                </Text>
+                {!localFilters.cityId && (
+                  <Ionicons name="checkmark-circle" size={18} color="#f97316" />
+                )}
+              </TouchableOpacity>
+              {cities.map((city) => (
+                <TouchableOpacity
+                  key={city.id}
+                  style={[
+                    styles.pickerItem,
+                    { backgroundColor: localFilters.cityId === city.id ? '#f973161a' : 'transparent' },
+                  ]}
+                  onPress={() => {
+                    setLocalFilters({ ...localFilters, cityId: city.id });
+                    setShowCityPicker(false);
+                  }}
+                >
+                  <Text style={[styles.pickerItemText, { color: theme.text }]}>
+                    {city.name}
+                  </Text>
+                  {localFilters.cityId === city.id && (
+                    <Ionicons name="checkmark-circle" size={18} color="#f97316" />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </Modal>
   );
 };

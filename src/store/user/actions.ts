@@ -1,34 +1,8 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import type { ThunkApi } from '../../models/store'
+import type { AuthUser } from '../../models/user'
 import API_CONFIG from '../../config/api.config'
 import fetchWithAuth from '../../utils/fetchWithAuth'
-
-// Interface pour un utilisateur
-export interface AuthUser {
-  id: string
-  firstName: string
-  lastName: string
-  email: string
-  phone?: string
-  avatar?: string | null
-  role?: {
-    id: string
-    name: string
-  }
-  city?: {
-    id: string
-    name: string
-  }
-  status?: 'ACTIVE' | 'PENDING' | 'SUSPENDED'
-  slug?: string
-  isVerified?: boolean
-  createdAt: string
-  updatedAt: string
-  // Statistiques vendeur
-  productCount?: number
-  averageRating?: number
-  totalReviews?: number
-}
 
 // Interface pour la réponse de liste d'utilisateurs
 export interface UserListResponse {

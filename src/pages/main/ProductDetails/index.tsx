@@ -28,6 +28,7 @@ import {
   clearCurrentProduct 
 } from '../../../store/product/slice';
 import { getImageUrl } from '../../../utils/imageUtils';
+import { normalizePhoneForWhatsApp } from '../../../utils/phoneUtils';
 import { HomeStackParamList } from '../../../types/navigation';
 import createStyles from './style';
 
@@ -144,22 +145,16 @@ const ProductDetails = () => {
   };
 
   const handleContactSeller = () => {
-    const phoneNumber = product?.telephone || product?.user?.phone;
+    const phoneNumber = product?.telephone || product?.user.phone;
     if (!phoneNumber) return;
 
+    const normalizedPhone = normalizePhoneForWhatsApp(phoneNumber);
     const message = encodeURIComponent(
       `Bonjour, je suis intéressé(e) par votre produit "${product.name}"`
     );
-    const whatsappUrl = `whatsapp://send?phone=${phoneNumber}&text=${message}`;
+    const whatsappUrl = `https://wa.me/${normalizedPhone}?text=${message}`;
 
-    Linking.canOpenURL(whatsappUrl)
-      .then((supported) => {
-        if (supported) {
-          Linking.openURL(whatsappUrl);
-        } else {
-          Alert.alert('Erreur', 'WhatsApp n\'est pas installé');
-        }
-      })
+    Linking.openURL(whatsappUrl)
       .catch(() => Alert.alert('Erreur', 'Impossible d\'ouvrir WhatsApp'));
   };
 
@@ -476,7 +471,7 @@ const ProductDetails = () => {
               </TouchableOpacity>
 
               {/* Boutons de contact */}
-              {(product.telephone || product.user?.phone) && (
+              {(product.telephone || product.user.phone) && (
                 <View style={styles.contactButtons}>
                   {!showPhoneNumber ? (
                     <TouchableOpacity
@@ -495,7 +490,7 @@ const ProductDetails = () => {
                     >
                       <Icon name="call" size={17} color="#10B981" />
                       <Text style={[styles.buttonText, { color: '#10B981' }]}>
-                        {product.telephone || product.user?.phone}
+                        {product.telephone || product.user.phone}
                       </Text>
                     </TouchableOpacity>
                   )}

@@ -19,7 +19,11 @@ import { GoogleAuthService } from '../../../services/googleAuthService'
 =======
 import API_CONFIG from '../../../config/api.config'
 import { Loading } from '../../../components/LoadingVariants'
+<<<<<<< HEAD
 >>>>>>> f22e267a215db3d8c21e6beec5d3112afac0620e
+=======
+import { normalizePhoneNumber, validateCameroonPhone } from '../../../utils/phoneUtils'
+>>>>>>> e9e8f2c76c52749a5d24ba7430589a0aeacd2119
 
 type LoginNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>
 
@@ -48,6 +52,7 @@ const Login = () => {
     return () => backHandler.remove();
   }, [navigation]);
 
+<<<<<<< HEAD
   // 🔐 Gérer la réponse de Google OAuth
   useEffect(() => {
     if (response?.type === 'success') {
@@ -134,18 +139,26 @@ const Login = () => {
   };
 
   // Validation simplifiée
+=======
+  // Validation avec phoneUtils (comme web)
+>>>>>>> e9e8f2c76c52749a5d24ba7430589a0aeacd2119
   const validateIdentifier = (value: string): { isValid: boolean; error: string } => {
     const trimmed = value.trim()
     if (!trimmed) return { isValid: false, error: 'Email ou téléphone requis' }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    const phoneRegex = /^(\+237|237)?\s?\d{8,9}$/
     
-    if (emailRegex.test(trimmed) || phoneRegex.test(trimmed.replace(/\s/g, ''))) {
+    // Tester d'abord l'email
+    if (emailRegex.test(trimmed)) {
       return { isValid: true, error: '' }
     }
     
-    return { isValid: false, error: 'Email invalide ou numéro Camerounais invalide' }
+    // Puis tester le téléphone avec phoneUtils
+    if (validateCameroonPhone(trimmed)) {
+      return { isValid: true, error: '' }
+    }
+    
+    return { isValid: false, error: 'Email invalide ou numéro Camerounais invalide (format: 6XX XX XX XX)' }
   }
 
   const handleLogin = async () => {
@@ -169,8 +182,13 @@ const Login = () => {
     }
 
     try {
+      // Normaliser si c'est un téléphone (comme web)
+      const normalizedIdentifier = validateCameroonPhone(identifier) 
+        ? normalizePhoneNumber(identifier)
+        : identifier.trim();
+      
       await dispatch(loginAction({
-        identifiant: identifier.trim(),
+        identifiant: normalizedIdentifier,
         password: password,
       })).unwrap()
 

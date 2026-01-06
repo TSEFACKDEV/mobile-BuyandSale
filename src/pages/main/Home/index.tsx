@@ -24,7 +24,7 @@ import { fetchCitiesAction } from '../../../store/city/actions';
 import { fetchPublicSellersAction } from '../../../store/user/actions';
 
 // Components
-import TopNavigation from '../../../components/TopNavigation/TopNavigation';
+import TopNavigation from '../../../components/TopNavigation';
 import CategoryCard from '../../../components/CategoryCard';
 import ProductCard from '../../../components/ProductHomeCard';
 import SellerCard from '../../../components/SellerHomeCard';
@@ -45,7 +45,9 @@ const Home = () => {
   const productsLoading = validatedProductsStatus === 'loading';
   const { data: cities, status: cityStatus } = useAppSelector(state => state.city);
   const citiesLoading = cityStatus === 'PENDING';
-  const { sellers: publicSellers, sellersStatus: publicSellersStatus } = useAppSelector(state => state.user);
+  // ✅ CORRECTION : Utiliser les bons sélecteurs pour les vendeurs
+  const publicSellers = useAppSelector(state => state.user.users.entities);
+  const publicSellersStatus = useAppSelector(state => state.user.users.status);
   const sellersLoading = publicSellersStatus === 'PENDING';
   const [refreshing, setRefreshing] = React.useState(false);
 

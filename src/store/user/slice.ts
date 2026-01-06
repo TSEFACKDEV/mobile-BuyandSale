@@ -1,137 +1,138 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
+import type { RootState } from '../index'
+import type { AuthUser } from '../../models/user'
+import { LoadingType, type AsyncState } from '../../models/store'
 import {
   fetchPublicSellersAction,
   fetchUserByIdAction,
   reportUserAction,
-  type AuthUser,
   type UserListResponse,
 } from './actions'
-import { LoadingType } from '../../models/store'
-import type { RootState } from '../index'
 
-// Interface pour l'état du slice (simplifié - pas de CRUD admin)
-export interface UserState {
-  sellers: AuthUser[] // Liste des vendeurs publics
-  currentUser: AuthUser | null // Détails d'un vendeur spécifique
-  sellersStatus: LoadingType
-  currentUserStatus: LoadingType
-  reportStatus: LoadingType
-  error: string | null
+interface UserStats {
+  total: number
+  active: number
+  pending: number
+  suspended: number
+}
+
+interface UserState {
+  users: AsyncState<AuthUser[]>
+  currentUser: AsyncState<AuthUser | null>
   pagination: {
     total: number
     page: number
     limit: number
     totalPages: number
+    perpage: number
+    prevPage: number | null
+    currentPage: number
+    nextPage: number | null
+    totalPage: number
   } | null
-  stats: {
-    total: number
-    active: number
-    pending: number
-    suspended: number
-  } | null
+  stats: UserStats | null
 }
 
-// État initial
 const initialState: UserState = {
-  sellers: [],
-  currentUser: null,
-  sellersStatus: LoadingType.IDLE,
-  currentUserStatus: LoadingType.IDLE,
-  reportStatus: LoadingType.IDLE,
-  error: null,
+  users: {
+    entities: [],
+    status: LoadingType.IDLE,
+    error: null,
+    pagination: null,
+  },
+  currentUser: {
+    entities: null,
+    status: LoadingType.IDLE,
+    error: null,
+    pagination: null,
+  },
   pagination: null,
   stats: null,
 }
 
-// Helper pour extraire le message d'erreur
-const getErrorMessage = (action: any): string => {
-  return action.payload?.message || action.error?.message || 'Une erreur est survenue'
-}
-
-// Slice (simplifié - sans fonctionnalités admin)
-export const userSlice = createSlice({
+const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    // Réinitialiser l'état
     resetUserState: (state) => {
-      state.sellers = []
-      state.currentUser = null
-      state.sellersStatus = LoadingType.IDLE
-      state.currentUserStatus = LoadingType.IDLE
-      state.reportStatus = LoadingType.IDLE
-      state.error = null
+      state.users = {
+        entities: [],
+        status: LoadingType.IDLE,
+        error: null,
+        pagination: null,
+      }
+      state.currentUser = {
+        entities: null,
+        status: LoadingType.IDLE,
+        error: null,
+        pagination: null,
+      }
       state.pagination = null
       state.stats = null
-    },
-    // Réinitialiser le statut de signalement
-    resetReportStatus: (state) => {
-      state.reportStatus = LoadingType.IDLE
-      state.error = null
     },
   },
   extraReducers: (builder) => {
     builder
-      // ✅ Fetch public sellers - Endpoint public
+      // fetchPublicSellersAction
       .addCase(fetchPublicSellersAction.pending, (state) => {
-        state.sellersStatus = LoadingType.PENDING
-        state.error = null
+        state.users.status = LoadingType.PENDING
+        state.users.error = null
       })
-      .addCase(
-        fetchPublicSellersAction.fulfilled,
-        (state, action: PayloadAction<UserListResponse>) => {
-          state.sellersStatus = LoadingType.SUCCESS
-          state.sellers = action.payload.users
-          state.pagination = action.payload.pagination
-          state.stats = action.payload.stats
-        }
-      )
+      .addCase(fetchPublicSellersAction.fulfilled, (state, action) => {
+        state.users.status = LoadingType.SUCCESS
+        state.users.entities = action.payload.users
+        state.pagination = action.payload.pagination
+        state.stats = action.payload.stats
+      })
       .addCase(fetchPublicSellersAction.rejected, (state, action) => {
-        state.sellersStatus = LoadingType.FAILED
-        state.error = getErrorMessage(action)
-      })
-      // ✅ Fetch user by ID - Endpoint public
-      .addCase(fetchUserByIdAction.pending, (state) => {
-        state.currentUserStatus = LoadingType.PENDING
-        state.error = null
-      })
-      .addCase(
-        fetchUserByIdAction.fulfilled,
-        (state, action: PayloadAction<AuthUser>) => {
-          state.currentUserStatus = LoadingType.SUCCESS
-          state.currentUser = action.payload
+        state.users.status = LoadingType.FAILED
+        state.users.error = {
+          meta: {
+            status: 500,
+            message: action.payload?.message || action.error?.message || 'Une erreur est survenue',
+          },
+          error: action.error?.message || null,
         }
-      )
+      })
+      // fetchUserByIdAction
+      .addCase(fetchUserByIdAction.pending, (state) => {
+        state.currentUser.status = LoadingType.PENDING
+        state.currentUser.error = null
+      })
+      .addCase(fetchUserByIdAction.fulfilled, (state, action) => {
+        state.currentUser.status = LoadingType.SUCCESS
+        state.currentUser.entities = action.payload
+      })
       .addCase(fetchUserByIdAction.rejected, (state, action) => {
-        state.currentUserStatus = LoadingType.FAILED
-        state.error = getErrorMessage(action)
+        state.currentUser.status = LoadingType.FAILED
+        state.currentUser.error = {
+          meta: {
+            status: 500,
+            message: action.payload?.message || action.error?.message || 'Une erreur est survenue',
+          },
+          error: action.error?.message || null,
+        }
       })
-      // ✅ Report user - Auth requise
-      .addCase(reportUserAction.pending, (state) => {
-        state.reportStatus = LoadingType.PENDING
-        state.error = null
-      })
-      .addCase(reportUserAction.fulfilled, (state) => {
-        state.reportStatus = LoadingType.SUCCESS
-      })
-      .addCase(reportUserAction.rejected, (state, action) => {
-        state.reportStatus = LoadingType.FAILED
-        state.error = getErrorMessage(action)
-      })
+      // reportUserAction
+      .addCase(reportUserAction.pending, () => {})
+      .addCase(reportUserAction.fulfilled, () => {})
+      .addCase(reportUserAction.rejected, () => {})
   },
 })
 
-// Actions
-export const { resetUserState, resetReportStatus } = userSlice.actions
-
-// Selectors
-export const selectSellers = (state: RootState) => state.user.sellers
-export const selectCurrentUser = (state: RootState) => state.user.currentUser
-export const selectSellersStatus = (state: RootState) => state.user.sellersStatus
-export const selectCurrentUserStatus = (state: RootState) => state.user.currentUserStatus
-export const selectReportStatus = (state: RootState) => state.user.reportStatus
-export const selectUserError = (state: RootState) => state.user.error
-export const selectUserPagination = (state: RootState) => state.user.pagination
+// Sélecteurs
+export const selectUsersState = (state: RootState) => state.user.users
+export const selectUsers = (state: RootState) => state.user.users.entities
+export const selectUsersStatus = (state: RootState) => state.user.users.status
+export const selectUsersError = (state: RootState) => state.user.users.error
 export const selectUserStats = (state: RootState) => state.user.stats
 
+export const selectCurrentUser = (state: RootState) => state.user.currentUser.entities
+export const selectCurrentUserStatus = (state: RootState) => state.user.currentUser.status
+export const selectCurrentUserError = (state: RootState) => state.user.currentUser.error
+
+export const selectUserById = (userId: string) => (state: RootState) =>
+  state.user.users.entities.find((user) => user.id === userId)
+
+export const { resetUserState } = userSlice.actions
 export default userSlice

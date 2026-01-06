@@ -51,7 +51,7 @@ export interface AuthUser {
   email: string;
   phone: string;
   isVerified: boolean;
-  status: 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'BANNED';
+  status: 'PENDING' | 'ACTIVE' | 'SUSPENDED';
   avatar?: string;
   slug?: string;
   createdAt: string;
@@ -63,9 +63,16 @@ export interface AuthUser {
   permissionKeys?: string[];
   _count?: {
     products: number;
-    favorites?: number;
-    reviews?: number;
+    reviewsReceived?: number;
   };
+  // Pour les vendeurs publics (enrichi par le backend)
+  reviewsReceived?: Array<{ rating: number }>;
+  products?: Array<{
+    id: string;
+    name: string;
+    images: string[];
+    price: number;
+  }>;
 }
 
 export interface UserLoginForm {

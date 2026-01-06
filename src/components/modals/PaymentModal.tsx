@@ -13,6 +13,7 @@ import {
 import { useThemeColors } from '../../contexts/ThemeContext';
 import { useAppDispatch } from '../../hooks/store';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { normalizePhoneNumber, validateCameroonPhone } from '../../utils/phoneUtils';
 import { assignForfaitWithPaymentAction } from '../../store/forfait/actions';
 
 const { width } = Dimensions.get('window');
@@ -43,8 +44,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handlePayment = async () => {
-    if (!phoneNumber || phoneNumber.trim().length < 8) {
-      Alert.alert('Erreur', 'Veuillez entrer un numéro de téléphone valide');
+    if (!validateCameroonPhone(phoneNumber)) {
+      Alert.alert('Erreur', 'Numéro de téléphone camerounais invalide (format: 6XX XX XX XX)');
       return;
     }
 
@@ -60,7 +61,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         assignForfaitWithPaymentAction({
           productId,
           forfaitType: forfaitType as any,
-          phoneNumber: phoneNumber.trim(),
+          phoneNumber: phoneNumber,
         })
       );
 
@@ -155,9 +156,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   placeholder="6 XX XX XX XX"
                   placeholderTextColor={colors.textSecondary}
                   value={phoneNumber}
-                  onChangeText={setPhoneNumber}
+                  onChangeText={(text) => setPhoneNumber(normalizePhoneNumber(text))}
                   keyboardType="phone-pad"
-                  maxLength={9}
                 />
               </View>
             </View>

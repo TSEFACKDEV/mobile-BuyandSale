@@ -3,18 +3,12 @@ import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useThemeColors } from '../../contexts/ThemeContext';
-import type { AuthUser } from '../../store/user/actions';
+import type { AuthUser } from '../../models/user';
 import { getImageUrl, PLACEHOLDER_IMAGE } from '../../utils/imageUtils';
 import createStyles from './style';
 
 interface SellerCardProps {
-  seller: AuthUser & {
-    _count?: {
-      products?: number;
-      reviewsReceived?: number;
-    };
-    averageRating?: number;
-  };
+  seller: AuthUser;
   onPress?: () => void;
 }
 
@@ -22,9 +16,13 @@ const SellerCard: React.FC<SellerCardProps> = ({ seller, onPress }) => {
   const colors = useThemeColors();
   const navigation = useNavigation();
 
+  // Statistiques (comme la version web React)
   const productCount = seller._count?.products || 0;
   const reviewsCount = seller._count?.reviewsReceived || 0;
-  const averageRating = seller.averageRating || 0;
+  const averageRating = seller.reviewsReceived?.length
+    ? seller.reviewsReceived.reduce((sum, review) => sum + review.rating, 0) /
+      seller.reviewsReceived.length
+    : 0;
 
   const handlePress = () => {
     if (onPress) {

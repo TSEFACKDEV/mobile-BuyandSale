@@ -19,7 +19,11 @@ import type { UserRegisterForm } from '../../../models/user'
 import { GoogleAuthService } from '../../../services/googleAuthService'
 =======
 import { Loading } from '../../../components/LoadingVariants'
+<<<<<<< HEAD
 >>>>>>> f22e267a215db3d8c21e6beec5d3112afac0620e
+=======
+import { normalizePhoneNumber, validateCameroonPhone } from '../../../utils/phoneUtils'
+>>>>>>> e9e8f2c76c52749a5d24ba7430589a0aeacd2119
 
 type RegisterNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Register'>
 type AuthNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Auth'>
@@ -142,12 +146,6 @@ const Register = () => {
     return emailRegex.test(email)
   }
 
-  const validatePhone = (phone: string) => {
-    const cleanPhone = phone.replace(/\s/g, '')
-    const phoneRegex = /^(\+237|237)\d{8,9}$|^\d{8,9}$/
-    return phoneRegex.test(cleanPhone) && cleanPhone.replace(/\D/g, '').length >= 8
-  }
-
   const handleRegister = async () => {
     setFirstNameError('')
     setLastNameError('')
@@ -187,11 +185,11 @@ const Register = () => {
     }
 
     // Validation Téléphone
-    if (!phone.trim()) {
+    if (!phone) {
       setPhoneError('Téléphone requis')
       isValid = false
-    } else if (!validatePhone(phone)) {
-      setPhoneError('Numéro invalide (ex: +237 6XX XXX XXX)')
+    } else if (!validateCameroonPhone(phone)) {
+      setPhoneError('Numéro de téléphone camerounais invalide (format: 6XX XX XX XX)')
       isValid = false
     }
 
@@ -230,7 +228,7 @@ const Register = () => {
             firstName: firstName.trim(),
             lastName: lastName.trim(),
             email: email.trim(),
-            phone: phone.trim(),
+            phone: normalizePhoneNumber(phone),
             password: password,
           })
         ).unwrap()

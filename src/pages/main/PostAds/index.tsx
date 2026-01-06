@@ -25,6 +25,7 @@ import { getAllCategoriesAction } from '../../../store/category/actions';
 import { fetchCitiesAction } from '../../../store/city/actions';
 import { createProductAction } from '../../../store/product/actions';
 import { getAllForfaitsAction } from '../../../store/forfait/actions';
+import { normalizePhoneNumber, validateCameroonPhone } from '../../../utils/phoneUtils';
 
 // Redux Selectors
 import {
@@ -237,7 +238,7 @@ const PostAds: React.FC = () => {
       case 3:
         // Étape 3 : Contact (téléphone, quantité)
         return (
-          formData.telephone.trim().length >= 9 &&
+          validateCameroonPhone(formData.telephone) &&
           Number(formData.quantity) > 0
         );
       default:
@@ -296,8 +297,8 @@ const PostAds: React.FC = () => {
         validationErrors.push('Veuillez renseigner le quartier');
       }
 
-      if (!formData.telephone || formData.telephone.trim().length < 8) {
-        validationErrors.push('Veuillez entrer un numéro de téléphone valide');
+if (!validateCameroonPhone(formData.telephone)) {
+      validationErrors.push('Numéro de téléphone camerounais invalide (format: 6XX XX XX XX)');
       }
 
       if (!formData.images || formData.images.length === 0) {
@@ -320,7 +321,7 @@ const PostAds: React.FC = () => {
         cityId: formData.cityId,
         etat: formData.etat,
         quartier: formData.quartier.trim(),
-        telephone: formData.telephone.trim(),
+        telephone: formData.telephone,
         images: formData.images,
       };
 
@@ -693,9 +694,8 @@ const PostAds: React.FC = () => {
             placeholder="6XX XX XX XX"
             placeholderTextColor={colors.textSecondary}
             value={formData.telephone}
-            onChangeText={(text) => handleInputChange('telephone', text)}
+            onChangeText={(text) => handleInputChange('telephone', normalizePhoneNumber(text))}
             keyboardType="phone-pad"
-            maxLength={9}
           />
         </View>
       </View>
