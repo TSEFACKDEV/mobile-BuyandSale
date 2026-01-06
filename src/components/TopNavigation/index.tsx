@@ -3,7 +3,8 @@ import { View, Text, TouchableOpacity, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { useThemeColors } from '../../contexts/ThemeContext';
-import { useAppSelector } from '../../hooks/store';
+import { useAppSelector, useAppDispatch } from '../../hooks/store';
+import { fetchNotificationsAction } from '../../store/notification/actions';
 import { getImageUrl } from '../../utils/imageUtils';
 import createStyles from './style';
 
@@ -20,9 +21,20 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
 }) => {
   const colors = useThemeColors();
   const navigation = useNavigation();
+  const dispatch = useAppDispatch();
   
   const authState = useAppSelector((state) => state.authentification);
   const user = authState.auth.entities;
+
+  // Récupérer le compteur de notifications non lues
+  const { unreadCount } = useAppSelector((state) => state.notification);
+
+  // Charger les notifications au montage
+  React.useEffect(() => {
+    if (user) {
+      dispatch(fetchNotificationsAction());
+    }
+  }, [dispatch, user]);
 
   const handleBackPress = () => {
     if (onBackPress) {
@@ -93,6 +105,13 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
             activeOpacity={0.7}
           >
             <Icon name="notifications-outline" size={24} color={colors.text} />
+            {unreadCount > 0 && (
+              <View style={styles.notificationBadge}>
+                <Text style={styles.notificationBadgeText}>
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
 
           {user && (
