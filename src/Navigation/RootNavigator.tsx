@@ -36,6 +36,7 @@ import {
   RootStackParamList,
   AuthStackParamList,
   HomeStackParamList,
+  ProductsStackParamList,
   BottomTabParamList,
 } from '../types/navigation';
 
@@ -47,7 +48,8 @@ import { useThemeColors } from '../contexts/ThemeContext';
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
-const ProductsStack = createNativeStackNavigator<HomeStackParamList>(); // Réutilise le même type
+const ProductsStack = createNativeStackNavigator<ProductsStackParamList>();
+const SettingsStack = createNativeStackNavigator();
 const BottomTab = createBottomTabNavigator<BottomTabParamList>();
 const MainStack = createNativeStackNavigator();
 
@@ -125,6 +127,19 @@ const HomeStackNavigator = () => {
           </Authenticated>
         )}
       </HomeStack.Screen>
+      <HomeStack.Screen
+        name="UserProfile"
+        options={{
+          title: 'Mon profil',
+        }}
+      >
+        {() => (
+          <Authenticated>
+            <TopNavigation showBackButton title="Mon profil" />
+            <UserProfile />
+          </Authenticated>
+        )}
+      </HomeStack.Screen>
     </HomeStack.Navigator>
   );
 };
@@ -169,6 +184,21 @@ const ProductsStackNavigator = () => {
 };
 
 // =====================
+// Settings Stack Navigator
+// =====================
+const SettingsStackNavigator = () => {
+  return (
+    <SettingsStack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <SettingsStack.Screen name="Settings" component={Settings} />
+    </SettingsStack.Navigator>
+  );
+};
+
+// =====================
 // Wrapper components for screens with TopNavigation
 // =====================
 const SellersWithNav = () => (
@@ -192,15 +222,6 @@ const NotificationsWithNav = () => (
     <Authenticated>
       <TopNavigation showBackButton title="Notifications" />
       <Notifications />
-    </Authenticated>
-  </View>
-);
-
-const UserProfileWithNav = () => (
-  <View style={{ flex: 1 }}>
-    <Authenticated>
-      <TopNavigation showBackButton title="Mon profil" />
-      <UserProfile />
     </Authenticated>
   </View>
 );
@@ -246,7 +267,7 @@ const MainTabNavigator = () => {
             case 'Sellers':
               iconName = focused ? 'people' : 'people-outline';
               break;
-            case 'Settings':
+            case 'SettingsTab':
               iconName = focused ? 'search' : 'search-outline';
               break;
             default:
@@ -303,8 +324,8 @@ const MainTabNavigator = () => {
 
       {/* SEARCH (redirect to Products) */}
       <BottomTab.Screen
-        name="Settings"
-        component={ProductsStackNavigator}
+        name="SettingsTab"
+        component={SettingsStackNavigator}
         options={{
           tabBarLabel: 'Rechercher',
           title: 'Recherche',
@@ -315,41 +336,35 @@ const MainTabNavigator = () => {
 };
 
 // =====================
-// Main Stack Navigator (BottomTab + écrans TopNavigation)
+// Main Stack Navigator (BottomTab + Modals)
 // =====================
-const MainStackNavigator = () => {
-  return (
-    <MainStack.Navigator
+const MainStackNavigator = () => (
+  <MainStack.Navigator
+    screenOptions={{
+      headerShown: false,
+    }}
+  >
+    <MainStack.Screen
+      name="MainTab"
+      component={MainTabNavigator}
+    />
+    <MainStack.Group
       screenOptions={{
+        presentation: 'modal',
         headerShown: false,
       }}
     >
       <MainStack.Screen
-        name="MainTab"
-        component={MainTabNavigator}
+        name="Favorites"
+        component={FavoritesWithNav}
       />
-      <MainStack.Group
-        screenOptions={{
-          presentation: 'modal',
-          headerShown: false,
-        }}
-      >
-        <MainStack.Screen
-          name="Favorites"
-          component={FavoritesWithNav}
-        />
-        <MainStack.Screen
-          name="Notifications"
-          component={NotificationsWithNav}
-        />
-        <MainStack.Screen
-          name="UserProfile"
-          component={UserProfileWithNav}
-        />
-      </MainStack.Group>
-    </MainStack.Navigator>
-  );
-};
+      <MainStack.Screen
+        name="Notifications"
+        component={NotificationsWithNav}
+      />
+    </MainStack.Group>
+  </MainStack.Navigator>
+);
 
 // =====================
 // Root Navigator (Onboarding -> Auth -> Main)

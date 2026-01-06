@@ -65,15 +65,6 @@ const createStyles = (theme: any) => StyleSheet.create({
   sellersContainer: {
     paddingLeft: 16,
   },
-  loadingContainer: {
-    padding: 40,
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: theme.colors.textSecondary,
-  },
   emptyContainer: {
     padding: 40,
     alignItems: 'center',

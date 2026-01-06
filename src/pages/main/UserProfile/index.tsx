@@ -1,777 +1,732 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
+  RefreshControl,
+  Alert,
+  TextInput,
   Image,
   ActivityIndicator,
-  Alert,
-  RefreshControl,
-  TextInput,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 
-import { useThemeColors, useTheme } from '../../../contexts/ThemeContext';
-import { useLanguage } from '../../../contexts/LanguageContext';
 import { useAppSelector, useAppDispatch } from '../../../hooks/store';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useProducts } from '../../../hooks/useProducts';
-import { RootNavigationProp } from '../../../types/navigation';
+import { useSellerReviews } from '../../../hooks/useSellerReviews';
+import { useTheme, useThemeColors } from '../../../contexts/ThemeContext';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import { selectUserAuthenticated } from '../../../store/authentification/slice';
-import { logoutAction } from '../../../store/authentification/actions';
-import { updateUserAction } from '../../../store/user/actions';
-import { selectForfaits } from '../../../store/forfait/slice';
-import { getAllForfaitsAction } from '../../../store/forfait/actions';
-
-import {
-  BoostOfferModal,
-  ForfaitSelectorModal,
-  PaymentModal,
-  PaymentStatusModal,
-} from '../../../components/modals';
-
+import { logoutAction, getUserProfileAction, updateUserAction } from '../../../store/authentification/actions';
+import { LoadingType } from '../../../models/store';
+import { getImageUrl, PLACEHOLDER_IMAGE } from '../../../utils/imageUtils';
+import EditProductModal from '../../../components/EditProductModal';
+import PaymentHistory from '../../../components/UserProfile/PaymentHistory';
+import { Loading, ProductCardSkeleton } from '../../../components/LoadingVariants';
 import { styles } from './styles';
 
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  images: string[];
-  status?: string;
-}
-
-type TabType = 'active' | 'pending' | 'profile' | 'settings';
+type TabType = 'active' | 'pending' | 'payments' | 'profile';
 
 const UserProfile: React.FC = () => {
-  const navigation = useNavigation<RootNavigationProp>();
   const dispatch = useAppDispatch();
-  const colors = useThemeColors();
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const { t } = useTranslation();
-  const { toggleDarkMode, theme } = useTheme();
-  const { language, toggleLanguage } = useLanguage();
+  const { theme } = useTheme();
+  const colors = useThemeColors();
+  const isDark = theme.isDark;
 
-  // Redux state
-  const authData = useAppSelector(selectUserAuthenticated);
-  const forfaits = useAppSelector(selectForfaits);
-  const user = authData?.entities;
-
-  // Local state
+  const authState = useAppSelector((state) => state.authentification);
+  const user = authState.auth.entities;
+  const isAuthenticated = user !== null;
+  const isLoggingOut = authState.auth.status === LoadingType.PENDING && !user;
+  
   const [activeTab, setActiveTab] = useState<TabType>('profile');
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [profileData, setProfileData] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
+    email: user?.email || '',
     phone: user?.phone || '',
   });
 
-  // Forfait states
-  const [selectedProductForBoost, setSelectedProductForBoost] = useState<Product | null>(null);
-  const [showBoostOffer, setShowBoostOffer] = useState(false);
-  const [showForfaitSelector, setShowForfaitSelector] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [showPaymentStatusModal, setShowPaymentStatusModal] = useState(false);
-  const [selectedForfaitId, setSelectedForfaitId] = useState<string | null>(null);
-  const [selectedForfaitType, setSelectedForfaitType] = useState<string | null>(null);
-  const [selectedForfaitPrice, setSelectedForfaitPrice] = useState<number>(0);
-  const [currentPaymentId, setCurrentPaymentId] = useState<string | null>(null);
+  const { products: userProducts, refetch: refetchUserProducts, deleteProduct: deleteUserProduct, isLoading: isLoadingUserProducts } = useProducts(
+    'user',
+    { userId: user?.id, limit: 12 }
+  );
 
-  // Products hooks
-  const { products: userProducts, isLoading: isLoadingActive, refetch: refetchActive } = useProducts('user', {
-    userId: user?.id,
-    limit: 20,
-  });
+  const { products: userPendingProducts, refetch: refetchPendingProducts, isLoading: isLoadingPendingProducts } = useProducts(
+    'pending',
+    undefined,
+    { autoFetch: true }
+  );
 
-  const { products: pendingProducts, isLoading: isLoadingPending, refetch: refetchPending, deleteProduct } = useProducts('pending', undefined, {
-    autoFetch: !!user?.id,
-  });
+  const { userRating, totalReviews: userTotalReviews } = useSellerReviews(user?.id, false);
 
-  // Load forfaits
-  useEffect(() => {
-    if (user?.id && forfaits.length === 0) {
-      dispatch(getAllForfaitsAction());
-    }
-  }, [user?.id, forfaits.length, dispatch]);
-
-  // Update profile data when user changes
-  useEffect(() => {
-    if (user) {
-      setProfileData({
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-        phone: user.phone || '',
-      });
-    }
-  }, [user]);
-
-  // Handlers
-  const handleRefresh = useCallback(async () => {
+  const refreshData = useCallback(async () => {
     setRefreshing(true);
     try {
-      await Promise.all([refetchActive(), refetchPending()]);
+      await Promise.all([
+        refetchUserProducts(),
+        refetchPendingProducts(),
+        dispatch(getUserProfileAction()),
+      ]);
     } finally {
       setRefreshing(false);
     }
-  }, [refetchActive, refetchPending]);
+  }, [refetchUserProducts, refetchPendingProducts, dispatch]);
 
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback(async () => {
     Alert.alert(
-      t('userProfile.actions.logout'),
-      t('userProfile.messages.logoutConfirm'),
+      'Déconnexion',
+      'Voulez-vous vraiment vous déconnecter ?',
       [
-        { text: t('userProfile.actions.cancel'), style: 'cancel' },
+        { text: 'Annuler', style: 'cancel' },
         {
-          text: t('userProfile.actions.logout'),
+          text: 'Déconnecter',
           style: 'destructive',
           onPress: async () => {
             try {
               await dispatch(logoutAction()).unwrap();
+              // Redirection automatique vers Auth/Login
               navigation.reset({
                 index: 0,
-                routes: [{ name: 'Auth' }],
+                routes: [{ name: 'Auth' as any, params: { screen: 'Login' } }],
               });
             } catch (error) {
-              Alert.alert('Erreur', 'Erreur lors de la déconnexion');
+              console.error('Erreur lors de la déconnexion:', error);
+              // En cas d'erreur, on redirige quand même
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Auth' as any, params: { screen: 'Login' } }],
+              });
             }
           },
         },
       ]
     );
-  }, [dispatch, navigation, t]);
+  }, [dispatch, navigation]);
+
+  const handleStartEdit = useCallback(() => {
+    setProfileData({
+      firstName: user?.firstName || '',
+      lastName: user?.lastName || '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+    });
+    setIsEditingProfile(true);
+  }, [user]);
+
+  const handleCancelEdit = useCallback(() => {
+    setIsEditingProfile(false);
+  }, []);
 
   const handleSaveProfile = useCallback(async () => {
     if (!user?.id) return;
 
     try {
-      await dispatch(updateUserAction({
-        id: user.id,
-        data: profileData,
-      })).unwrap();
+      const result = await dispatch(
+        updateUserAction({
+          id: user.id,
+          updates: profileData,
+        })
+      ).unwrap();
 
-      Alert.alert('Succès', t('userProfile.messages.profileUpdateSuccess'));
-      setIsEditingProfile(false);
+      if (result) {
+        Alert.alert('Succès', 'Profil mis à jour avec succès');
+        setIsEditingProfile(false);
+        // Rafraîchir le profil
+        await dispatch(getUserProfileAction());
+      }
     } catch (error: any) {
-      Alert.alert('Erreur', error.message || t('userProfile.messages.profileUpdateError'));
+      Alert.alert('Erreur', error.message || 'Échec de la mise à jour du profil');
     }
-  }, [user?.id, profileData, dispatch, t]);
+  }, [profileData, user?.id, dispatch]);
 
-  const handleCancelEdit = useCallback(() => {
-    setProfileData({
-      firstName: user?.firstName || '',
-      lastName: user?.lastName || '',
-      phone: user?.phone || '',
-    });
-    setIsEditingProfile(false);
-  }, [user]);
+  const handleAvatarUpload = useCallback(async () => {
+    try {
+      // Demander les permissions
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert('Permission refusée', 'Nous avons besoin de votre permission pour accéder à la galerie');
+        return;
+      }
 
-  const handleAvatarPick = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission requise', 'Nous avons besoin de votre permission pour accéder aux photos.');
-      return;
+      // Ouvrir le sélecteur d'image
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: 'images',
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (result.canceled || !result.assets || result.assets.length === 0) {
+        return;
+      }
+
+      const asset = result.assets[0];
+      setIsUploadingAvatar(true);
+
+      // Créer le FormData
+      const formData = new FormData();
+      
+      // Ajouter l'image
+      const uriParts = asset.uri.split('.');
+      const fileType = uriParts[uriParts.length - 1];
+      
+      formData.append('avatar', {
+        uri: asset.uri,
+        name: `avatar.${fileType}`,
+        type: `image/${fileType}`,
+      } as any);
+
+      // Ajouter les champs requis
+      formData.append('firstName', user!.firstName);
+      formData.append('lastName', user!.lastName);
+      formData.append('email', user!.email);
+      if (user!.phone) {
+        formData.append('phone', user!.phone);
+      }
+
+      // TODO: Implémenter updateUserAvatarAction dans le store mobile
+      // Pour l'instant, on fait l'appel direct
+      const API_CONFIG = require('../../../config/api.config').default;
+      const API_ENDPOINTS = require('../../../helpers/api').default;
+      const fetchWithAuth = require('../../../utils/fetchWithAuth').default;
+
+      const response = await fetchWithAuth(
+        `${API_CONFIG.BASE_URL}/${API_ENDPOINTS.USER_UPDATE.replace(':id', user!.id)}`,
+        {
+          method: 'PUT',
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.meta?.message || 'Échec de la mise à jour de l\'avatar');
+      }
+
+      Alert.alert('Succès', 'Avatar mis à jour avec succès');
+      await dispatch(getUserProfileAction());
+    } catch (error: any) {
+      Alert.alert('Erreur', error.message || 'Échec de la mise à jour de l\'avatar');
+    } finally {
+      setIsUploadingAvatar(false);
     }
+  }, [user, dispatch]);
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: 'images',
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
+  if (!isAuthenticated || !user) {
+    return <Loading fullScreen message="Chargement du profil..." />;
+  }
 
-    if (!result.canceled && result.assets[0]) {
-      Alert.alert('Info', 'Fonctionnalité de mise à jour d\'avatar à implémenter');
-    }
+  if (isLoggingOut) {
+    return <Loading fullScreen message="Déconnexion en cours..." />;
+  }
+
+  const tabs = [
+    { id: 'active' as TabType, label: 'Actifs', icon: 'cube-outline', count: userProducts.length },
+    { id: 'pending' as TabType, label: 'En attente', icon: 'time-outline', count: userPendingProducts.length },
+    { id: 'payments' as TabType, label: 'Paiements', icon: 'card-outline', count: null },
+    { id: 'profile' as TabType, label: 'Profil', icon: 'person-outline', count: null },
+  ];
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
-  const handleProductAction = useCallback(async (product: Product, action: 'view' | 'edit' | 'delete' | 'boost') => {
-    switch (action) {
-      case 'view':
-        navigation.navigate('Main', {
-          screen: 'HomeTab',
-          params: {
-            screen: 'ProductDetails',
-            params: { productId: product.id },
-          },
-        });
-        break;
-      
-      case 'edit':
-        Alert.alert('Info', 'Édition de produit à implémenter');
-        break;
-      
-      case 'delete':
-        Alert.alert(
-          t('userProfile.actions.delete'),
-          t('userProfile.messages.deleteConfirm'),
-          [
-            { text: t('userProfile.actions.cancel'), style: 'cancel' },
-            {
-              text: t('userProfile.actions.delete'),
-              style: 'destructive',
-              onPress: async () => {
-                try {
-                  await deleteProduct(product.id);
-                  Alert.alert('Succès', t('userProfile.messages.deleteSuccess'));
-                  await handleRefresh();
-                } catch (error: any) {
-                  Alert.alert('Erreur', error.message || t('userProfile.messages.deleteError'));
-                }
-              },
-            },
-          ]
-        );
-        break;
-      
-      case 'boost':
-        setSelectedProductForBoost(product);
-        setShowBoostOffer(true);
-        break;
-    }
-  }, [navigation, deleteProduct, t, handleRefresh]);
-
-  // Forfait handlers
-  const handleAcceptBoost = useCallback(() => {
-    setShowBoostOffer(false);
-    setTimeout(() => setShowForfaitSelector(true), 100);
-  }, []);
-
-  const handleDeclineBoost = useCallback(() => {
-    setShowBoostOffer(false);
-    setSelectedProductForBoost(null);
-  }, []);
-
-  const handleForfaitSelected = useCallback((forfaitType: string, forfaitId: string) => {
-    if (!selectedProductForBoost) return;
-
-    const forfait = forfaits.find((f: any) => f.id === forfaitId);
-    if (!forfait) {
-      Alert.alert('Erreur', 'Forfait non trouvé');
-      return;
-    }
-
-    setSelectedForfaitId(forfaitId);
-    setSelectedForfaitType(forfaitType);
-    setSelectedForfaitPrice(forfait.price);
-    setShowForfaitSelector(false);
-    setTimeout(() => setShowPaymentModal(true), 100);
-  }, [selectedProductForBoost, forfaits]);
-
-  const handlePaymentInitiated = useCallback((paymentId: string) => {
-    setCurrentPaymentId(paymentId);
-    setShowPaymentModal(false);
-    setTimeout(() => setShowPaymentStatusModal(true), 300);
-  }, []);
-
-  const handlePaymentSuccess = useCallback(() => {
-    setShowPaymentStatusModal(false);
-    Alert.alert('Parfait !', 'Votre annonce est maintenant boostée !', [
-      { text: 'OK', onPress: () => handleRefresh() },
-    ]);
-    setSelectedProductForBoost(null);
-  }, [handleRefresh]);
-
-  const handlePaymentError = useCallback(() => {
-    setShowPaymentStatusModal(false);
-    Alert.alert('Erreur', 'Le paiement a échoué. Veuillez réessayer.');
-  }, []);
-
-  // Render functions
-  const renderHeader = () => {
-    const initials = user?.firstName && user?.lastName
-      ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
-      : user?.email?.[0]?.toUpperCase() || '?';
-
-    const memberSince = user?.createdAt 
-      ? new Date(user.createdAt).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
-      : 'récemment';
-
+  const renderStars = (rating: number) => {
     return (
-      <View style={styles.headerSection}>
-        {/* Cover Photo */}
-        <View style={styles.coverPhoto}>
-          <View style={[styles.coverGradient, { backgroundColor: colors.primary }]} />
-        </View>
-
-        {/* Profile Card */}
-        <View style={[styles.profileCard, { backgroundColor: colors.surface }]}>
-          <View style={styles.profileHeader}>
-            {/* Avatar */}
-            <View style={styles.avatarContainer}>
-              {user?.avatar ? (
-                <Image source={{ uri: user.avatar }} style={styles.avatar} />
-              ) : (
-                <View style={styles.avatarPlaceholder}>
-                  <Text style={styles.avatarText}>{initials}</Text>
-                </View>
-              )}
-              <TouchableOpacity style={styles.editAvatarButton} onPress={handleAvatarPick}>
-                <Icon name="camera" size={14} color="#FFF" />
-              </TouchableOpacity>
-            </View>
-
-            {/* Profile Info */}
-            <View style={styles.profileInfo}>
-              <Text style={[styles.userName, { color: colors.text }]}>
-                {user?.firstName} {user?.lastName}
-              </Text>
-              <Text style={[styles.userEmail, { color: colors.textSecondary }]}>
-                {user?.email}
-              </Text>
-              <View style={styles.memberSince}>
-                <Icon name="calendar-outline" size={12} color={colors.textTertiary} style={{ marginRight: 4 }} />
-                <Text style={{ fontSize: 11, color: colors.textTertiary }}>
-                  {t('userProfile.profile.memberSince')} {memberSince}
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Stats Row */}
-          <View style={[styles.statsRow, { borderTopColor: colors.border }]}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{userProducts.length}</Text>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-                {t('userProfile.stats.products')}
-              </Text>
-            </View>
-            <View style={[styles.statItem, { borderLeftWidth: 1, borderRightWidth: 1, borderColor: colors.border }]}>
-              <Text style={styles.statValue}>0</Text>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-                {t('userProfile.stats.reviews')}
-              </Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>0</Text>
-              <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-                {t('userProfile.stats.rating')}
-              </Text>
-            </View>
-          </View>
-        </View>
-      </View>
-    );
-  };
-
-  const renderActionButtons = () => (
-    <View style={styles.actionButtons}>
-      <TouchableOpacity
-        style={[styles.actionButton, styles.primaryButton]}
-        onPress={() => navigation.navigate('PostAd')}
-      >
-        <Icon name="add-circle" size={18} color="#FFF" />
-        <Text style={[styles.actionButtonText, styles.primaryButtonText]}>
-          {t('userProfile.actions.createAd')}
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.actionButton, styles.secondaryButton, { borderColor: colors.border, backgroundColor: colors.surface }]}
-        onPress={handleLogout}
-      >
-        <Icon name="log-out-outline" size={18} color={colors.text} />
-        <Text style={[styles.actionButtonText, { color: colors.text }]}>
-          {t('userProfile.actions.logout')}
-        </Text>
-      </TouchableOpacity>
-    </View>
-  );
-
-  const renderTabs = () => {
-    const tabs = [
-      { 
-        id: 'active' as TabType, 
-        label: t('userProfile.tabs.activeProducts'), 
-        icon: 'checkmark-circle', 
-        count: userProducts.length 
-      },
-      { 
-        id: 'pending' as TabType, 
-        label: t('userProfile.tabs.pendingProducts'), 
-        icon: 'time', 
-        count: pendingProducts.length 
-      },
-      { 
-        id: 'profile' as TabType, 
-        label: t('userProfile.tabs.profile'), 
-        icon: 'person', 
-        count: null 
-      },
-      { 
-        id: 'settings' as TabType, 
-        label: t('userProfile.tabs.settings'), 
-        icon: 'settings', 
-        count: null 
-      },
-    ];
-
-    return (
-      <View style={styles.tabsContainer}>
-        {tabs.map((tab) => (
-          <TouchableOpacity
-            key={tab.id}
-            style={[
-              styles.tab,
-              activeTab === tab.id && [styles.activeTab, { backgroundColor: `rgba(255, 107, 53, ${colors.isDark ? '0.15' : '0.1'})` }]
-            ]}
-            onPress={() => setActiveTab(tab.id)}
-          >
-            <View style={styles.tabContent}>
-              <Icon 
-                name={tab.icon} 
-                size={20} 
-                color={activeTab === tab.id ? '#FF6B35' : colors.textSecondary}
-                style={styles.tabIcon}
-              />
-              <Text style={[
-                styles.tabText, 
-                { color: colors.textSecondary }, 
-                activeTab === tab.id && styles.activeTabText
-              ]}>
-                {tab.label}
-              </Text>
-            </View>
-            {tab.count !== null && tab.count > 0 && (
-              <View style={styles.tabBadge}>
-                <Text style={styles.tabBadgeText}>{tab.count}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
+      <View style={styles.starsContainer}>
+        {[...Array(5)].map((_, i) => (
+          <Icon
+            key={i}
+            name={i < Math.floor(rating) ? 'star' : 'star-outline'}
+            size={16}
+            color="#FACC15"
+          />
         ))}
       </View>
     );
   };
 
-  const renderProduct = (product: Product, isPending: boolean = false) => (
-    <View key={product.id} style={[styles.productCard, { backgroundColor: colors.surface }]}>
-      <Image
-        source={{ uri: product.images[0] || 'https://via.placeholder.com/200' }}
-        style={styles.productImage}
-      />
-      <View style={styles.productInfo}>
-        <Text style={[styles.productName, { color: colors.text }]} numberOfLines={2}>
-          {product.name}
-        </Text>
-        <Text style={styles.productPrice}>{product.price} FCFA</Text>
-        <View style={styles.productActions}>
-          {!isPending && (
-            <>
-              <TouchableOpacity
-                style={[styles.productActionButton, styles.viewButton]}
-                onPress={() => handleProductAction(product, 'view')}
-              >
-                <Icon name="eye-outline" size={16} color={colors.text} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.productActionButton, styles.boostButton]}
-                onPress={() => handleProductAction(product, 'boost')}
-              >
-                <Icon name="rocket-outline" size={16} color="#D97706" />
-              </TouchableOpacity>
-            </>
-          )}
-          {isPending && (
-            <>
-              <TouchableOpacity
-                style={[styles.productActionButton, styles.editButton]}
-                onPress={() => handleProductAction(product, 'edit')}
-              >
-                <Icon name="pencil" size={16} color="#FF6B35" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.productActionButton, styles.deleteButton]}
-                onPress={() => handleProductAction(product, 'delete')}
-              >
-                <Icon name="trash" size={16} color="#EF4444" />
-              </TouchableOpacity>
-            </>
-          )}
-        </View>
-      </View>
-    </View>
-  );
-
-  const renderActiveProducts = () => {
-    if (isLoadingActive) {
-      return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#FF6B35" />
-        </View>
-      );
-    }
-
-    if (userProducts.length === 0) {
-      return (
-        <View style={styles.emptyContainer}>
-          <Icon name="cube-outline" size={64} color={colors.textTertiary} style={styles.emptyIcon} />
-          <Text style={[styles.emptyText, { color: colors.text }]}>
-            {t('userProfile.messages.noProducts')}
-          </Text>
-          <Text style={[styles.emptySubtext, { color: colors.textSecondary }]}>
-            Commencez à publier vos annonces dès maintenant
-          </Text>
-          <TouchableOpacity style={styles.emptyButton} onPress={() => navigation.navigate('PostAd')}>
-            <Text style={styles.emptyButtonText}>{t('userProfile.actions.createAd')}</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
-
-    return (
-      <View style={styles.productsGrid}>
-        {userProducts.map((product) => renderProduct(product, false))}
-      </View>
-    );
-  };
-
-  const renderPendingProducts = () => {
-    if (isLoadingPending) {
-      return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#FF6B35" />
-        </View>
-      );
-    }
-
-    if (pendingProducts.length === 0) {
-      return (
-        <View style={styles.emptyContainer}>
-          <Icon name="time-outline" size={64} color={colors.textTertiary} style={styles.emptyIcon} />
-          <Text style={[styles.emptyText, { color: colors.text }]}>
-            {t('userProfile.messages.noPendingProducts')}
-          </Text>
-        </View>
-      );
-    }
-
-    return (
-      <View style={styles.productsGrid}>
-        {pendingProducts.map((product) => renderProduct(product, true))}
-      </View>
-    );
-  };
-
-  const renderProfileForm = () => (
-    <View style={styles.form}>
-      <View style={styles.inputGroup}>
-        <Text style={[styles.label, { color: colors.text }]}>
-          {t('userProfile.profile.firstName')}
-        </Text>
-        <TextInput
-          style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
-          editable={isEditingProfile}
-          value={profileData.firstName}
-          onChangeText={(text) => setProfileData({ ...profileData, firstName: text })}
-        />
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={[styles.label, { color: colors.text }]}>
-          {t('userProfile.profile.lastName')}
-        </Text>
-        <TextInput
-          style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
-          editable={isEditingProfile}
-          value={profileData.lastName}
-          onChangeText={(text) => setProfileData({ ...profileData, lastName: text })}
-        />
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={[styles.label, { color: colors.text }]}>
-          {t('userProfile.profile.email')}
-        </Text>
-        <TextInput
-          style={[styles.input, styles.inputDisabled, { backgroundColor: colors.backgroundSecondary, color: colors.text, borderColor: colors.border }]}
-          editable={false}
-          value={user?.email}
-        />
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={[styles.label, { color: colors.text }]}>
-          {t('userProfile.profile.phone')}
-        </Text>
-        <TextInput
-          style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
-          editable={isEditingProfile}
-          value={profileData.phone}
-          onChangeText={(text) => setProfileData({ ...profileData, phone: text })}
-        />
-      </View>
-
-      {isEditingProfile ? (
-        <View style={styles.formButtons}>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.secondaryButton, { flex: 1, borderColor: colors.border }]}
-            onPress={handleCancelEdit}
-          >
-            <Text style={[styles.actionButtonText, { color: colors.text }]}>
-              {t('userProfile.actions.cancel')}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.primaryButton, { flex: 1 }]}
-            onPress={handleSaveProfile}
-          >
-            <Text style={[styles.actionButtonText, styles.primaryButtonText]}>
-              {t('userProfile.actions.saveProfile')}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <TouchableOpacity
-          style={[styles.actionButton, styles.primaryButton]}
-          onPress={() => setIsEditingProfile(true)}
-        >
-          <Icon name="pencil-outline" size={20} color="#FFF" />
-          <Text style={[styles.actionButtonText, styles.primaryButtonText]}>
-            {t('userProfile.actions.editProfile')}
-          </Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-
-  const renderSettings = () => (
-    <View>
-      {/* Apparence Section */}
-      <View style={styles.settingsSection}>
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
-          Apparence
-        </Text>
-        
-        <View style={[styles.settingItem, { backgroundColor: colors.surface }]}>
-          <View style={styles.settingLeft}>
-            <View style={[styles.settingIcon, { backgroundColor: theme.isDark ? 'rgba(255, 107, 53, 0.15)' : '#FFF3E0' }]}>
-              <Icon name={theme.isDark ? "moon" : "sunny"} size={22} color="#FF6B35" />
-            </View>
-            <View style={styles.settingTextContainer}>
-              <Text style={[styles.settingTitle, { color: colors.text }]}>
-                {t('userProfile.settings.theme')}
-              </Text>
-              <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>
-                {theme.isDark ? t('userProfile.settings.themeDark') : t('userProfile.settings.themeLight')}
-              </Text>
-            </View>
-          </View>
-          <TouchableOpacity
-            style={[styles.toggleButton, { backgroundColor: theme.isDark ? '#FF6B35' : '#E0E0E0' }]}
-            onPress={toggleDarkMode}
-            activeOpacity={0.7}
-          >
-            <View style={[styles.toggleThumb, theme.isDark ? styles.toggleThumbActive : styles.toggleThumbInactive]} />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Langue Section */}
-      <View style={styles.settingsSection}>
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
-          Langue
-        </Text>
-
-        <View style={[styles.settingItem, { backgroundColor: colors.surface }]}>
-          <View style={styles.settingLeft}>
-            <View style={[styles.settingIcon, { backgroundColor: language === 'en' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(59, 130, 246, 0.15)' }]}>
-              <Icon name="language" size={22} color={language === 'en' ? '#10B981' : '#3B82F6'} />
-            </View>
-            <View style={styles.settingTextContainer}>
-              <Text style={[styles.settingTitle, { color: colors.text }]}>
-                {t('userProfile.settings.language')}
-              </Text>
-              <Text style={[styles.settingSubtitle, { color: colors.textSecondary }]}>
-                {language === 'fr' ? t('userProfile.settings.languageFr') : t('userProfile.settings.languageEn')}
-              </Text>
-            </View>
-          </View>
-          <TouchableOpacity
-            style={[styles.toggleButton, { backgroundColor: language === 'en' ? '#10B981' : '#E0E0E0' }]}
-            onPress={toggleLanguage}
-            activeOpacity={0.7}
-          >
-            <View style={[styles.toggleThumb, language === 'en' ? styles.toggleThumbActive : styles.toggleThumbInactive]} />
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
-  );
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'active':
-        return renderActiveProducts();
-      case 'pending':
-        return renderPendingProducts();
-      case 'profile':
-        return renderProfileForm();
-      case 'settings':
-        return renderSettings();
-      default:
-        return null;
-    }
-  };
-
-  if (!user) {
-    return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#FF6B35" />
-        </View>
-      </View>
-    );
-  }
-
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? '#111827' : '#F9FAFB' }]}>
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#FF6B35" />
+          <RefreshControl refreshing={refreshing} onRefresh={refreshData} colors={[colors.primary]} />
         }
       >
-        {renderHeader()}
-        {renderActionButtons()}
-        {renderTabs()}
-        <View style={styles.contentContainer}>
-          {renderContent()}
+        {/* Header */}
+        <View style={[styles.header, isDark && styles.headerDark]}>
+          <View style={styles.headerContent}>
+            <TouchableOpacity 
+              style={styles.avatarContainer}
+              onPress={handleAvatarUpload}
+              disabled={isUploadingAvatar}
+            >
+              <View style={styles.avatar}>
+                {isUploadingAvatar ? (
+                  <ActivityIndicator size="large" color="#FFFFFF" />
+                ) : user.avatar && user.avatar !== 'undefined' && user.avatar !== 'null' ? (
+                  <Image
+                    source={{ uri: getImageUrl(user.avatar, 'avatar') }}
+                    style={styles.avatarImage}
+                    onError={() => {
+                      // Si l'image ne charge pas, on affichera les initiales
+                    }}
+                  />
+                ) : (
+                  <Text style={styles.avatarText}>
+                    {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+                  </Text>
+                )}
+              </View>
+              {!isUploadingAvatar && (
+                <View style={styles.avatarOverlay}>
+                  <Icon name="camera" size={20} color="#FFFFFF" />
+                </View>
+              )}
+            </TouchableOpacity>
+            <View style={styles.userInfo}>
+              <Text style={[styles.userName, isDark && styles.userNameDark]}>
+                {user.firstName} {user.lastName}
+              </Text>
+              <Text style={[styles.userEmail, isDark && styles.userEmailDark]}>
+                {user.email}
+              </Text>
+              <View style={styles.ratingContainer}>
+                {renderStars(userRating)}
+                <Text style={[styles.ratingValue, isDark && styles.ratingValueDark]}>
+                  {userRating > 0 ? userRating.toFixed(1) : '0.0'}
+                </Text>
+                <Text style={[styles.ratingCount, isDark && styles.ratingCountDark]}>
+                  ({userTotalReviews > 0 ? `${userTotalReviews} avis` : 'Aucun avis'})
+                </Text>
+              </View>
+            </View>
+          </View>
+          <View style={[styles.memberSince, isDark && styles.memberSinceDark]}>
+            <Text style={[styles.memberSinceLabel, isDark && styles.memberSinceLabelDark]}>
+              Membre depuis
+            </Text>
+            <Text style={[styles.memberSinceDate, isDark && styles.memberSinceDateDark]}>
+              {formatDate(user.createdAt)}
+            </Text>
+          </View>
+        </View>
+
+        {/* Tabs */}
+        <View style={[styles.tabsContainer, isDark && styles.tabsContainerDark]}>
+          <View style={[styles.tabsList, isDark && styles.tabsListDark]}>
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <TouchableOpacity
+                  key={tab.id}
+                  style={[styles.tab, isActive && styles.tabActive]}
+                  onPress={() => setActiveTab(tab.id)}
+                >
+                  <Icon name={tab.icon} size={18} color={isActive ? '#2563EB' : isDark ? '#9CA3AF' : '#6B7280'} />
+                  <Text
+                    style={[
+                      styles.tabText,
+                      isDark && styles.tabTextDark,
+                      isActive && styles.tabTextActive,
+                    ]}
+                  >
+                    {tab.label}
+                  </Text>
+                  {tab.count !== null && (
+                    <View
+                      style={[
+                        styles.tabBadge,
+                        isDark && styles.tabBadgeDark,
+                        isActive && styles.tabBadgeActive,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.tabBadgeText,
+                          isDark && styles.tabBadgeTextDark,
+                          isActive && styles.tabBadgeTextActive,
+                        ]}
+                      >
+                        {tab.count}
+                      </Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* Content */}
+        <View style={[styles.tabContent, isDark && styles.tabContentDark]}>
+          {activeTab === 'active' && (
+            <View>
+              <View style={styles.tabHeader}>
+                <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+                  Mes annonces actives ({userProducts.length})
+                </Text>
+                <TouchableOpacity
+                  style={styles.createButton}
+                  onPress={() => (navigation as any).navigate('PostAd')}
+                >
+                  <Icon name="add-circle" size={20} color="#FFFFFF" />
+                  <Text style={styles.createButtonText}>Créer</Text>
+                </TouchableOpacity>
+              </View>
+              {isLoadingUserProducts ? (
+                <View style={styles.productsGrid}>
+                  <ProductCardSkeleton count={4} />
+                </View>
+              ) : userProducts.length === 0 ? (
+                <View style={styles.emptyState}>
+                  <Icon name="cube-outline" size={64} color="#9CA3AF" />
+                  <Text style={[styles.emptyStateTitle, isDark && styles.emptyStateTitleDark]}>
+                    Aucune annonce active
+                  </Text>
+                  <Text style={[styles.emptyStateDescription, isDark && styles.emptyStateDescriptionDark]}>
+                    Créez votre première annonce pour commencer à vendre
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.emptyStateButton}
+                    onPress={() => (navigation as any).navigate('PostAd')}
+                  >
+                    <Icon name="add-circle-outline" size={20} color="#FFFFFF" />
+                    <Text style={styles.emptyStateButtonText}>Créer ma première annonce</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles.productsGrid}>
+                  {userProducts.map((product: any) => (
+                    <View key={product.id} style={[styles.productCard, isDark && styles.productCardDark]}>
+                      <Image
+                        source={{ 
+                          uri: product.images?.[0] 
+                            ? getImageUrl(product.images[0], 'product') 
+                            : PLACEHOLDER_IMAGE 
+                        }}
+                        style={styles.productImage}
+                      />
+                      <View style={styles.productInfo}>
+                        <Text style={[styles.productName, isDark && styles.productNameDark]} numberOfLines={2}>
+                          {product.name}
+                        </Text>
+                        <Text style={[styles.productPrice, isDark && styles.productPriceDark]}>
+                          {product.price.toLocaleString()} FCFA
+                        </Text>
+                        <View style={styles.productActions}>
+                          <TouchableOpacity
+                            style={styles.productActionButton}
+                            onPress={() => {
+                              navigation.navigate('ProductDetails', { productId: product.id });
+                            }}
+                          >
+                            <Icon name="eye-outline" size={18} color={colors.primary} />
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={styles.productActionButton}
+                            onPress={() => {
+                              setEditingProductId(product.id);
+                              setShowEditModal(true);
+                            }}
+                          >
+                            <Icon name="create-outline" size={18} color="#FACC15" />
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={styles.productActionButton}
+                            onPress={() => Alert.alert(
+                              'Confirmation',
+                              `Voulez-vous supprimer "${product.name}" ?`,
+                              [
+                                { text: 'Annuler', style: 'cancel' },
+                                { 
+                                  text: 'Supprimer', 
+                                  style: 'destructive',
+                                  onPress: async () => {
+                                    try {
+                                      await deleteUserProduct(product.id);
+                                      Alert.alert('Succès', 'Produit supprimé avec succès');
+                                      await refetchUserProducts();
+                                    } catch (error: any) {
+                                      Alert.alert('Erreur', error.message || 'Échec de la suppression');
+                                    }
+                                  }
+                                }
+                              ]
+                            )}
+                          >
+                            <Icon name="trash-outline" size={18} color="#EF4444" />
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={styles.productActionButton}
+                            onPress={() => Alert.alert('Info', `Booster le produit ${product.name}`)}
+                          >
+                            <Icon name="rocket-outline" size={18} color="#10B981" />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+          )}
+
+          {activeTab === 'pending' && (
+            <View>
+              <View style={styles.tabHeader}>
+                <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+                  Annonces en attente ({userPendingProducts.length})
+                </Text>
+                <TouchableOpacity
+                  style={styles.createButton}
+                  onPress={() => (navigation as any).navigate('PostAd')}
+                >
+                  <Icon name="add-circle" size={20} color="#FFFFFF" />
+                  <Text style={styles.createButtonText}>Créer</Text>
+                </TouchableOpacity>
+              </View>
+              {isLoadingPendingProducts ? (
+                <View style={styles.productsGrid}>
+                  <ProductCardSkeleton count={4} />
+                </View>
+              ) : userPendingProducts.length === 0 ? (
+                <View style={styles.emptyState}>
+                  <Icon name="time-outline" size={64} color="#9CA3AF" />
+                  <Text style={[styles.emptyStateTitle, isDark && styles.emptyStateTitleDark]}>
+                    Aucune annonce en attente
+                  </Text>
+                  <Text style={[styles.emptyStateDescription, isDark && styles.emptyStateDescriptionDark]}>
+                    Vos annonces en cours de modération apparaîtront ici
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.emptyStateButton}
+                    onPress={() => (navigation as any).navigate('PostAd')}
+                  >
+                    <Icon name="add-circle-outline" size={20} color="#FFFFFF" />
+                    <Text style={styles.emptyStateButtonText}>Créer une annonce</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles.productsGrid}>
+                  {userPendingProducts.map((product: any) => (
+                    <View key={product.id} style={[styles.productCard, isDark && styles.productCardDark]}>
+                      <Image
+                        source={{ 
+                          uri: product.images?.[0] 
+                            ? getImageUrl(product.images[0], 'product') 
+                            : PLACEHOLDER_IMAGE 
+                        }}
+                        style={styles.productImage}
+                      />
+                      <View style={styles.pendingBadge}>
+                        <Icon name="time-outline" size={14} color="#FFFFFF" />
+                        <Text style={styles.pendingBadgeText}>En attente</Text>
+                      </View>
+                      <View style={styles.productInfo}>
+                        <Text style={[styles.productName, isDark && styles.productNameDark]} numberOfLines={2}>
+                          {product.name}
+                        </Text>
+                        <Text style={[styles.productPrice, isDark && styles.productPriceDark]}>
+                          {product.price.toLocaleString()} FCFA
+                        </Text>
+                        <View style={styles.productActions}>
+                          <TouchableOpacity
+                            style={styles.productActionButton}
+                            onPress={() => {
+                              navigation.navigate('ProductDetails', { productId: product.id });
+                            }}
+                          >
+                            <Icon name="eye-outline" size={18} color={colors.primary} />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+          )}
+ayments' && (
+            <PaymentHistory userId={user.id} />
+          )}
+
+          {activeTab === 'p
+          {activeTab === 'profile' && (
+            <View>
+              <View style={styles.profileHeader}>
+                <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+                  Informations personnelles
+                </Text>
+                {!isEditingProfile && (
+                  <TouchableOpacity style={styles.editProfileButton} onPress={handleStartEdit}>
+                    <Icon name="create-outline" size={18} color="#FFFFFF" />
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {isEditingProfile ? (
+                <View style={styles.profileForm}>
+                  <View style={styles.profileField}>
+                    <Text style={[styles.profileLabel, isDark && styles.profileLabelDark]}>
+                      Prénom
+                    </Text>
+                    <TextInput
+                      style={[styles.profileInput, isDark && styles.profileInputDark]}
+                      value={profileData.firstName}
+                      onChangeText={(text) => setProfileData({ ...profileData, firstName: text })}
+                      placeholder="Prénom"
+                      placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
+                    />
+                  </View>
+
+                  <View style={styles.profileField}>
+                    <Text style={[styles.profileLabel, isDark && styles.profileLabelDark]}>
+                      Nom
+                    </Text>
+                    <TextInput
+                      style={[styles.profileInput, isDark && styles.profileInputDark]}
+                      value={profileData.lastName}
+                      onChangeText={(text) => setProfileData({ ...profileData, lastName: text })}
+                      placeholder="Nom"
+                      placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
+                    />
+                  </View>
+
+                  <View style={styles.profileField}>
+                    <Text style={[styles.profileLabel, isDark && styles.profileLabelDark]}>
+                      Email
+                    </Text>
+                    <TextInput
+                      style={[styles.profileInput, isDark && styles.profileInputDark]}
+                      value={profileData.email}
+                      onChangeText={(text) => setProfileData({ ...profileData, email: text })}
+                      placeholder="Email"
+                      placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                    />
+                  </View>
+
+                  <View style={styles.profileField}>
+                    <Text style={[styles.profileLabel, isDark && styles.profileLabelDark]}>
+                      Téléphone
+                    </Text>
+                    <TextInput
+                      style={[styles.profileInput, isDark && styles.profileInputDark]}
+                      value={profileData.phone}
+                      onChangeText={(text) => setProfileData({ ...profileData, phone: text })}
+                      placeholder="6XX XX XX XX"
+                      placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
+                      keyboardType="phone-pad"
+                    />
+                  </View>
+
+                  <View style={styles.profileActions}>
+                    <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
+                      <Text style={styles.profileButtonText}>Enregistrer</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.cancelButton} onPress={handleCancelEdit}>
+                      <Text style={styles.profileButtonText}>Annuler</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ) : (
+                <View style={styles.profileForm}>
+                  <View style={styles.profileField}>
+                    <Text style={[styles.profileLabel, isDark && styles.profileLabelDark]}>
+                      Nom complet
+                    </Text>
+                    <View style={[styles.profileValue, isDark && styles.profileValueDark]}>
+                      <Text style={[styles.profileValueText, isDark && styles.profileValueTextDark]}>
+                        {user.firstName} {user.lastName}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.profileField}>
+                    <Text style={[styles.profileLabel, isDark && styles.profileLabelDark]}>
+                      Email
+                    </Text>
+                    <View style={[styles.profileValue, isDark && styles.profileValueDark]}>
+                      <Text style={[styles.profileValueText, isDark && styles.profileValueTextDark]}>
+                        {user.email}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.profileField}>
+                    <Text style={[styles.profileLabel, isDark && styles.profileLabelDark]}>
+                      Téléphone
+                    </Text>
+                    <View style={[styles.profileValue, isDark && styles.profileValueDark]}>
+                      <Text style={[styles.profileValueText, isDark && styles.profileValueTextDark]}>
+                        {user.phone || 'Non renseigné'}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.profileField}>
+                    <Text style={[styles.profileLabel, isDark && styles.profileLabelDark]}>
+                      Membre depuis
+                    </Text>
+                    <View style={[styles.profileValue, isDark && styles.profileValueDark]}>
+                      <Text style={[styles.profileValueText, isDark && styles.profileValueTextDark]}>
+                        {formatDate(user.createdAt)}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={[styles.settingsSection, isDark && styles.settingsSectionDark]}>
+                    <TouchableOpacity 
+                      style={[styles.settingsButton, { backgroundColor: colors.primary }]} 
+                      onPress={() => (navigation as any).navigate('MainTab', { screen: 'SettingsTab' })}
+                    >
+                      <Icon name="settings-outline" size={20} color="#FFFFFF" />
+                      <Text style={styles.profileButtonText}>Paramètres</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+                      <Icon name="log-out-outline" size={20} color="#FFFFFF" />
+                      <Text style={styles.profileButtonText}>Se déconnecter</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+            </View>
+          )}
         </View>
       </ScrollView>
 
-      <BoostOfferModal
-        visible={showBoostOffer}
-        onAccept={handleAcceptBoost}
-        onDecline={handleDeclineBoost}
-      />
-
-      <ForfaitSelectorModal
-        visible={showForfaitSelector}
-        forfaits={Array.isArray(forfaits) ? forfaits : []}
-        onSelect={handleForfaitSelected}
-        onSkip={handleDeclineBoost}
-        onClose={() => setShowForfaitSelector(false)}
-      />
-
-      <PaymentModal
-        visible={showPaymentModal}
-        productId={selectedProductForBoost?.id || null}
-        forfaitId={selectedForfaitId}
-        forfaitType={selectedForfaitType}
-        forfaitPrice={selectedForfaitPrice}
-        onPaymentInitiated={handlePaymentInitiated}
-        onClose={() => setShowPaymentModal(false)}
-      />
-
-      <PaymentStatusModal
-        visible={showPaymentStatusModal}
-        paymentId={currentPaymentId}
-        onSuccess={handlePaymentSuccess}
-        onError={handlePaymentError}
-        onClose={() => setShowPaymentStatusModal(false)}
-      />
+      {/* Modal d'édition */}
+      {editingProductId && (
+        <EditProductModal
+          visible={showEditModal}
+          productId={editingProductId}
+          onClose={() => {
+            setShowEditModal(false);
+            setEditingProductId(null);
+          }}
+          onSuccess={() => {
+            refetchUserProducts();
+          }}
+        />
+      )}
     </View>
   );
 };

@@ -140,7 +140,7 @@ export const useProducts = (
 
   // Delete product function
   const deleteProduct = useCallback(async (productId: string) => {
-    return dispatch(deleteProductAction({ productId })).unwrap();
+    return dispatch(deleteProductAction(productId)).unwrap();
   }, [dispatch]);
 
   return {

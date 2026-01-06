@@ -15,7 +15,11 @@ import { handleSocialAuthCallback } from '../../../store/authentification/action
 import { selectUserRegisted } from '../../../store/register/slice'
 import { LoadingType } from '../../../models/store'
 import type { UserRegisterForm } from '../../../models/user'
+<<<<<<< HEAD
 import { GoogleAuthService } from '../../../services/googleAuthService'
+=======
+import { Loading } from '../../../components/LoadingVariants'
+>>>>>>> f22e267a215db3d8c21e6beec5d3112afac0620e
 
 type RegisterNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Register'>
 type AuthNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Auth'>
@@ -278,6 +282,10 @@ const Register = () => {
         }
       }
     }
+  }
+
+  if (isLoading) {
+    return <Loading fullScreen message="Inscription en cours..." />;
   }
 
   return (

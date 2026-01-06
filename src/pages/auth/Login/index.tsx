@@ -14,7 +14,12 @@ import { useAppDispatch, useAppSelector } from '../../../hooks/store'
 import { loginAction, handleSocialAuthCallback } from '../../../store/authentification/actions'
 import { selectUserAuthenticated } from '../../../store/authentification/slice'
 import { LoadingType } from '../../../models/store'
+<<<<<<< HEAD
 import { GoogleAuthService } from '../../../services/googleAuthService'
+=======
+import API_CONFIG from '../../../config/api.config'
+import { Loading } from '../../../components/LoadingVariants'
+>>>>>>> f22e267a215db3d8c21e6beec5d3112afac0620e
 
 type LoginNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>
 
@@ -169,7 +174,11 @@ const Login = () => {
         password: password,
       })).unwrap()
 
-      Alert.alert('Succès', 'Connexion réussie !', [{ text: 'OK' }])
+      // Redirection automatique vers la page principale
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Main' as any, params: { screen: 'HomeTab' } }],
+      })
     } catch (error: any) {
       const errorMessage = error?.message || error?.error?.message || 'Erreur de connexion'
 
@@ -183,6 +192,10 @@ const Login = () => {
         Alert.alert('Erreur', errorMessage, [{ text: 'OK' }])
       }
     }
+  }
+
+  if (isLoading) {
+    return <Loading fullScreen message="Connexion en cours..." />;
   }
 
   return (

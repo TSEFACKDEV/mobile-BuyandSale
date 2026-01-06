@@ -10,8 +10,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
-  SafeAreaView,
+  Modal,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import { useThemeColors } from '../../../contexts/ThemeContext';
@@ -98,6 +99,8 @@ const PostAds: React.FC = () => {
   
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [showCityPicker, setShowCityPicker] = useState(false);
   
   // États pour les forfaits
   const [showBoostOffer, setShowBoostOffer] = useState(false);
@@ -141,6 +144,16 @@ const PostAds: React.FC = () => {
   // Handlers
   const handleInputChange = (field: keyof PostAdFormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const getCategoryName = () => {
+    const category = categories.find(c => c.id === formData.categoryId);
+    return category?.name || 'Sélectionner une catégorie';
+  };
+
+  const getCityName = () => {
+    const city = cities.find(c => c.id === formData.cityId);
+    return city?.name || 'Sélectionner une ville';
   };
 
   // Sélection d'images
@@ -314,6 +327,7 @@ const PostAds: React.FC = () => {
       const result = await dispatch(createProductAction(productData));
 
       if (result.meta.requestStatus === 'fulfilled') {
+        // Proposer le boost
         const createdProduct = (result.payload as any)?.product;
 
         if (!createdProduct?.id) {
@@ -515,29 +529,15 @@ const PostAds: React.FC = () => {
         <Text style={[styles.label, { color: colors.text }]}>
           Catégorie <Text style={styles.required}>*</Text>
         </Text>
-        <View style={styles.gridContainer}>
-          {categories.map((category: any) => (
-            <TouchableOpacity
-              key={category.id}
-              style={[
-                styles.gridButton,
-                { borderColor: colors.border },
-                formData.categoryId === category.id && styles.gridButtonActive,
-              ]}
-              onPress={() => handleInputChange('categoryId', category.id)}
-            >
-              <Text
-                style={[
-                  styles.gridButtonText,
-                  { color: colors.text },
-                  formData.categoryId === category.id && styles.gridButtonTextActive,
-                ]}
-              >
-                {category.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        <TouchableOpacity
+          style={[styles.picker, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          onPress={() => setShowCategoryPicker(true)}
+        >
+          <Text style={[styles.pickerText, { color: formData.categoryId ? colors.text : colors.textSecondary }]}>
+            {getCategoryName()}
+          </Text>
+          <Icon name="chevron-down" size={20} color={colors.textSecondary} />
+        </TouchableOpacity>
       </View>
 
       {/* État du produit */}
@@ -650,29 +650,15 @@ const PostAds: React.FC = () => {
         <Text style={[styles.label, { color: colors.text }]}>
           Ville <Text style={styles.required}>*</Text>
         </Text>
-        <View style={styles.gridContainer}>
-          {cities.map((city: any) => (
-            <TouchableOpacity
-              key={city.id}
-              style={[
-                styles.gridButton,
-                { borderColor: colors.border },
-                formData.cityId === city.id && styles.gridButtonActive,
-              ]}
-              onPress={() => handleInputChange('cityId', city.id)}
-            >
-              <Text
-                style={[
-                  styles.gridButtonText,
-                  { color: colors.text },
-                  formData.cityId === city.id && styles.gridButtonTextActive,
-                ]}
-              >
-                {city.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        <TouchableOpacity
+          style={[styles.picker, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          onPress={() => setShowCityPicker(true)}
+        >
+          <Text style={[styles.pickerText, { color: formData.cityId ? colors.text : colors.textSecondary }]}>
+            {getCityName()}
+          </Text>
+          <Icon name="chevron-down" size={20} color={colors.textSecondary} />
+        </TouchableOpacity>
       </View>
 
       {/* Quartier */}
@@ -932,8 +918,10 @@ const PostAds: React.FC = () => {
               <ActivityIndicator color="#FFF" />
             ) : (
               <>
-                <Icon name="checkmark-circle" size={20} color="#FFF" />
-                <Text style={styles.footerButtonTextWhite}>Publier</Text>
+                <Text style={styles.footerButtonTextWhite}>
+                  Publier
+                </Text>
+                <Icon name="checkmark" size={20} color="#FFF" />
               </>
             )}
           </TouchableOpacity>
@@ -941,6 +929,82 @@ const PostAds: React.FC = () => {
       </View>
 
       {/* Modals */}
+      {/* Modal de sélection de catégorie */}
+      <Modal visible={showCategoryPicker} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.pickerModal, { backgroundColor: colors.surface }]}>
+            <View style={[styles.pickerHeader, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.pickerHeaderTitle, { color: colors.text }]}>
+                Sélectionner une catégorie
+              </Text>
+              <TouchableOpacity onPress={() => setShowCategoryPicker(false)}>
+                <Icon name="close" size={24} color={colors.text} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView>
+              {categories.map((category) => (
+                <TouchableOpacity
+                  key={category.id}
+                  style={[
+                    styles.pickerItem,
+                    { backgroundColor: formData.categoryId === category.id ? '#f973161a' : 'transparent' },
+                  ]}
+                  onPress={() => {
+                    handleInputChange('categoryId', category.id);
+                    setShowCategoryPicker(false);
+                  }}
+                >
+                  <Text style={[styles.pickerItemText, { color: colors.text }]}>
+                    {category.name}
+                  </Text>
+                  {formData.categoryId === category.id && (
+                    <Icon name="checkmark-circle" size={20} color="#f97316" />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de sélection de ville */}
+      <Modal visible={showCityPicker} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.pickerModal, { backgroundColor: colors.surface }]}>
+            <View style={[styles.pickerHeader, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.pickerHeaderTitle, { color: colors.text }]}>
+                Sélectionner une ville
+              </Text>
+              <TouchableOpacity onPress={() => setShowCityPicker(false)}>
+                <Icon name="close" size={24} color={colors.text} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView>
+              {cities.map((city) => (
+                <TouchableOpacity
+                  key={city.id}
+                  style={[
+                    styles.pickerItem,
+                    { backgroundColor: formData.cityId === city.id ? '#f973161a' : 'transparent' },
+                  ]}
+                  onPress={() => {
+                    handleInputChange('cityId', city.id);
+                    setShowCityPicker(false);
+                  }}
+                >
+                  <Text style={[styles.pickerItemText, { color: colors.text }]}>
+                    {city.name}
+                  </Text>
+                  {formData.cityId === city.id && (
+                    <Icon name="checkmark-circle" size={20} color="#f97316" />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
       <BoostOfferModal
         visible={showBoostOffer}
         onAccept={handleAcceptBoost}

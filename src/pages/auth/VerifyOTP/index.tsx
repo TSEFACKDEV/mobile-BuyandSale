@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from '../../../hooks/store'
 import { verifyOtpAction, resendOtpAction } from '../../../store/register/actions'
 import { selectOtpVerification, selectResendOtp } from '../../../store/register/slice'
 import { LoadingType } from '../../../models/store'
+import { Loading } from '../../../components/LoadingVariants'
 
 type VerifyOTPNavigationProp = NativeStackNavigationProp<
   AuthStackParamList,
@@ -70,19 +71,11 @@ const VerifyOTP = () => {
         })
       ).unwrap()
 
-      // 🎉 Vérification réussie - Rediriger vers Login (comme le frontend React)
-      Alert.alert(
-        'Succès',
-        'Compte vérifié avec succès ! Vous pouvez maintenant vous connecter.',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              navigation.navigate('Login')
-            },
-          },
-        ]
-      )
+      // 🎉 Vérification réussie - Redirection automatique vers Login
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      })
     } catch (error: unknown) {
       // 🚨 Gestion d'erreurs
       let errorMessage = 'Code OTP invalide'
@@ -141,6 +134,10 @@ const VerifyOTP = () => {
 
       Alert.alert('Erreur', errorMessage, [{ text: 'OK' }])
     }
+  }
+
+  if (isLoading) {
+    return <Loading fullScreen message="Vérification en cours..." />;
   }
 
   return (
