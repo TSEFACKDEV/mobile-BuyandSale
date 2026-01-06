@@ -51,10 +51,10 @@ interface Payment {
 }
 
 interface PaymentHistoryProps {
-  // Future: Support admin view with userId
+  userId: string;
 }
 
-const PaymentHistory: React.FC<PaymentHistoryProps> = () => {
+const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
   const colors = useThemeColors();
   const { t } = useTranslation();
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -127,6 +127,13 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = () => {
       CANCELLED: '#6b7280',
       EXPIRED: '#f97316',
     },
+    labels: {
+      SUCCESS: 'Payé',
+      PENDING: 'En attente',
+      FAILED: 'Échoué',
+      CANCELLED: 'Annulé',
+      EXPIRED: 'Expiré',
+    },
   }), []);
 
   const forfaitConfig = useMemo(() => ({
@@ -150,6 +157,10 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = () => {
     return statusConfig.colors[status];
   }, [statusConfig]);
 
+  const getStatusLabel = useCallback((status: Payment['status']) => {
+    return statusConfig.labels[status];
+  }, [statusConfig]);
+
   const getForfaitTypeLabel = useCallback((type: Payment['forfait']['type']) => {
     return forfaitConfig.labels[type];
   }, [forfaitConfig]);
@@ -161,11 +172,9 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = () => {
   const formatDate = useCallback((dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('fr-FR', {
-      day: '2-digit',
+      day: 'numeric',
       month: 'short',
       year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
     });
   }, []);
 
@@ -269,7 +278,7 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = () => {
                 },
               ]}
             >
-              {/* En-tête de la carte */}
+              {/* En-tête compact */}
               <View style={styles.cardHeader}>
                 <View style={styles.productInfo}>
                   <Image
@@ -281,7 +290,7 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = () => {
                   <View style={styles.productDetails}>
                     <Text
                       style={[styles.productName, { color: colors.text }]}
-                      numberOfLines={2}
+                      numberOfLines={1}
                     >
                       {payment.product.name}
                     </Text>
@@ -296,78 +305,51 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = () => {
                           {getForfaitTypeLabel(payment.forfait.type)}
                         </Text>
                       </View>
-                      {isActive && (
-                        <View style={styles.activeBadge}>
-                          <Icon name="trending-up" size={12} color="#10b981" />
-                          <Text style={styles.activeBadgeText}>Actif</Text>
-                        </View>
-                      )}
                     </View>
+                    <Text style={[styles.dateText, { color: colors.textSecondary }]}>
+                      {formatDate(payment.createdAt)}
+                    </Text>
                   </View>
                 </View>
                 <View style={styles.statusContainer}>
-                  <Icon name={getStatusIcon(payment.status)} size={24} color={statusColor} />
-                  <Text style={[styles.amountText, { color: colors.text }]}>
-                    {payment.amount.toLocaleString()} XAF
-                  </Text>
-                </View>
-              </View>
-
-              {/* Détails du paiement */}
-              <View style={[styles.cardDetails, { borderTopColor: colors.border }]}>
-                <View style={styles.detailRow}>
-                  <Icon name="calendar-outline" size={16} color={colors.textSecondary} />
-                  <Text style={[styles.detailText, { color: colors.textSecondary }]}>
-                    Créé: {formatDate(payment.createdAt)}
-                  </Text>
-                </View>
-
-                {payment.paidAt && (
-                  <View style={styles.detailRow}>
-                    <Icon name="checkmark-circle-outline" size={16} color={colors.textSecondary} />
-                    <Text style={[styles.detailText, { color: colors.textSecondary }]}>
-                      Payé: {formatDate(payment.paidAt)}
+                  <View style={[styles.statusBadge, { backgroundColor: `${statusColor}15` }]}>
+                    <Icon name={getStatusIcon(payment.status)} size={14} color={statusColor} />
+                    <Text style={[styles.statusText, { color: statusColor }]}>
+                      {getStatusLabel(payment.status)}
                     </Text>
                   </View>
-                )}
-
-                {isActive && payment.activeForfait && (
-                  <>
-                    <View style={styles.detailRow}>
-                      <Icon name="time-outline" size={16} color={colors.textSecondary} />
-                      <Text style={[styles.detailText, { color: colors.textSecondary }]}>
-                        Reste: {payment.remainingDays} jour(s)
-                      </Text>
-                    </View>
-                    <View style={styles.detailRow}>
-                      <Icon name="calendar-outline" size={16} color={colors.textSecondary} />
-                      <Text style={[styles.detailText, { color: colors.textSecondary }]}>
-                        Expire: {formatDate(payment.activeForfait.expiresAt)}
-                      </Text>
-                    </View>
-
-                    {/* Barre de progression */}
-                    {payment.remainingDays !== undefined && (
-                      <View style={styles.progressContainer}>
-                        <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
-                          <View
-                            style={[
-                              styles.progressFill,
-                              {
-                                width: `${Math.min(100, Math.max(0, (payment.remainingDays / payment.forfait.duration) * 100))}%`,
-                                backgroundColor: payment.remainingDays < 7 ? '#f59e0b' : '#10b981',
-                              },
-                            ]}
-                          />
-                        </View>
-                        <Text style={[styles.progressText, { color: colors.textSecondary }]}>
-                          {payment.remainingDays}/{payment.forfait.duration} jours
-                        </Text>
-                      </View>
-                    )}
-                  </>
-                )}
+                  <Text style={[styles.amountText, { color: colors.text }]}>
+                    {payment.amount.toLocaleString()} F
+                  </Text>
+                </View>
               </View>
+
+              {/* Détails compacts pour paiements actifs uniquement */}
+              {isActive && payment.activeForfait && payment.remainingDays !== undefined && (
+                <View style={[styles.cardDetails, { borderTopColor: colors.border }]}>
+                  <View style={styles.progressContainer}>
+                    <View style={styles.progressHeader}>
+                      <Text style={[styles.progressLabel, { color: colors.textSecondary }]}>
+                        Forfait actif
+                      </Text>
+                      <Text style={[styles.progressDays, { color: payment.remainingDays < 7 ? '#f59e0b' : '#10b981' }]}>
+                        {payment.remainingDays}j restants
+                      </Text>
+                    </View>
+                    <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
+                      <View
+                        style={[
+                          styles.progressFill,
+                          {
+                            width: `${Math.min(100, Math.max(0, (payment.remainingDays / payment.forfait.duration) * 100))}%`,
+                            backgroundColor: payment.remainingDays < 7 ? '#f59e0b' : '#10b981',
+                          },
+                        ]}
+                      />
+                    </View>
+                  </View>
+                </View>
+              )}
             </View>
           );
         })}

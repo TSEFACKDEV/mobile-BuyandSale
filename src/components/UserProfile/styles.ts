@@ -49,14 +49,15 @@ export const styles = StyleSheet.create({
     gap: 16,
   },
   paymentCard: {
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
     overflow: 'hidden',
+    marginBottom: 12,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 16,
+    padding: 12,
   },
   productInfo: {
     flexDirection: 'row',
@@ -64,32 +65,33 @@ export const styles = StyleSheet.create({
     marginRight: 12,
   },
   productImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    marginRight: 12,
+    width: 50,
+    height: 50,
+    borderRadius: 6,
+    marginRight: 10,
   },
   productDetails: {
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: 'center',
   },
   productName: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   badgesRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
+    gap: 4,
+    marginBottom: 3,
   },
   forfaitBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 10,
   },
   forfaitBadgeText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
   },
   activeBadge: {
@@ -106,20 +108,34 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#10b981',
   },
+  dateText: {
+    fontSize: 11,
+  },
   statusContainer: {
     alignItems: 'flex-end',
     justifyContent: 'space-between',
   },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginBottom: 6,
+  },
+  statusText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
   amountText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
-    marginTop: 4,
   },
   cardDetails: {
     borderTopWidth: 1,
-    padding: 16,
-    paddingTop: 12,
-    gap: 8,
+    padding: 12,
+    paddingTop: 10,
   },
   detailRow: {
     flexDirection: 'row',
@@ -130,17 +146,30 @@ export const styles = StyleSheet.create({
     fontSize: 13,
   },
   progressContainer: {
-    marginTop: 8,
+    marginTop: 0,
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  progressLabel: {
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  progressDays: {
+    fontSize: 11,
+    fontWeight: '700',
   },
   progressBar: {
-    height: 6,
-    borderRadius: 3,
+    height: 5,
+    borderRadius: 2.5,
     overflow: 'hidden',
-    marginBottom: 4,
   },
   progressFill: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: 2.5,
   },
   progressText: {
     fontSize: 11,

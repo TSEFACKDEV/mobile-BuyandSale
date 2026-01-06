@@ -19,7 +19,16 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, onPress }) => {
     if (onPress) {
       onPress();
     } else {
-      (navigation as any).navigate('Products', { categoryId: category.id });
+      (navigation as any).navigate('Main', {
+        screen: 'MainTab',
+        params: {
+          screen: 'Products',
+          params: {
+            screen: 'ProductsList',
+            params: { categoryId: category.id }
+          }
+        }
+      });
     }
   };
 

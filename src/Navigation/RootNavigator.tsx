@@ -160,6 +160,7 @@ const HomeStackNavigator = () => {
 };
 
 // =====================
+// =====================
 // Products Stack Navigator
 // =====================
 const ProductsStackNavigator = () => {
@@ -169,7 +170,10 @@ const ProductsStackNavigator = () => {
         headerShown: false,
       }}
     >
-      <ProductsStack.Screen name="ProductsList" component={Products} />
+      <ProductsStack.Screen 
+        name="ProductsList" 
+        component={Products}
+      />
     </ProductsStack.Navigator>
   );
 };

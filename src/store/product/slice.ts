@@ -8,6 +8,7 @@ import type {
   ProductStatsResponse,
 } from './actions';
 import {
+  getHomeProductsAction,
   getValidatedProductsAction,
   getCategoryProductsAction,
   getProductByIdAction,
@@ -32,6 +33,11 @@ type LoadingType = 'idle' | 'loading' | 'succeeded' | 'failed';
 // ===============================
 
 interface ProductState {
+  // Produits page Home
+  homeProducts: Product[];
+  homeProductsStatus: LoadingType;
+  homeProductsError: string | null;
+
   // Liste des produits (marketplace)
   validatedProducts: Product[];
   validatedProductsStatus: LoadingType;
@@ -96,6 +102,10 @@ interface ProductState {
 // ===============================
 
 const initialState: ProductState = {
+  homeProducts: [],
+  homeProductsStatus: 'idle',
+  homeProductsError: null,
+
   validatedProducts: [],
   validatedProductsStatus: 'idle',
   validatedProductsError: null,
@@ -152,12 +162,6 @@ const productSlice = createSlice({
   name: 'product',
   initialState,
   reducers: {
-    // Réinitialiser les produits validés
-    clearValidatedProducts: (state) => {
-      state.validatedProducts = [];
-      state.validatedProductsPagination = null;
-    },
-
     // Réinitialiser le produit courant
     clearCurrentProduct: (state) => {
       state.currentProduct = null;
@@ -178,6 +182,25 @@ const productSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    // ===============================
+    // GET HOME PRODUCTS
+    // ===============================
+    builder.addCase(getHomeProductsAction.pending, (state) => {
+      state.homeProductsStatus = 'loading';
+      state.homeProductsError = null;
+    });
+    builder.addCase(
+      getHomeProductsAction.fulfilled,
+      (state, action: PayloadAction<ProductListResponse>) => {
+        state.homeProductsStatus = 'succeeded';
+        state.homeProducts = action.payload.products;
+      }
+    );
+    builder.addCase(getHomeProductsAction.rejected, (state, action) => {
+      state.homeProductsStatus = 'failed';
+      state.homeProductsError = action.payload?.message || 'Erreur inconnue';
+    });
+
     // ===============================
     // GET VALIDATED PRODUCTS
     // ===============================
@@ -457,7 +480,6 @@ const productSlice = createSlice({
 // ===============================
 
 export const {
-  clearValidatedProducts,
   clearCurrentProduct,
   clearCreateProductError,
   clearUpdateProductError,
@@ -489,6 +511,10 @@ export const selectSellerProductsStatus = (state: any) => state.product.sellerPr
 export const selectSellerProductsError = (state: any) => state.product.sellerProductsError;
 export const selectSellerPagination = (state: any) => state.product.sellerProductsPagination;
 export const selectCurrentSeller = (state: any) => state.product.currentSeller;
+
+// Produits Home
+export const selectHomeProducts = (state: any) => state.product.homeProducts;
+export const selectHomeProductsStatus = (state: any) => state.product.homeProductsStatus;
 
 // Produits de l'utilisateur
 export const selectUserProducts = (state: any) => state.product.userProducts;

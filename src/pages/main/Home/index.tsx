@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { 
   View, 
   Text, 
@@ -15,11 +15,7 @@ import { enrichCategoriesWithIcons } from '../../../utils/categoryHelpers';
 
 // Actions
 import { getAllCategoriesAction } from '../../../store/category/actions';
-import { getValidatedProductsAction } from '../../../store/product/actions';
-import { 
-  selectValidatedProducts, 
-  selectValidatedProductsStatus 
-} from '../../../store/product/slice';
+import { getHomeProductsAction } from '../../../store/product/actions';
 import { fetchCitiesAction } from '../../../store/city/actions';
 import { fetchPublicSellersAction } from '../../../store/user/actions';
 
@@ -40,12 +36,11 @@ const Home = () => {
   // State from Redux
   const { data: categories, status: categoryStatus } = useAppSelector(state => state.category);
   const categoriesLoading = categoryStatus === 'PENDING';
-  const validatedProducts = useAppSelector(selectValidatedProducts);
-  const validatedProductsStatus = useAppSelector(selectValidatedProductsStatus);
-  const productsLoading = validatedProductsStatus === 'loading';
+  const homeProducts = useAppSelector(state => state.product.homeProducts);
+  const homeProductsStatus = useAppSelector(state => state.product.homeProductsStatus);
+  const productsLoading = homeProductsStatus === 'loading';
   const { data: cities, status: cityStatus } = useAppSelector(state => state.city);
   const citiesLoading = cityStatus === 'PENDING';
-  // ✅ CORRECTION : Utiliser les bons sélecteurs pour les vendeurs
   const publicSellers = useAppSelector(state => state.user.users.entities);
   const publicSellersStatus = useAppSelector(state => state.user.users.status);
   const sellersLoading = publicSellersStatus === 'PENDING';
@@ -60,16 +55,13 @@ const Home = () => {
     try {
       await Promise.all([
         dispatch(getAllCategoriesAction({ limit: 20 })).unwrap(),
-        dispatch(getValidatedProductsAction({ page: 1, limit: 12 })).unwrap(),
+        dispatch(getHomeProductsAction()).unwrap(),
         dispatch(fetchCitiesAction()).unwrap(),
         dispatch(fetchPublicSellersAction({ page: 1, limit: 10 })).unwrap(),
       ]);
     } catch (error: any) {
-      console.error('❌ Erreur chargement données Home:', error);
-      
       // Retry automatique en cas d'erreur réseau (max 2 tentatives)
       if (error?.message?.includes('Network') && retryCount < 2) {
-        console.log(`🔄 Nouvelle tentative (${retryCount + 1}/2) dans 1 seconde...`);
         setTimeout(() => loadInitialData(retryCount + 1), 1000);
       }
     }
@@ -81,20 +73,16 @@ const Home = () => {
     setRefreshing(false);
   };
 
-  // Produits à la une (déjà triés par le backend par priorité de forfait)
-  // Backend: PREMIUM (1) > TOP_ANNONCE (2) > URGENT (3) > Sans forfait
+  // Produits à la une (triés par priorité de forfait backend)
   const featuredProducts = useMemo(() => {
-    if (!validatedProducts || validatedProducts.length === 0) return [];
-    // Le backend retourne déjà les produits triés par priorité de forfait
-    // On limite juste à 12 produits pour la page d'accueil
-    return validatedProducts.slice(0, 12);
-  }, [validatedProducts]);
+    if (!homeProducts || homeProducts.length === 0) return [];
+    return homeProducts.slice(0, 12);
+  }, [homeProducts]);
 
-  // Top vendeurs (limiter à 10) avec calcul des statistiques de reviews
+  // Top vendeurs avec calcul des statistiques de reviews
   const topSellers = useMemo(() => {
     if (!publicSellers || publicSellers.length === 0) return [];
     
-    // Calculer les stats de reviews pour chaque vendeur (comme le fait le backend pour le web)
     return publicSellers.slice(0, 10).map((seller: any) => {
       const reviews = seller.reviewsReceived || [];
       const totalReviews = reviews.length;
@@ -105,8 +93,7 @@ const Home = () => {
       return {
         ...seller,
         totalReviews,
-        averageRating,
-
+        averageRating
       };
     });
   }, [publicSellers]);

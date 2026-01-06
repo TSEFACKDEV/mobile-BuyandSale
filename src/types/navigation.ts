@@ -23,13 +23,13 @@ export type HomeStackParamList = {
 
 // Products Stack (écrans de produits)
 export type ProductsStackParamList = {
-  ProductsList: undefined;
+  ProductsList: { categoryId?: string };
 };
 
 // Bottom Tab Navigator (navigation principale optimisée)
 export type BottomTabParamList = {
   HomeTab: undefined;
-  Products: undefined;
+  Products: undefined; // Le tab lui-même ne reçoit pas de params
   PostAd: undefined;
   Sellers: undefined;
   Profile: undefined;
