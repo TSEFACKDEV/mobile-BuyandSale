@@ -84,6 +84,75 @@ const UserProfile: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('profile');
   const [refreshing, setRefreshing] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+
+  // ✨ Fonction pour calculer les jours restants d'un forfait
+  const calculateRemainingDays = useCallback((expiresAt: string | Date): number => {
+    const now = new Date();
+    const expiry = new Date(expiresAt);
+    const diff = expiry.getTime() - now.getTime();
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    return Math.max(0, days);
+  }, []);
+
+  // ✨ Fonction pour obtenir les forfaits actifs d'un produit triés par priorité
+  const getActiveForfaits = useCallback((productForfaits: any[]) => {
+    if (!productForfaits || productForfaits.length === 0) return [];
+
+    const now = new Date();
+    const FORFAIT_PRIORITY = {
+      PREMIUM: 1,
+      TOP_ANNONCE: 2,
+      URGENT: 3,
+    };
+
+    return productForfaits
+      .filter((pf: any) => {
+        const expiryDate = new Date(pf.expiresAt);
+        return pf.isActive && expiryDate > now;
+      })
+      .sort((a: any, b: any) => {
+        const priorityA = FORFAIT_PRIORITY[a.forfait?.type as keyof typeof FORFAIT_PRIORITY] || 999;
+        const priorityB = FORFAIT_PRIORITY[b.forfait?.type as keyof typeof FORFAIT_PRIORITY] || 999;
+        return priorityA - priorityB;
+      });
+  }, []);
+
+  // ✨ Composant Badge Forfait
+  const ForfaitBadge = useCallback(({ forfait, expiresAt }: { forfait: any, expiresAt: string | Date }) => {
+    const remainingDays = calculateRemainingDays(expiresAt);
+    const type = forfait?.type;
+    
+    const badgeConfig = {
+      PREMIUM: {
+        style: styles.forfaitBadgePremium,
+        icon: 'crown',
+        label: 'premium',
+      },
+      TOP_ANNONCE: {
+        style: styles.forfaitBadgeTopAnnonce,
+        icon: 'trending-up',
+        label: 'top',
+      },
+      URGENT: {
+        style: styles.forfaitBadgeUrgent,
+        icon: 'flame',
+        label: 'urgent',
+      },
+    };
+
+    const config = badgeConfig[type as keyof typeof badgeConfig];
+    if (!config) return null;
+
+    return (
+      <View style={[styles.forfaitBadge, config.style]}>
+        <Icon name={config.icon} size={12} color="#FFFFFF" />
+        <Text style={styles.forfaitBadgeText}>{config.label}</Text>
+        {remainingDays > 0 && (
+          <Text style={styles.forfaitDaysText}>• {remainingDays}j</Text>
+        )}
+      </View>
+    );
+  }, [calculateRemainingDays]);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);

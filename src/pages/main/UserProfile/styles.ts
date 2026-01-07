@@ -470,26 +470,48 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  forfaitBadge: {
+  // Forfait badges (booster badges)
+  forfaitBadgesContainer: {
     position: 'absolute',
     top: 8,
     left: 8,
+    gap: 6,
+    maxWidth: '80%',
+  },
+  forfaitBadge: {
     paddingVertical: 4,
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     borderRadius: 6,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
   },
+  forfaitBadgePremium: {
+    backgroundColor: 'rgba(147, 51, 234, 0.95)', // Purple
+  },
+  forfaitBadgeTopAnnonce: {
+    backgroundColor: 'rgba(59, 130, 246, 0.95)', // Blue
+  },
+  forfaitBadgeUrgent: {
+    backgroundColor: 'rgba(239, 68, 68, 0.95)', // Red
+  },
   forfaitBadgeText: {
     color: '#FFFFFF',
     fontSize: 11,
     fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  forfaitDaysText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '600',
+    opacity: 0.9,
   },
   productInfo: {
     padding: 12,

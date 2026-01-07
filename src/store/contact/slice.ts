@@ -79,4 +79,13 @@ const contactSlice = createSlice({
 
 export const { resetContactState, clearContactError } = contactSlice.actions;
 
+// ===============================
+// SELECTORS
+// ===============================
+
+export const selectContactStatus = (state: { contact: ContactState }) => state.contact.status;
+export const selectContactError = (state: { contact: ContactState }) => state.contact.error;
+export const selectContactSuccess = (state: { contact: ContactState }) => state.contact.success;
+export const selectLastContact = (state: { contact: ContactState }) => state.contact.lastContact;
+
 export default contactSlice.reducer;

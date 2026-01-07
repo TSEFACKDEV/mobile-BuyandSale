@@ -51,10 +51,14 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
     }
   }, [favoritesCount, scaleAnim]);
 
-  // Charger les notifications au montage
+  // Charger les notifications au montage SEULEMENT si on n'est pas sur une page modale
+  // (About, Contact, UseCondition, Confidentiality ne devraient pas déclencher de refresh)
   React.useEffect(() => {
-    dispatch(fetchNotificationsAction());
-  }, [dispatch]);
+    // Ne pas charger les notifications si on affiche juste un titre (page modale)
+    if (!title || !showBackButton) {
+      dispatch(fetchNotificationsAction());
+    }
+  }, [dispatch, title, showBackButton]);
 
   const handleBackPress = () => {
     if (onBackPress) {
