@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { normalizePhoneNumber, validateCameroonPhone } from '../../../../utils/phoneUtils';
+import { validateCameroonPhone } from '../../../../utils/phoneUtils';
 import PhoneInput from '../../../../components/PhoneInput';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '../../../../contexts/ThemeContext';

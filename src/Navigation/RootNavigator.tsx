@@ -67,6 +67,8 @@ const AuthNavigator = () => {
     <AuthStack.Navigator
       screenOptions={{
         headerShown: false,
+        gestureEnabled: true,
+        animation: 'slide_from_right',
       }}
     >
       <AuthStack.Screen name="Login" component={Login} />
@@ -122,6 +124,8 @@ const HomeStackNavigator = () => {
     <HomeStack.Navigator
       screenOptions={{
         headerShown: false,
+        gestureEnabled: true,
+        animation: 'slide_from_right',
       }}
     >
       <HomeStack.Screen name="Home" component={Home} />
@@ -188,6 +192,8 @@ const ProductsStackNavigator = () => {
     <ProductsStack.Navigator
       screenOptions={{
         headerShown: false,
+        gestureEnabled: true,
+        animation: 'slide_from_right',
       }}
     >
       <ProductsStack.Screen 
@@ -206,6 +212,8 @@ const SellersStackNavigator = () => {
     <SellersStack.Navigator
       screenOptions={{
         headerShown: false,
+        gestureEnabled: true,
+        animation: 'slide_from_right',
       }}
     >
       <SellersStack.Screen name="SellersList" component={Sellers} />
@@ -458,6 +466,8 @@ const MainStackNavigator = () => (
     id="MainStack"
     screenOptions={{
       headerShown: false,
+      gestureEnabled: true,
+      animation: 'slide_from_right',
     }}
   >
     <MainStack.Screen
@@ -468,6 +478,8 @@ const MainStackNavigator = () => (
       screenOptions={{
         presentation: 'modal',
         headerShown: false,
+        gestureEnabled: true,
+        animation: 'slide_from_bottom',
       }}
     >
       <MainStack.Screen
@@ -560,6 +572,8 @@ export const RootNavigator = () => {
       <RootStack.Navigator
         screenOptions={{
           headerShown: false,
+          gestureEnabled: true,
+          animation: 'slide_from_right',
         }}
       >
         {!isOnboardingComplete ? (

@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 const createStyles = (colors: any) => StyleSheet.create({
   container: {
     width: 120,
+    height: 170,
     backgroundColor: colors.surface,
     borderRadius: 10,
     padding: 10,
@@ -53,6 +54,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: colors.text,
     marginBottom: 5,
     textAlign: 'center',
+    minHeight: 32,
   },
   statsContainer: {
     gap: 3,

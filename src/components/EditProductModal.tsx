@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
-import { normalizePhoneNumber, validateCameroonPhone } from '../utils/phoneUtils';
+import { validateCameroonPhone } from '../utils/phoneUtils';
 import { useAppDispatch, useAppSelector } from '../hooks/store';
 import { useThemeColors } from '../contexts/ThemeContext';
 import { getProductByIdAction, updateProductAction } from '../store/product/actions';

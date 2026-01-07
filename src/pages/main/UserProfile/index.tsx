@@ -24,7 +24,6 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { logoutAction, getUserProfileAction, updateUserAction } from '../../../store/authentification/actions';
 import { LoadingType } from '../../../models/store';
 import { getImageUrl, PLACEHOLDER_IMAGE } from '../../../utils/imageUtils';
-import { normalizePhoneNumber } from '../../../utils/phoneUtils';
 import EditProductModal from '../../../components/EditProductModal';
 import PaymentHistory from '../../../components/UserProfile/PaymentHistory';
 import { Loading, ProductCardSkeleton } from '../../../components/LoadingVariants';
