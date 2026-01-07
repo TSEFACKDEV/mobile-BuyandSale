@@ -48,6 +48,75 @@ const UserProfile: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('profile');
   const [refreshing, setRefreshing] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+
+  // ✨ Fonction pour calculer les jours restants d'un forfait
+  const calculateRemainingDays = useCallback((expiresAt: string | Date): number => {
+    const now = new Date();
+    const expiry = new Date(expiresAt);
+    const diff = expiry.getTime() - now.getTime();
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    return Math.max(0, days);
+  }, []);
+
+  // ✨ Fonction pour obtenir les forfaits actifs d'un produit triés par priorité
+  const getActiveForfaits = useCallback((productForfaits: any[]) => {
+    if (!productForfaits || productForfaits.length === 0) return [];
+
+    const now = new Date();
+    const FORFAIT_PRIORITY = {
+      PREMIUM: 1,
+      TOP_ANNONCE: 2,
+      URGENT: 3,
+    };
+
+    return productForfaits
+      .filter((pf: any) => {
+        const expiryDate = new Date(pf.expiresAt);
+        return pf.isActive && expiryDate > now;
+      })
+      .sort((a: any, b: any) => {
+        const priorityA = FORFAIT_PRIORITY[a.forfait?.type as keyof typeof FORFAIT_PRIORITY] || 999;
+        const priorityB = FORFAIT_PRIORITY[b.forfait?.type as keyof typeof FORFAIT_PRIORITY] || 999;
+        return priorityA - priorityB;
+      });
+  }, []);
+
+  // ✨ Composant Badge Forfait
+  const ForfaitBadge = useCallback(({ forfait, expiresAt }: { forfait: any, expiresAt: string | Date }) => {
+    const remainingDays = calculateRemainingDays(expiresAt);
+    const type = forfait?.type;
+    
+    const badgeConfig = {
+      PREMIUM: {
+        style: styles.forfaitBadgePremium,
+        icon: 'crown',
+        label: 'premium',
+      },
+      TOP_ANNONCE: {
+        style: styles.forfaitBadgeTopAnnonce,
+        icon: 'trending-up',
+        label: 'top',
+      },
+      URGENT: {
+        style: styles.forfaitBadgeUrgent,
+        icon: 'flame',
+        label: 'urgent',
+      },
+    };
+
+    const config = badgeConfig[type as keyof typeof badgeConfig];
+    if (!config) return null;
+
+    return (
+      <View style={[styles.forfaitBadge, config.style]}>
+        <Icon name={config.icon} size={12} color="#FFFFFF" />
+        <Text style={styles.forfaitBadgeText}>{config.label}</Text>
+        {remainingDays > 0 && (
+          <Text style={styles.forfaitDaysText}>• {remainingDays}j</Text>
+        )}
+      </View>
+    );
+  }, [calculateRemainingDays]);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -414,76 +483,94 @@ const UserProfile: React.FC = () => {
                 </View>
               ) : (
                 <View style={styles.productsGrid}>
-                  {userProducts.map((product: any) => (
-                    <View key={product.id} style={[styles.productCard, isDark && styles.productCardDark]}>
-                      <Image
-                        source={{ 
-                          uri: product.images?.[0] 
-                            ? getImageUrl(product.images[0], 'product') 
-                            : PLACEHOLDER_IMAGE 
-                        }}
-                        style={styles.productImage}
-                      />
-                      <View style={styles.productInfo}>
-                        <Text style={[styles.productName, isDark && styles.productNameDark]} numberOfLines={2}>
-                          {product.name}
-                        </Text>
-                        <Text style={[styles.productPrice, isDark && styles.productPriceDark]}>
-                          {product.price.toLocaleString()} FCFA
-                        </Text>
-                        <View style={styles.productActions}>
-                          <TouchableOpacity
-                            style={styles.productActionButton}
-                            onPress={() => {
-                              navigation.navigate('ProductDetails', { productId: product.id });
-                            }}
-                          >
-                            <Icon name="eye-outline" size={18} color={colors.primary} />
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={styles.productActionButton}
-                            onPress={() => {
-                              setEditingProductId(product.id);
-                              setShowEditModal(true);
-                            }}
-                          >
-                            <Icon name="create-outline" size={18} color="#FACC15" />
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={styles.productActionButton}
-                            onPress={() => Alert.alert(
-                              'Confirmation',
-                              `Voulez-vous supprimer "${product.name}" ?`,
-                              [
-                                { text: 'Annuler', style: 'cancel' },
-                                { 
-                                  text: 'Supprimer', 
-                                  style: 'destructive',
-                                  onPress: async () => {
-                                    try {
-                                      await deleteUserProduct(product.id);
-                                      Alert.alert('Succès', 'Produit supprimé avec succès');
-                                      await refetchUserProducts();
-                                    } catch (error: any) {
-                                      Alert.alert('Erreur', error.message || 'Échec de la suppression');
+                  {userProducts.map((product: any) => {
+                    const activeForfaits = getActiveForfaits(product.productForfaits || []);
+                    
+                    return (
+                      <View key={product.id} style={[styles.productCard, isDark && styles.productCardDark]}>
+                        <Image
+                          source={{ 
+                            uri: product.images?.[0] 
+                              ? getImageUrl(product.images[0], 'product') 
+                              : PLACEHOLDER_IMAGE 
+                          }}
+                          style={styles.productImage}
+                        />
+                        
+                        {/* Badges de forfait (booster badges) */}
+                        {activeForfaits.length > 0 && (
+                          <View style={styles.forfaitBadgesContainer}>
+                            {activeForfaits.map((pf: any, index: number) => (
+                              <ForfaitBadge 
+                                key={`${pf.id}-${index}`} 
+                                forfait={pf.forfait} 
+                                expiresAt={pf.expiresAt} 
+                              />
+                            ))}
+                          </View>
+                        )}
+
+                        <View style={styles.productInfo}>
+                          <Text style={[styles.productName, isDark && styles.productNameDark]} numberOfLines={2}>
+                            {product.name}
+                          </Text>
+                          <Text style={[styles.productPrice, isDark && styles.productPriceDark]}>
+                            {product.price.toLocaleString()} FCFA
+                          </Text>
+                          <View style={styles.productActions}>
+                            <TouchableOpacity
+                              style={styles.productActionButton}
+                              onPress={() => {
+                                navigation.navigate('ProductDetails', { productId: product.id });
+                              }}
+                            >
+                              <Icon name="eye-outline" size={18} color={colors.primary} />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={styles.productActionButton}
+                              onPress={() => {
+                                setEditingProductId(product.id);
+                                setShowEditModal(true);
+                              }}
+                            >
+                              <Icon name="create-outline" size={18} color="#FACC15" />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={styles.productActionButton}
+                              onPress={() => Alert.alert(
+                                'Confirmation',
+                                `Voulez-vous supprimer "${product.name}" ?`,
+                                [
+                                  { text: 'Annuler', style: 'cancel' },
+                                  { 
+                                    text: 'Supprimer', 
+                                    style: 'destructive',
+                                    onPress: async () => {
+                                      try {
+                                        await deleteUserProduct(product.id);
+                                        Alert.alert('Succès', 'Produit supprimé avec succès');
+                                        await refetchUserProducts();
+                                      } catch (error: any) {
+                                        Alert.alert('Erreur', error.message || 'Échec de la suppression');
+                                      }
                                     }
                                   }
-                                }
-                              ]
-                            )}
-                          >
-                            <Icon name="trash-outline" size={18} color="#EF4444" />
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={styles.productActionButton}
-                            onPress={() => Alert.alert('Info', `Booster le produit ${product.name}`)}
-                          >
-                            <Icon name="rocket-outline" size={18} color="#10B981" />
-                          </TouchableOpacity>
+                                ]
+                              )}
+                            >
+                              <Icon name="trash-outline" size={18} color="#EF4444" />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={styles.productActionButton}
+                              onPress={() => Alert.alert('Info', `Booster le produit ${product.name}`)}
+                            >
+                              <Icon name="rocket-outline" size={18} color="#10B981" />
+                            </TouchableOpacity>
+                          </View>
                         </View>
                       </View>
-                    </View>
-                  ))}
+                    );
+                  })}
                 </View>
               )}
             </View>
