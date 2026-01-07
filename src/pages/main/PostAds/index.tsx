@@ -25,7 +25,7 @@ import { getAllCategoriesAction } from '../../../store/category/actions';
 import { fetchCitiesAction } from '../../../store/city/actions';
 import { createProductAction } from '../../../store/product/actions';
 import { getAllForfaitsAction } from '../../../store/forfait/actions';
-import { normalizePhoneNumber, validateCameroonPhone } from '../../../utils/phoneUtils';
+import { validateCameroonPhone } from '../../../utils/phoneUtils';
 import PhoneInput from '../../../components/PhoneInput';
 
 // Redux Selectors

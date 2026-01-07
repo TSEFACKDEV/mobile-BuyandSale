@@ -231,12 +231,16 @@ const Onboarding = () => {
         showsHorizontalScrollIndicator={false}
         pagingEnabled
         bounces={false}
-        scrollEnabled={false}
+        scrollEnabled={true}
         keyExtractor={(item) => item.id}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { x: scrollX } } }],
           { useNativeDriver: false }
         )}
+        onMomentumScrollEnd={(event) => {
+          const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
+          setCurrentSlide(slideIndex);
+        }}
       />
 
       <Footer />
