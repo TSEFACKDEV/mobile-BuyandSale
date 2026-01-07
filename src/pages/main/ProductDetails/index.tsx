@@ -229,7 +229,10 @@ const ProductDetails = () => {
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={['top']}>
       <StatusBar barStyle="dark-content" backgroundColor={theme.colors.background} />
       <View style={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 100 }}
+        >
           {/* Images carousel avec boutons overlay */}
           <View style={styles.carouselContainer}>
           {product.images && product.images.length > 0 ? (

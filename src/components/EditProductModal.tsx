@@ -24,6 +24,7 @@ import { selectCategories } from '../store/category/slice';
 import { selectCities } from '../store/city/slice';
 import { getImageUrl, PLACEHOLDER_IMAGE } from '../utils/imageUtils';
 import { Loading } from './LoadingVariants';
+import PhoneInput from './PhoneInput';
 
 interface EditProductModalProps {
   visible: boolean;
@@ -472,14 +473,12 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
 
             {/* Téléphone */}
             <View style={styles.section}>
-              <Text style={[styles.label, { color: colors.text }]}>Téléphone *</Text>
-              <TextInput
-                style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
+              <PhoneInput
+                label="Téléphone"
                 value={formData.telephone}
-                onChangeText={(value) => handleInputChange('telephone', normalizePhoneNumber(value))}
+                onChangeText={(value) => handleInputChange('telephone', value)}
                 placeholder="6XX XX XX XX"
-                placeholderTextColor={colors.textSecondary}
-                keyboardType="phone-pad"
+                required
               />
             </View>
 

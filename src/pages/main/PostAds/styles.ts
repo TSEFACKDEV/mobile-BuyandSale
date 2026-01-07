@@ -184,6 +184,22 @@ export const styles = StyleSheet.create({
     marginTop: 6,
     opacity: 0.7,
   },
+  characterCounter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
+    gap: 8,
+  },
+  warningText: {
+    fontSize: 12,
+    color: '#F59E0B',
+    fontWeight: '500',
+  },
+  validText: {
+    fontSize: 12,
+    color: '#10B981',
+    fontWeight: '500',
+  },
 
   // Grid moderne pour catégories/villes - Grille complète sur toute la largeur
   gridContainer: {
