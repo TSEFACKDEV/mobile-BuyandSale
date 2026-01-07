@@ -2,20 +2,40 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Provider } from 'react-redux';
+import { Provider, useDispatch, useSelector } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { store, persistor } from './src/store';
+import { store, persistor, RootState, AppDispatch } from './src/store';
 import { AuthProvider } from './src/contexts/AuthContext';
 import RootNavigator from './src/Navigation/RootNavigator';
 import { ThemeProvider } from './src/contexts/ThemeContext';
 import { LanguageProvider } from './src/contexts/LanguageContext';
+import socketService from './src/services/socketService';
+import pushNotificationService from './src/services/pushNotificationService';
+import { addNotification } from './src/store/notification/slice';
 
 
-// Composant interne qui a accès au store
 function AppContent() {
+  const dispatch = useDispatch<AppDispatch>();
+  const user = useSelector((state: RootState) => state.authentification.auth.entities);
+
   useEffect(() => {
-    // Nettoyer les anciennes clés AsyncStorage obsolètes
+    pushNotificationService.initialize();
+  }, []);
+
+  useEffect(() => {
+    if (user?.id) {
+      socketService.connect(user.id, (notification) => {
+        dispatch(addNotification(notification));
+      });
+
+      return () => {
+        socketService.disconnect();
+      };
+    }
+  }, [user?.id, dispatch]);
+
+  useEffect(() => {
     const cleanupOldKeys = async () => {
       try {
         await AsyncStorage.multiRemove([
@@ -23,7 +43,6 @@ function AppContent() {
           '@buyAndSale:accessToken',
           '@buyAndSale:refreshToken',
         ]);
-        console.log('✅ Anciennes clés AsyncStorage nettoyées');
       } catch (error) {
         console.error('Erreur nettoyage:', error);
       }

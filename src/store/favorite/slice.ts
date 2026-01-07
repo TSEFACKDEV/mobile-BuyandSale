@@ -6,6 +6,7 @@ import {
   toggleFavoriteAction,
   Favorite,
 } from './actions';
+import { logoutAction } from '../authentification/actions';
 
 // ===============================
 // LOADING STATES
@@ -47,23 +48,7 @@ const initialState: FavoriteState = {
 const favoriteSlice = createSlice({
   name: 'favorite',
   initialState,
-  reducers: {
-    // Réinitialiser l'erreur
-    resetError: (state) => {
-      state.error = null;
-    },
-    // Réinitialiser le statut de toggle pour un produit
-    resetToggleStatus: (state, action: PayloadAction<string>) => {
-      delete state.toggleStatus[action.payload];
-    },
-    // Vider tous les favoris (au logout)
-    clearFavorites: (state) => {
-      state.data = [];
-      state.status = LoadingType.IDLE;
-      state.error = null;
-      state.toggleStatus = {};
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     // ===============================
     // GET USER FAVORITES
@@ -78,7 +63,6 @@ const favoriteSlice = createSlice({
         (state, action: PayloadAction<Favorite[]>) => {
           state.status = LoadingType.SUCCEEDED;
           state.data = action.payload;
-          state.error = null;
         }
       )
       .addCase(getUserFavoritesAction.rejected, (state, action) => {
@@ -98,10 +82,7 @@ const favoriteSlice = createSlice({
       .addCase(addToFavoritesAction.fulfilled, (state, action) => {
         const { productId, favorite } = action.payload;
         state.toggleStatus[productId] = LoadingType.SUCCEEDED;
-        
-        // Ajouter le nouveau favori à la liste
         state.data.push(favorite);
-        state.error = null;
       })
       .addCase(addToFavoritesAction.rejected, (state, action) => {
         const productId = action.meta.arg.productId;
@@ -121,10 +102,7 @@ const favoriteSlice = createSlice({
       .addCase(removeFromFavoritesAction.fulfilled, (state, action) => {
         const { productId } = action.payload;
         state.toggleStatus[productId] = LoadingType.SUCCEEDED;
-        
-        // Supprimer le favori de la liste
         state.data = state.data.filter((fav) => fav.productId !== productId);
-        state.error = null;
       })
       .addCase(removeFromFavoritesAction.rejected, (state, action) => {
         const productId = action.meta.arg.productId;
@@ -145,18 +123,20 @@ const favoriteSlice = createSlice({
         const { productId, isNowFavorite } = action.payload;
         state.toggleStatus[productId] = LoadingType.SUCCEEDED;
         
-        // Si le produit a été retiré, on le supprime de la liste
-        // (si ajouté, il a déjà été ajouté par addToFavoritesAction.fulfilled)
         if (!isNowFavorite) {
           state.data = state.data.filter((fav) => fav.productId !== productId);
         }
-        
-        state.error = null;
       })
       .addCase(toggleFavoriteAction.rejected, (state, action) => {
         const productId = action.meta.arg.productId;
         state.toggleStatus[productId] = LoadingType.FAILED;
         state.error = action.payload?.message || 'Erreur lors du toggle favori';
+      })
+      .addCase(logoutAction.fulfilled, (state) => {
+        state.data = [];
+        state.status = LoadingType.IDLE;
+        state.error = null;
+        state.toggleStatus = {};
       });
   },
 });
@@ -174,6 +154,10 @@ export const selectValidFavorites = createSelector(
   (favorites) => favorites.filter((fav) => fav.productId && fav.product)
 );
 
-export const { resetError, resetToggleStatus, clearFavorites } = favoriteSlice.actions;
+// Selector mémorisé pour obtenir le nombre de favoris valides
+export const selectValidFavoritesCount = createSelector(
+  [selectValidFavorites],
+  (validFavorites) => validFavorites.length
+);
 
 export default favoriteSlice.reducer;

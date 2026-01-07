@@ -1,8 +1,9 @@
 import { View, Text, StyleSheet, ScrollView, Switch } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme, useThemeMode } from '../../../contexts/ThemeContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import pushNotificationService from '../../../services/pushNotificationService';
 
 const Settings = () => {
   const { theme } = useTheme();
@@ -11,6 +12,14 @@ const Settings = () => {
   const colors = theme.colors;
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+  useEffect(() => {
+    const loadNotificationPreference = async () => {
+      const enabled = await pushNotificationService.getNotificationPreference();
+      setNotificationsEnabled(enabled);
+    };
+    loadNotificationPreference();
+  }, []);
 
   const isDarkMode = mode === 'dark' || (mode === 'system' && theme.isDark);
 
@@ -22,9 +31,10 @@ const Settings = () => {
     await setLanguage(language === 'fr' ? 'en' : 'fr');
   };
 
-  const toggleNotifications = () => {
-    setNotificationsEnabled(!notificationsEnabled);
-    // TODO: Implémenter la logique de sauvegarde des préférences de notifications
+  const toggleNotifications = async () => {
+    const newValue = !notificationsEnabled;
+    setNotificationsEnabled(newValue);
+    await pushNotificationService.setNotificationEnabled(newValue);
   };
 
   const styles = StyleSheet.create({

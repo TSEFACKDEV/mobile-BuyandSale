@@ -44,28 +44,24 @@ const createStyles = (colors: any) => StyleSheet.create({
   iconButton: {
     padding: 8,
     borderRadius: 8,
+    position: 'relative',
   },
-  avatarImage: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: colors.primary,
-  },
-  avatarPlaceholder: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.primary,
+  notificationBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: '#EF4444',
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 4,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: colors.primary,
   },
-  avatarText: {
+  notificationBadgeText: {
     color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
   orangeText: {
     color: '#FB923C', // COLORS.primary

@@ -484,7 +484,24 @@ const UserProfile: React.FC = () => {
               ) : (
                 <View style={styles.productsGrid}>
                   {userProducts.map((product: any) => {
-                    const activeForfaits = getActiveForfaits(product.productForfaits || []);
+                    // Trouver le forfait actif s'il existe
+                    const activeForfait = product.productForfaits?.find(
+                      (pf: any) => pf.isActive && new Date(pf.expiresAt) > new Date()
+                    );
+                    const forfaitType = activeForfait?.forfait?.type;
+                    
+                    // Configuration des couleurs de forfait
+                    const forfaitColors: Record<string, string> = {
+                      PREMIUM: '#9333ea',
+                      TOP_ANNONCE: '#3b82f6',
+                      URGENT: '#ef4444',
+                    };
+                    
+                    const forfaitLabels: Record<string, string> = {
+                      PREMIUM: 'Premium',
+                      TOP_ANNONCE: 'Top',
+                      URGENT: 'Urgent',
+                    };
                     
                     return (
                       <View key={product.id} style={[styles.productCard, isDark && styles.productCardDark]}>
@@ -496,20 +513,20 @@ const UserProfile: React.FC = () => {
                           }}
                           style={styles.productImage}
                         />
-                        
-                        {/* Badges de forfait (booster badges) */}
-                        {activeForfaits.length > 0 && (
-                          <View style={styles.forfaitBadgesContainer}>
-                            {activeForfaits.map((pf: any, index: number) => (
-                              <ForfaitBadge 
-                                key={`${pf.id}-${index}`} 
-                                forfait={pf.forfait} 
-                                expiresAt={pf.expiresAt} 
-                              />
-                            ))}
+                        {/* Badge forfait */}
+                        {forfaitType && (
+                          <View 
+                            style={[
+                              styles.forfaitBadge, 
+                              { backgroundColor: forfaitColors[forfaitType] }
+                            ]}
+                          >
+                            <Icon name="star" size={10} color="#FFFFFF" />
+                            <Text style={styles.forfaitBadgeText}>
+                              {forfaitLabels[forfaitType]}
+                            </Text>
                           </View>
                         )}
-
                         <View style={styles.productInfo}>
                           <Text style={[styles.productName, isDark && styles.productNameDark]} numberOfLines={2}>
                             {product.name}

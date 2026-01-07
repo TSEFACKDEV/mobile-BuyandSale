@@ -18,28 +18,26 @@ export type HomeStackParamList = {
   ProductDetails: { productId: string };
   SellerDetails: { sellerId: string };
   UserProfile: undefined;
+  Favorites: undefined;
 };
 
 // Products Stack (écrans de produits)
 export type ProductsStackParamList = {
-  ProductsList: { focusSearch?: boolean } | undefined;
-  ProductDetails: { productId: string };
-  SellerDetails: { sellerId: string };
+  ProductsList: { categoryId?: string };
 };
 
 // Bottom Tab Navigator (navigation principale optimisée)
 export type BottomTabParamList = {
   HomeTab: undefined;
-  Products: { focusSearch?: boolean } | undefined;
-  PostAd: undefined; // Nouveau tab pour poster une annonce
+  Products: undefined; // Le tab lui-même ne reçoit pas de params
+  PostAd: undefined;
   Sellers: undefined;
-  SearchTab: undefined;
+  Profile: undefined;
 };
 
 // Main Stack Navigator (BottomTab + Modals)
 export type MainStackParamList = {
   MainTab: undefined;
-  Favorites: undefined;
   Notifications: undefined;
 };
 

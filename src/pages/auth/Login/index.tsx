@@ -67,7 +67,7 @@ const Login = () => {
     }
 
     try {
-      console.log('🔐 [Login] Authentification Google en cours...');
+
 
       // Échanger le token Google avec notre backend
       const result = await GoogleAuthService.authenticateWithBackend(

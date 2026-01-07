@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -27,12 +27,14 @@ const Products = () => {
   const dispatch = useAppDispatch();
   const theme = useThemeColors();
   const route = useRoute();
-  const searchInputRef = useRef<TextInput>(null);
+  const routeParams = route.params as { categoryId?: string } | undefined;
 
   // Redux state
-  const { validatedProducts, validatedProductsStatus, validatedProductsPagination } = useAppSelector(
-    (state) => state.product
-  );
+  const productState = useAppSelector((state) => state.product);
+  const validatedProducts = productState.validatedProducts;
+  const validatedProductsStatus = productState.validatedProductsStatus;
+  const validatedProductsPagination = productState.validatedProductsPagination;
+  
   const { data: categories } = useAppSelector((state) => state.category);
   const { data: cities } = useAppSelector((state) => state.city);
   const authData = useAppSelector(selectUserAuthenticated);
@@ -54,29 +56,43 @@ const Products = () => {
     search: '',
   });
 
-  // Charger les produits et favoris
+  // Charger catégories et villes une seule fois
   useEffect(() => {
-    // Charger catégories et villes au montage
     dispatch(getAllCategoriesAction({ limit: 50 }));
     dispatch(fetchCitiesAction());
   }, []);
 
+  // Synchroniser le categoryId des params avec les filtres
+  useEffect(() => {
+    const categoryIdFromParams = routeParams?.categoryId;
+    setFilters(prev => {
+      // Ne mettre à jour que si c'est différent pour éviter les boucles
+      if (prev.categoryId !== categoryIdFromParams) {
+        return { ...prev, categoryId: categoryIdFromParams };
+      }
+      return prev;
+    });
+    setCurrentPage(1);
+  }, [routeParams?.categoryId]);
+
+  // Nettoyer les filtres quand on quitte la page
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setSearchQuery('');
+        setCurrentPage(1);
+        setFilters({ search: '' });
+      };
+    }, [])
+  );
+
+  // Charger les produits quand page ou filtres changent
   useEffect(() => {
     loadProducts();
     if (isAuthenticated) {
       dispatch(getUserFavoritesAction());
     }
   }, [currentPage, filters]);
-
-  // Focus automatique sur la barre de recherche quand on clique sur le bouton recherche
-  useFocusEffect(
-    React.useCallback(() => {
-      const params = route.params as { focusSearch?: boolean } | undefined;
-      if (params?.focusSearch) {
-        setTimeout(() => searchInputRef.current?.focus(), 100);
-      }
-    }, [route.params])
-  );
 
   const loadProducts = async () => {
     try {
@@ -202,7 +218,6 @@ const Products = () => {
       <View style={[styles.searchContainer, { backgroundColor: theme.backgroundSecondary }]}>
         <Ionicons name="search-outline" size={20} color={theme.textSecondary} />
         <TextInput
-          ref={searchInputRef}
           style={[styles.searchInput, { color: theme.text }]}
           placeholder="Rechercher un produit..."
           placeholderTextColor={theme.textSecondary}
@@ -227,26 +242,32 @@ const Products = () => {
               {filteredProducts.length} résultat{filteredProducts.length !== 1 ? 's' : ''}
             </Text>
           </View>
+        </View>
+        <View style={styles.actionButtons}>
           {activeFiltersCount > 0 && (
-            <TouchableOpacity onPress={handleClearFilters}>
-              <Text style={[styles.clearFiltersText, { color: theme.primary }]}>
+            <TouchableOpacity 
+              onPress={handleClearFilters}
+              style={[styles.clearFiltersButton, { backgroundColor: '#EF4444' }]}
+            >
+              <Ionicons name="close-circle" size={16} color="#FFFFFF" />
+              <Text style={styles.clearFiltersButtonText}>
                 Effacer ({activeFiltersCount})
               </Text>
             </TouchableOpacity>
           )}
+          <TouchableOpacity
+            style={[styles.filterButton, { backgroundColor: theme.primary }]}
+            onPress={() => setShowFilters(true)}
+          >
+            <Ionicons name="filter-outline" size={16} color="#FFFFFF" />
+            <Text style={styles.filterButtonText}>Filtres</Text>
+            {activeFiltersCount > 0 && (
+              <View style={styles.filterBadge}>
+                <Text style={styles.filterBadgeText}>{activeFiltersCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={styles.filterButton}
-          onPress={() => setShowFilters(true)}
-        >
-          <Ionicons name="filter-outline" size={18} color={theme.primary} />
-          <Text style={[styles.statText, { color: theme.primary }]}>Filtres</Text>
-          {activeFiltersCount > 0 && (
-            <View style={styles.filterBadge}>
-              <Text style={styles.filterBadgeText}>{activeFiltersCount}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
       </View>
     </View>
   );

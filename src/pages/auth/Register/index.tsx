@@ -72,7 +72,7 @@ const Register = () => {
     }
 
     try {
-      console.log('🔐 [Register] Authentification Google en cours...');
+
 
       // Échanger le token Google avec notre backend
       const result = await GoogleAuthService.authenticateWithBackend(

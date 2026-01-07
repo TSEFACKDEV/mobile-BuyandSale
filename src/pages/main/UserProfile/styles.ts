@@ -153,27 +153,30 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
+    paddingHorizontal: 4,
   },
   tabsListDark: {
     borderBottomColor: '#374151',
   },
   tab: {
     flex: 1,
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+    minWidth: 70,
   },
   tabActive: {
     borderBottomWidth: 2,
     borderBottomColor: '#2563EB',
   },
   tabText: {
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: '500',
     color: '#6B7280',
-    marginLeft: 6,
+    marginTop: 4,
+    textAlign: 'center',
   },
   tabTextDark: {
     color: '#9CA3AF',
@@ -184,10 +187,12 @@ export const styles = StyleSheet.create({
   },
   tabBadge: {
     backgroundColor: '#E5E7EB',
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    marginLeft: 6,
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    marginTop: 2,
+    minWidth: 20,
+    alignItems: 'center',
   },
   tabBadgeDark: {
     backgroundColor: '#374151',
@@ -199,7 +204,7 @@ export const styles = StyleSheet.create({
     backgroundColor: '#1E3A8A',
   },
   tabBadgeText: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: 'bold',
     color: '#4B5563',
   },
@@ -465,48 +470,26 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  // Forfait badges (booster badges)
-  forfaitBadgesContainer: {
+  forfaitBadge: {
     position: 'absolute',
     top: 8,
     left: 8,
-    gap: 6,
-    maxWidth: '80%',
-  },
-  forfaitBadge: {
     paddingVertical: 4,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     borderRadius: 6,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
   },
-  forfaitBadgePremium: {
-    backgroundColor: 'rgba(147, 51, 234, 0.95)', // Purple
-  },
-  forfaitBadgeTopAnnonce: {
-    backgroundColor: 'rgba(59, 130, 246, 0.95)', // Blue
-  },
-  forfaitBadgeUrgent: {
-    backgroundColor: 'rgba(239, 68, 68, 0.95)', // Red
-  },
   forfaitBadgeText: {
     color: '#FFFFFF',
     fontSize: 11,
     fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  forfaitDaysText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: '600',
-    opacity: 0.9,
   },
   productInfo: {
     padding: 12,
