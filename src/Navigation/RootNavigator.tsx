@@ -474,6 +474,10 @@ const MainStackNavigator = () => (
       name="MainTab"
       component={MainTabNavigator}
     />
+    <MainStack.Screen
+      name="Settings"
+      component={SettingsWithNav}
+    />
     <MainStack.Group
       screenOptions={{
         presentation: 'modal',
@@ -485,10 +489,6 @@ const MainStackNavigator = () => (
       <MainStack.Screen
         name="Notifications"
         component={NotificationsWithNav}
-      />
-      <MainStack.Screen
-        name="Settings"
-        component={SettingsWithNav}
       />
       <MainStack.Screen
         name="About"
