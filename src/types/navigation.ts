@@ -9,7 +9,9 @@ export type AuthStackParamList = {
   ResetPassword: undefined;
   VerifyOTP: { userId?: string };
   AccountSuspended: undefined;
-  SocialCallback: { token?: string }
+  SocialCallback: { token?: string };
+  UseCondition: undefined;
+  Confidentiality: undefined;
 };
 
 // Home Stack (contient les écrans de contenu)

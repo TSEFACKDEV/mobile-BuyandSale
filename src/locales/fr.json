@@ -117,5 +117,270 @@
       "title": "Vendez en toute sécurité",
       "description": "Profitez de nos outils de protection et de notre support"
     }
+  },
+  "about": {
+    "hero": {
+      "title": "À propos de nous",
+      "subtitle": "La plateforme de petites annonces qui connecte les Camerounais pour acheter, vendre et échanger en toute confiance."
+    },
+    "mission": {
+      "title": "Notre Mission",
+      "description1": "Nous croyons que chaque Camerounais devrait avoir accès à une plateforme simple, sécurisée et efficace pour vendre ses biens ou trouver ce qu'il cherche.",
+      "description2": "Notre objectif est de démocratiser le commerce en ligne au Cameroun en proposant une solution adaptée aux besoins locaux, avec un service client en français et des fonctionnalités pensées pour notre marché.",
+      "whyChooseUs": "Pourquoi nous choisir ?",
+      "reasons": {
+        "secure": "Plateforme 100% sécurisée",
+        "community": "Communauté active et engagée",
+        "support": "Service client réactif",
+        "coverage": "Couverture nationale"
+      }
+    },
+    "stats": {
+      "title": "Nos chiffres parlent d'eux-mêmes",
+      "subtitle": "Une croissance constante grâce à la confiance de nos utilisateurs",
+      "activeUsers": "Utilisateurs actifs",
+      "publishedAds": "Annonces publiées",
+      "secureTransactions": "Transactions sécurisées",
+      "coveredCities": "Villes couvertes"
+    },
+    "features": {
+      "title": "Ce qui nous distingue",
+      "subtitle": "Des fonctionnalités pensées pour l'expérience utilisateur camerounaise",
+      "list": {
+        "easeOfUse": {
+          "title": "Simplicité d'utilisation",
+          "description": "Interface intuitive pour publier et rechercher des annonces en quelques clics."
+        },
+        "security": {
+          "title": "Sécurité garantie",
+          "description": "Vérification des utilisateurs et système de signalement pour votre sécurité."
+        },
+        "localSupport": {
+          "title": "Support local",
+          "description": "Conçu spécialement pour le marché camerounais avec support en français."
+        },
+        "freeAccess": {
+          "title": "Gratuit et accessible",
+          "description": "Publication gratuite d'annonces et accès libre pour tous les utilisateurs."
+        }
+      }
+    },
+    "cta": {
+      "title": "Prêt à nous rejoindre ?",
+      "subtitle": "Rejoignez des milliers de Camerounais qui font confiance à notre plateforme pour leurs achats et ventes en ligne.",
+      "startNow": "Commencer maintenant",
+      "contactUs": "Nous contacter"
+    }
+  },
+  "terms": {
+    "title": "Conditions d'utilisation",
+    "subtitle": "Règles et conditions d'utilisation de la plateforme BuyAndSale. Veuillez lire attentivement ces conditions avant d'utiliser nos services.",
+    "lastUpdated": "Dernière mise à jour",
+    "lastUpdatedDate": "2 septembre 2025",
+    "important": {
+      "title": "Important à retenir",
+      "description": "En utilisant BuyAndSale, vous acceptez ces conditions dans leur intégralité. Ces règles sont essentielles pour maintenir un environnement sûr et équitable pour tous nos utilisateurs."
+    },
+    "acceptance": {
+      "title": "Acceptation des conditions",
+      "content": {
+        "usage": "En utilisant BuyAndSale, vous acceptez ces conditions d'utilisation dans leur intégralité. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser notre plateforme.",
+        "application": "Ces conditions s'appliquent à tous les utilisateurs de la plateforme, qu'ils soient acheteurs ou vendeurs."
+      }
+    },
+    "services": {
+      "title": "Description des services",
+      "description": "BuyAndSale est une plateforme de petites annonces en ligne destinée aux utilisateurs camerounais. Nous mettons en relation acheteurs et vendeurs mais ne sommes pas partie aux transactions.",
+      "offeredTitle": "✓ Ce que nous offrons",
+      "notGuaranteedTitle": "⚠️ Ce que nous ne garantissons pas",
+      "offered": {
+        "freeAds": "• Publication d'annonces gratuites",
+        "searchFilters": "• Système de recherche et filtres",
+        "directContact": "• Contact direct avec les vendeurs",
+        "favorites": "• Système de favoris"
+      },
+      "notGuaranteed": {
+        "productQuality": "• La qualité des produits vendus",
+        "descriptionAccuracy": "• L'exactitude des descriptions",
+        "delivery": "• La livraison des commandes",
+        "payment": "• Le paiement des transactions"
+      }
+    },
+    "obligations": {
+      "title": "Obligations des utilisateurs",
+      "userCommitments": "✅ Vous vous engagez à :",
+      "prohibitions": "❌ Il est interdit de :",
+      "user": {
+        "accurateInfo": "• Fournir des informations exactes",
+        "respectLaws": "• Respecter les lois camerounaises",
+        "legalContent": "• Publier du contenu légal et approprié",
+        "respectUsers": "• Respecter les autres utilisateurs",
+        "secureAccount": "• Sécuriser votre compte"
+      },
+      "prohibited": {
+        "illegalProducts": "• Vendre des produits illégaux",
+        "fakeIdentity": "• Utiliser de fausses identités",
+        "spam": "• Faire du spam",
+        "hacking": "• Pirater ou attaquer le site",
+        "multipleFraudAccounts": "• Créer plusieurs comptes frauduleux"
+      }
+    },
+    "liability": {
+      "title": "Responsabilités et limitations",
+      "yourResponsibility": "Votre responsabilité",
+      "ourResponsibility": "Notre responsabilité",
+      "limitationTitle": "⚠️ Limitation de responsabilité",
+      "limitationContent": "BuyAndSale ne peut être tenu responsable des transactions entre utilisateurs, de la qualité des produits, des retards de livraison ou des litiges commerciaux. Nous agissons uniquement comme intermédiaire technique.",
+      "user": {
+        "legalityVerification": "• Vérification de la légalité de vos annonces",
+        "descriptionAccuracy": "• Exactitude des descriptions de produits",
+        "buyerAgreements": "• Respect des accords avec les acheteurs",
+        "dataProtection": "• Protection de vos données personnelles"
+      },
+      "our": {
+        "platformProvision": "• Fourniture de la plateforme technique",
+        "dataProtection": "• Protection des données selon notre politique",
+        "contentModeration": "• Modération des contenus signalés",
+        "basicSupport": "• Support technique de base"
+      }
+    },
+    "sanctions": {
+      "title": "Sanctions et mesures disciplinaires",
+      "introduction": "En cas de non-respect de ces conditions :",
+      "progression": "📢 Avertissement → ⏸️ Suspension → 🚫 Bannissement",
+      "description": "Sanctions progressives selon la gravité de l'infraction"
+    },
+    "modifications": {
+      "title": "Modifications des conditions",
+      "description": "Nous nous réservons le droit de modifier ces conditions à tout moment. Les utilisateurs seront informés des changements importants via email ou notification sur la plateforme.",
+      "continuityTitle": "Continuité d'utilisation = Acceptation",
+      "continuityContent": "En continuant à utiliser BuyAndSale après modification des conditions, vous acceptez automatiquement les nouvelles conditions."
+    }
+  },
+  "privacy": {
+    "title": "Politique de confidentialité",
+    "subtitle": "Votre confidentialité est notre priorité. Découvrez comment nous collectons, utilisons et protégeons vos données personnelles sur BuyAndSale.",
+    "lastUpdated": "Dernière mise à jour",
+    "lastUpdatedDate": "2 septembre 2025",
+    "summary": {
+      "title": "Résumé en bref",
+      "description": "BuyAndSale collecte uniquement les données nécessaires au fonctionnement de notre marketplace camerounaise. Vos informations personnelles ne sont jamais vendues à des tiers et restent sécurisées par des technologies de pointe."
+    },
+    "collection": {
+      "title": "Collecte d'informations",
+      "personal": {
+        "title": "Informations personnelles"
+      },
+      "products": {
+        "title": "Informations sur vos produits"
+      },
+      "technical": {
+        "title": "Informations techniques"
+      }
+    },
+    "usage": {
+      "title": "Utilisation de vos données",
+      "platform": {
+        "title": "Fonctionnement de la plateforme"
+      },
+      "communication": {
+        "title": "Communication et support"
+      }
+    },
+    "sharing": {
+      "title": "Partage des données",
+      "public": {
+        "title": "Informations publiques"
+      },
+      "notShared": {
+        "title": "Informations privées"
+      }
+    },
+    "protection": {
+      "title": "Protection des données",
+      "technical": {
+        "title": "Sécurité technique"
+      },
+      "access": {
+        "title": "Contrôle d'accès"
+      }
+    },
+    "rights": {
+      "title": "Vos droits",
+      "access": {
+        "title": "Droit d'accès"
+      },
+      "modification": {
+        "title": "Droit de rectification"
+      },
+      "deletion": {
+        "title": "Droit à l'effacement"
+      }
+    },
+    "contact": {
+      "title": "Nous contacter",
+      "description": "Des questions sur notre politique de confidentialité ? Notre équipe est là pour vous aider."
+    },
+    "content": {
+      "personal": {
+        "identity": "Identité : Nom, prénom lors de l'inscription",
+        "contact": "Contact : Adresse email et numéro de téléphone camerounais (+237)",
+        "avatar": "Photo de profil : Avatar optionnel que vous uploadez"
+      },
+      "products": {
+        "images": "Images de vos produits (maximum 5 par annonce)",
+        "descriptions": "Descriptions, prix, quantités et état des produits",
+        "location": "Localisation (ville et quartier au Cameroun)",
+        "phone": "Numéro de téléphone pour contact direct"
+      },
+      "technical": {
+        "connection": "Informations de connexion et de navigation",
+        "session": "Données de session pour la sécurité",
+        "preferences": "Préférences d'utilisation (langue, thème, favoris)"
+      },
+      "sharing": {
+        "public": {
+          "description": "Seuls votre nom, prénom et numéro de téléphone sont visibles publiquement sur vos annonces pour permettre aux acheteurs de vous contacter."
+        }
+      },
+      "protection": {
+        "technical": {
+          "encryption": "• Chiffrement avancé des mots de passe",
+          "connections": "• Connexions sécurisées",
+          "auth": "• Système d'authentification robuste",
+          "infrastructure": "• Infrastructure sécurisée",
+          "validation": "• Validation par code de vérification"
+        },
+        "access": {
+          "control": "• Contrôle d'accès strict aux données",
+          "admin": "• Administration sécurisée",
+          "monitoring": "• Surveillance des activités",
+          "reporting": "• Système de signalement intégré",
+          "moderation": "• Modération active des contenus"
+        }
+      }
+    }
+  },
+  "contact": {
+    "title": "Contactez-nous",
+    "subtitle": "Nous sommes là pour vous aider. Envoyez-nous un message et nous vous répondrons rapidement.",
+    "form": {
+      "name": "Nom complet",
+      "email": "Email",
+      "subject": "Sujet",
+      "message": "Message",
+      "send": "Envoyer le message",
+      "sending": "Envoi en cours...",
+      "success": "Message envoyé avec succès !",
+      "error": "Erreur lors de l'envoi"
+    },
+    "info": {
+      "email": "Email",
+      "phone": "Téléphone",
+      "address": "Adresse",
+      "responseTime": "Réponse sous 24-48h",
+      "availability": "Lun-Ven, 8h-18h",
+      "location": "Douala, Cameroun"
+    }
   }
 }

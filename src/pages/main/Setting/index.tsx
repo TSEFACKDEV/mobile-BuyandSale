@@ -1,11 +1,15 @@
-import { View, Text, StyleSheet, ScrollView, Switch } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/Ionicons';
+import Constants from 'expo-constants';
 import { useTheme, useThemeMode } from '../../../contexts/ThemeContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import pushNotificationService from '../../../services/pushNotificationService';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 const Settings = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const { theme } = useTheme();
   const { mode, setMode } = useThemeMode();
   const { language, setLanguage } = useLanguage();
@@ -44,7 +48,7 @@ const Settings = () => {
     },
     content: {
       padding: 16,
-      gap: 24,
+      gap: 32,
     },
     sectionTitle: {
       fontSize: 14,
@@ -55,7 +59,7 @@ const Settings = () => {
       letterSpacing: 0.5,
     },
     section: {
-      gap: 8,
+      gap: 12,
     },
     settingItem: {
       flexDirection: 'row',
@@ -95,6 +99,35 @@ const Settings = () => {
       fontSize: 13,
       color: colors.textSecondary,
     },
+    navigationItem: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 12,
+      paddingHorizontal: 12,
+      backgroundColor: colors.backgroundSecondary,
+      borderRadius: 8,
+      borderColor: colors.border,
+      borderWidth: 1,
+    },
+    chevron: {
+      marginLeft: 'auto',
+    },
+    versionContainer: {
+      marginTop: 24,
+      paddingVertical: 20,
+      alignItems: 'center',
+      gap: 4,
+    },
+    versionText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    versionSubtext: {
+      fontSize: 12,
+      color: colors.textTertiary,
+    },
   });
 
   return (
@@ -102,7 +135,7 @@ const Settings = () => {
       <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 24 }}
+        contentContainerStyle={{ paddingBottom: 40 }}
       >
         {/* THEME SWITCH */}
         <View style={styles.section}>
@@ -189,6 +222,133 @@ const Settings = () => {
               thumbColor="#FFFFFF"
             />
           </View>
+        </View>
+
+        {/* INFORMATION & LEGAL SECTION */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Informations & Légal</Text>
+          
+          <TouchableOpacity
+            style={styles.navigationItem}
+            onPress={() => navigation.navigate('About')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingLeft}>
+              <View style={styles.settingIcon}>
+                <Icon
+                  name="information-circle"
+                  size={20}
+                  color={colors.primary}
+                />
+              </View>
+              <View style={styles.settingTextContainer}>
+                <Text style={styles.settingLabel}>À propos</Text>
+                <Text style={styles.settingDescription}>
+                  Découvrez notre mission et nos valeurs
+                </Text>
+              </View>
+            </View>
+            <Icon
+              name="chevron-forward"
+              size={20}
+              color={colors.textSecondary}
+              style={styles.chevron}
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.navigationItem}
+            onPress={() => navigation.navigate('Contact')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingLeft}>
+              <View style={styles.settingIcon}>
+                <Icon
+                  name="mail"
+                  size={20}
+                  color={colors.primary}
+                />
+              </View>
+              <View style={styles.settingTextContainer}>
+                <Text style={styles.settingLabel}>Contact</Text>
+                <Text style={styles.settingDescription}>
+                  Envoyez-nous un message
+                </Text>
+              </View>
+            </View>
+            <Icon
+              name="chevron-forward"
+              size={20}
+              color={colors.textSecondary}
+              style={styles.chevron}
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.navigationItem}
+            onPress={() => navigation.navigate('UseCondition')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingLeft}>
+              <View style={styles.settingIcon}>
+                <Icon
+                  name="document-text"
+                  size={20}
+                  color={colors.primary}
+                />
+              </View>
+              <View style={styles.settingTextContainer}>
+                <Text style={styles.settingLabel}>Conditions d'utilisation</Text>
+                <Text style={styles.settingDescription}>
+                  Règles et conditions de la plateforme
+                </Text>
+              </View>
+            </View>
+            <Icon
+              name="chevron-forward"
+              size={20}
+              color={colors.textSecondary}
+              style={styles.chevron}
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.navigationItem}
+            onPress={() => navigation.navigate('Confidentiality')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingLeft}>
+              <View style={styles.settingIcon}>
+                <Icon
+                  name="shield-checkmark"
+                  size={20}
+                  color={colors.primary}
+                />
+              </View>
+              <View style={styles.settingTextContainer}>
+                <Text style={styles.settingLabel}>Politique de confidentialité</Text>
+                <Text style={styles.settingDescription}>
+                  Protection de vos données personnelles
+                </Text>
+              </View>
+            </View>
+            <Icon
+              name="chevron-forward"
+              size={20}
+              color={colors.textSecondary}
+              style={styles.chevron}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* VERSION INFO */}
+        <View style={styles.versionContainer}>
+          <Text style={styles.versionText}>
+            Version {Constants.expoConfig?.version || '1.0.0'}
+          </Text>
+          <Text style={styles.versionSubtext}>
+            BuyAndSale © {new Date().getFullYear()}
+          </Text>
         </View>
       </ScrollView>
     </View>

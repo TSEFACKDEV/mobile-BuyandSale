@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Alert, ActivityIndicator } from 'react-native'
+import { View, Text, Pressable, ScrollView, Alert, ActivityIndicator, TouchableOpacity } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -218,7 +218,7 @@ const Register = () => {
 
     // Validation Conditions
     if (!agreedToTerms) {
-      setTermsError('Veuillez accepter les conditions')
+      setTermsError('Vous devez lire et accepter les conditions d\'utilisation et la politique de confidentialité pour continuer')
       isValid = false
     }
 
@@ -399,7 +399,21 @@ const Register = () => {
             required
           />
 
-          {/* Terms & Conditions */}
+          {/* Info importante - Conditions d'utilisation */}
+          {!agreedToTerms && (
+            <View style={styles.infoBox}>
+              <MaterialCommunityIcons
+                name="information"
+                size={20}
+                color={COLORS.primary}
+              />
+              <Text style={styles.infoBoxText}>
+                Veuillez lire et accepter nos conditions avant de continuer
+              </Text>
+            </View>
+          )}
+
+          {/* Terms & Conditions - Version améliorée */}
           <View style={styles.termsContainer}>
             <Pressable
               style={[styles.checkbox, agreedToTerms && styles.checkboxChecked]}
@@ -407,6 +421,8 @@ const Register = () => {
                 setAgreedToTerms(!agreedToTerms)
                 setTermsError('')
               }}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: agreedToTerms }}
             >
               {agreedToTerms && (
                 <MaterialCommunityIcons
@@ -416,20 +432,47 @@ const Register = () => {
                 />
               )}
             </Pressable>
-            <Text style={styles.termsText}>
-              J'accepte les{' '}
-              <Text style={styles.termsLink}>conditions d'utilisation</Text> et
-              la{' '}
-              <Text style={styles.termsLink}>politique de confidentialité</Text>
-            </Text>
+            <View style={styles.termsTextContainer}>
+              <Text style={styles.termsText}>
+                J'ai lu et j'accepte les{' '}
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('UseCondition')}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.termsLink}>conditions d'utilisation</Text>
+                </TouchableOpacity>
+                {' '}et la{' '}
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Confidentiality')}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.termsLink}>politique de confidentialité</Text>
+                </TouchableOpacity>
+              </Text>
+            </View>
           </View>
-          {termsError && <Text style={styles.errorText}>{termsError}</Text>}
+          {termsError && (
+            <View style={styles.errorContainer}>
+              <MaterialCommunityIcons
+                name="alert-circle"
+                size={16}
+                color={COLORS.error}
+              />
+              <Text style={styles.errorText}>{termsError}</Text>
+            </View>
+          )}
 
           {/* Register Button */}
           <Button
-            title={isLoading ? 'Création en cours...' : 'S\'inscrire'}
+            title={
+              !agreedToTerms 
+                ? 'Acceptez les conditions pour continuer'
+                : isLoading 
+                ? 'Création en cours...' 
+                : 'S\'inscrire'
+            }
             onPress={handleRegister}
-            disabled={isLoading || isGoogleLoading}
+            disabled={!agreedToTerms || isLoading || isGoogleLoading}
             containerStyle={styles.registerButton}
           />
 

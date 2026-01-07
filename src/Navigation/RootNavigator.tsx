@@ -23,6 +23,10 @@ import UserProfile from '../pages/main/UserProfile';
 import Favorites from '../pages/main/Favorites/index';
 import Notifications from '../pages/main/Notifications';
 import Settings from '../pages/main/Setting/index';
+import About from '../pages/main/About/index';
+import UseCondition from '../pages/main/UseCondition/index';
+import Confidentiality from '../pages/main/Confidentiality/index';
+import Contact from '../pages/main/Contact/index';
 import PostAds from '../pages/main/PostAds/index';
 
 // Guards
@@ -90,6 +94,22 @@ const AuthNavigator = () => {
         name="SocialCallback" 
         component={SocialCallback}
       />
+      {/* Pages légales accessibles depuis l'inscription */}
+      <AuthStack.Group
+        screenOptions={{
+          presentation: 'modal',
+          headerShown: false,
+        }}
+      >
+        <AuthStack.Screen
+          name="UseCondition"
+          component={UseConditionWithNav}
+        />
+        <AuthStack.Screen
+          name="Confidentiality"
+          component={ConfidentialityWithNav}
+        />
+      </AuthStack.Group>
     </AuthStack.Navigator>
   );
 };
@@ -224,6 +244,34 @@ const SettingsWithNav = () => (
       <TopNavigation showBackButton title="Paramètres" />
       <Settings />
     </Authenticated>
+  </View>
+);
+
+const AboutWithNav = () => (
+  <View style={{ flex: 1 }}>
+    <TopNavigation showBackButton title="À propos" />
+    <About />
+  </View>
+);
+
+const UseConditionWithNav = () => (
+  <View style={{ flex: 1 }}>
+    <TopNavigation showBackButton title="Conditions d'utilisation" />
+    <UseCondition />
+  </View>
+);
+
+const ConfidentialityWithNav = () => (
+  <View style={{ flex: 1 }}>
+    <TopNavigation showBackButton title="Politique de confidentialité" />
+    <Confidentiality />
+  </View>
+);
+
+const ContactWithNav = () => (
+  <View style={{ flex: 1 }}>
+    <TopNavigation showBackButton title="Contact" />
+    <Contact />
   </View>
 );
 
@@ -429,6 +477,22 @@ const MainStackNavigator = () => (
       <MainStack.Screen
         name="Settings"
         component={SettingsWithNav}
+      />
+      <MainStack.Screen
+        name="About"
+        component={AboutWithNav}
+      />
+      <MainStack.Screen
+        name="UseCondition"
+        component={UseConditionWithNav}
+      />
+      <MainStack.Screen
+        name="Confidentiality"
+        component={ConfidentialityWithNav}
+      />
+      <MainStack.Screen
+        name="Contact"
+        component={ContactWithNav}
       />
     </MainStack.Group>
   </MainStack.Navigator>
