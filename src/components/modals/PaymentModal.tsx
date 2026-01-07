@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   View,
@@ -8,15 +8,16 @@ import {
   TextInput,
   ActivityIndicator,
   Alert,
-  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import { useThemeColors } from '../../contexts/ThemeContext';
 import { useAppDispatch } from '../../hooks/store';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { normalizePhoneNumber, validateCameroonPhone } from '../../utils/phoneUtils';
 import { assignForfaitWithPaymentAction } from '../../store/forfait/actions';
-
-const { width } = Dimensions.get('window');
 
 interface PaymentModalProps {
   visible: boolean;
@@ -43,9 +44,48 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Réinitialiser le numéro quand la modal s'ouvre
+  useEffect(() => {
+    if (visible) {
+      setPhoneNumber('');
+      setIsProcessing(false);
+    }
+  }, [visible]);
+
+  // Gérer les changements d'input sans formatage
+  const handlePhoneChange = (text: string) => {
+    const cleaned = text.replace(/\D/g, '');
+    
+    if (cleaned.length === 0) {
+      setPhoneNumber('');
+    } else if ((cleaned[0] === '6' || cleaned[0] === '7') && cleaned.length <= 9) {
+      setPhoneNumber(cleaned);
+    }
+  };
+
+  // Valider et normaliser le numéro pour le backend
+  const normalizeAndValidate = (phone: string): { valid: boolean; normalized: string } => {
+    const cleaned = phone.replace(/\D/g, '');
+    
+    // Retirer préfixes si présents
+    let normalized = cleaned;
+    if (normalized.startsWith('237')) normalized = normalized.substring(3);
+    if (normalized.startsWith('0')) normalized = normalized.substring(1);
+    
+    // Valider format [67]XXXXXXXX
+    const valid = /^[67]\d{8}$/.test(normalized);
+    return { valid, normalized };
+  };
+
   const handlePayment = async () => {
-    if (!validateCameroonPhone(phoneNumber)) {
-      Alert.alert('Erreur', 'Numéro de téléphone camerounais invalide (format: 6XX XX XX XX)');
+    if (!phoneNumber.trim()) {
+      Alert.alert('Erreur', 'Veuillez saisir votre numéro de téléphone');
+      return;
+    }
+
+    const { valid, normalized } = normalizeAndValidate(phoneNumber);
+    if (!valid) {
+      Alert.alert('Erreur', 'Numéro invalide (ex: 6xxxxxxxx )');
       return;
     }
 
@@ -61,7 +101,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         assignForfaitWithPaymentAction({
           productId,
           forfaitType: forfaitType as any,
-          phoneNumber: phoneNumber,
+          phoneNumber: normalized,
         })
       );
 
@@ -95,20 +135,31 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View style={styles.overlay}>
-        <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={[styles.title, { color: colors.text }]}>
-              Paiement du forfait
-            </Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Icon name="close" size={24} color={colors.text} />
-            </TouchableOpacity>
-          </View>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.overlay}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.keyboardView}
+          >
+            <TouchableWithoutFeedback>
+              <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
+                {/* Header */}
+                <View style={styles.header}>
+                  <Text style={[styles.title, { color: colors.text }]}>
+                    Paiement du forfait
+                  </Text>
+                  <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                    <Icon name="close" size={24} color={colors.text} />
+                  </TouchableOpacity>
+                </View>
 
-          {/* Content */}
-          <View style={styles.content}>
+                {/* Content with ScrollView */}
+                <ScrollView 
+                  style={styles.scrollView}
+                  contentContainerStyle={styles.content}
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}
+                >
             {/* Forfait Info */}
             <View style={[styles.infoCard, { backgroundColor: colors.background }]}>
               <View style={styles.infoRow}>
@@ -153,11 +204,15 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 </View>
                 <TextInput
                   style={[styles.phoneInput, { color: colors.text }]}
-                  placeholder="6 XX XX XX XX"
+                  placeholder="6xxxxxxxx"
                   placeholderTextColor={colors.textSecondary}
                   value={phoneNumber}
-                  onChangeText={(text) => setPhoneNumber(normalizePhoneNumber(text))}
+                  onChangeText={handlePhoneChange}
                   keyboardType="phone-pad"
+                  returnKeyType="done"
+                  onSubmitEditing={Keyboard.dismiss}
+                  blurOnSubmit={true}
+                  maxLength={9}
                 />
               </View>
             </View>
@@ -169,43 +224,46 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 Vous recevrez une notification sur votre téléphone. Validez le paiement pour activer le forfait.
               </Text>
             </View>
-          </View>
+                </ScrollView>
 
-          {/* Footer */}
-          <View style={styles.footer}>
-            <TouchableOpacity
-              style={[styles.button, styles.cancelButton, { borderColor: colors.border }]}
-              onPress={onClose}
-              disabled={isProcessing}
-            >
-              <Text style={[styles.cancelButtonText, { color: colors.text }]}>
-                Annuler
-              </Text>
-            </TouchableOpacity>
+                {/* Footer */}
+                <View style={styles.footer}>
+                  <TouchableOpacity
+                    style={[styles.button, styles.cancelButton, { borderColor: colors.border }]}
+                    onPress={onClose}
+                    disabled={isProcessing}
+                  >
+                    <Text style={[styles.cancelButtonText, { color: colors.text }]}>
+                      Annuler
+                    </Text>
+                  </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[
-                styles.button,
-                styles.payButton,
-                isProcessing && styles.buttonDisabled,
-              ]}
-              onPress={handlePayment}
-              disabled={isProcessing}
-            >
-              {isProcessing ? (
-                <ActivityIndicator color="#FFF" />
-              ) : (
-                <>
-                  <Icon name="card" size={20} color="#FFF" />
-                  <Text style={styles.payButtonText}>
-                    Payer {formatPrice(forfaitPrice)} FCFA
-                  </Text>
-                </>
-              )}
-            </TouchableOpacity>
-          </View>
+                  <TouchableOpacity
+                    style={[
+                      styles.button,
+                      styles.payButton,
+                      isProcessing && styles.buttonDisabled,
+                    ]}
+                    onPress={handlePayment}
+                    disabled={isProcessing}
+                  >
+                    {isProcessing ? (
+                      <ActivityIndicator color="#FFF" />
+                    ) : (
+                      <>
+                        <Icon name="card" size={20} color="#FFF" />
+                        <Text style={styles.payButtonText}>
+                          Payer {formatPrice(forfaitPrice)} FCFA
+                        </Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </KeyboardAvoidingView>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };
@@ -216,9 +274,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
+  keyboardView: {
+    width: '100%',
+  },
   modalContainer: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    maxHeight: '90%',
   },
   header: {
     flexDirection: 'row',
@@ -235,6 +297,10 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     padding: 4,
+  },
+  scrollView: {
+    flexGrow: 0,
+    flexShrink: 1,
   },
   content: {
     padding: 20,

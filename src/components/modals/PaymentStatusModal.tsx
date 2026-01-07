@@ -37,18 +37,25 @@ const PaymentStatusModal: React.FC<PaymentStatusModalProps> = ({
 
   const [status, setStatus] = useState<PaymentStatus>('PENDING');
   const [attempts, setAttempts] = useState(0);
+  const [countdownDisplay, setCountdownDisplay] = useState(10);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const maxAttempts = 40; // 40 tentatives * 3 secondes = 2 minutes
+  const countdownRef = useRef<NodeJS.Timeout | null>(null);
+  const maxAttempts = 4; // Seulement 4 vérifications (le webhook backend active automatiquement)
 
   useEffect(() => {
     if (visible && paymentId) {
       setStatus('PENDING');
       setAttempts(0);
+      setCountdownDisplay(10);
       startPolling();
     }
 
     return () => {
       stopPolling();
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
+      }
     };
   }, [visible, paymentId]);
 
@@ -60,10 +67,10 @@ const PaymentStatusModal: React.FC<PaymentStatusModalProps> = ({
     // Première vérification immédiate
     checkPaymentStatus();
 
-    // Ensuite toutes les 3 secondes
+    // Ensuite toutes les 15 secondes
     intervalRef.current = setInterval(() => {
       checkPaymentStatus();
-    }, 3000);
+    }, 15000);
   };
 
   const stopPolling = () => {
@@ -76,9 +83,15 @@ const PaymentStatusModal: React.FC<PaymentStatusModalProps> = ({
   const checkPaymentStatus = async () => {
     if (!paymentId) return;
 
-    try {
-      setAttempts((prev) => prev + 1);
+    // Si max tentatives atteint, arrêter le polling seulement
+    if (attempts >= maxAttempts) {
+      stopPolling();
+      return;
+    }
 
+    setAttempts((prev) => prev + 1);
+
+    try {
       const result = await dispatch(checkPaymentStatusAction(paymentId));
 
       if (result.meta.requestStatus === 'fulfilled') {
@@ -89,27 +102,34 @@ const PaymentStatusModal: React.FC<PaymentStatusModalProps> = ({
 
         if (currentStatus === 'SUCCESS') {
           stopPolling();
-          setTimeout(() => {
-            onSuccess();
-          }, 2000);
+          setCountdownDisplay(10);
+          
+          // Démarrer le compte à rebours
+          countdownRef.current = setInterval(() => {
+            setCountdownDisplay((prev) => {
+              if (prev <= 1) {
+                if (countdownRef.current) {
+                  clearInterval(countdownRef.current);
+                  countdownRef.current = null;
+                }
+                // Utiliser setTimeout pour éviter setState pendant le rendu
+                setTimeout(() => {
+                  onSuccess();
+                }, 0);
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
         } else if (currentStatus === 'FAILED' || currentStatus === 'CANCELLED') {
           stopPolling();
           setTimeout(() => {
             onError();
-          }, 2000);
+          }, 10000);
         }
       }
     } catch (error) {
       console.error('Erreur lors de la vérification du paiement:', error);
-    }
-
-    // Arrêter après max tentatives
-    if (attempts >= maxAttempts) {
-      stopPolling();
-      setStatus('FAILED');
-      setTimeout(() => {
-        onError();
-      }, 2000);
     }
   };
 
@@ -145,13 +165,13 @@ const PaymentStatusModal: React.FC<PaymentStatusModalProps> = ({
   const getStatusMessage = () => {
     switch (status) {
       case 'PENDING':
-        return 'Veuillez valider le paiement sur votre téléphone mobile.\nCela peut prendre quelques instants.';
+        return 'Veuillez valider le paiement sur votre téléphone.\nLe forfait sera activé automatiquement.';
       case 'SUCCESS':
-        return 'Votre forfait a été activé avec succès !\nVotre annonce est maintenant boostée.';
+        return `Merci pour votre paiement !\nVotre forfait a été activé avec succès.\n\nRedirection dans ${countdownDisplay} seconde${countdownDisplay > 1 ? 's' : ''}...`;
       case 'FAILED':
-        return 'Le paiement n\'a pas pu être effectué.\nVeuillez réessayer plus tard.';
+        return 'Le paiement n\'a pas pu être effectué.\nVeuillez réessayer.';
       case 'CANCELLED':
-        return 'Le paiement a été annulé.\nVous pouvez réessayer plus tard.';
+        return 'Le paiement a été annulé.\nVous pouvez réessayer.';
       default:
         return '';
     }
@@ -193,23 +213,21 @@ const PaymentStatusModal: React.FC<PaymentStatusModalProps> = ({
             {getStatusMessage()}
           </Text>
 
-          {/* Progress Indicator for Pending */}
-          {status === 'PENDING' && (
-            <View style={styles.progressContainer}>
-              <Text style={[styles.progressText, { color: colors.textSecondary }]}>
-                Tentative {attempts}/{maxAttempts}
-              </Text>
-            </View>
-          )}
-
           {/* Actions */}
           {status !== 'PENDING' && (
             <TouchableOpacity
               style={[styles.button, { backgroundColor: getStatusColor() }]}
-              onPress={status === 'SUCCESS' ? onSuccess : onError}
+              onPress={status === 'SUCCESS' ? () => {
+                // Arrêter le countdown si l'utilisateur clique manuellement
+                if (countdownRef.current) {
+                  clearInterval(countdownRef.current);
+                  countdownRef.current = null;
+                }
+                onSuccess();
+              } : onError}
             >
               <Text style={styles.buttonText}>
-                {status === 'SUCCESS' ? 'Voir mon annonce' : 'Fermer'}
+                {status === 'SUCCESS' ? 'Retour à l\'accueil' : 'Fermer'}
               </Text>
             </TouchableOpacity>
           )}

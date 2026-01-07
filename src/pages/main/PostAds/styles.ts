@@ -417,6 +417,7 @@ export const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     padding: 24,
+    paddingBottom: 80, // Espace pour la bottom navigation
     borderTopWidth: 0,
     gap: 14,
     elevation: 4,

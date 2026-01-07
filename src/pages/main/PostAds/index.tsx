@@ -480,12 +480,8 @@ if (!validateCameroonPhone(formData.telephone)) {
     setShowForfaitSelector(false);
     setShowBoostOffer(false);
 
-    Alert.alert('Parfait !', 'Votre annonce est maintenant boostée !', [
-      {
-        text: 'OK',
-        onPress: () => navigation.navigate('HomeTab'),
-      },
-    ]);
+    // Rediriger vers HomeTab où l'annonce boostée apparaîtra en haut
+    navigation.navigate('HomeTab');
   };
 
   const handlePaymentError = () => {
@@ -496,12 +492,20 @@ if (!validateCameroonPhone(formData.telephone)) {
     setShowForfaitSelector(false);
     setShowBoostOffer(false);
 
-    Alert.alert('Erreur', 'Le paiement a échoué. Vous pourrez booster votre annonce plus tard.', [
-      {
-        text: 'OK',
-        onPress: () => navigation.navigate('HomeTab'),
-      },
-    ]);
+    // Rediriger directement sans Alert redondant
+    navigation.navigate('HomeTab');
+  };
+
+  const handlePaymentCancel = () => {
+    if (!isMountedRef.current) return;
+
+    setShowPaymentModal(false);
+    setShowPaymentStatusModal(false);
+    setShowForfaitSelector(false);
+    setShowBoostOffer(false);
+
+    // Rediriger vers Home pour éviter les duplications
+    navigation.navigate('HomeTab');
   };
 
   // Render des étapes
@@ -1051,6 +1055,8 @@ if (!validateCameroonPhone(formData.telephone)) {
         onSelect={handleForfaitSelected}
         onSkip={handleSkipForfait}
         onClose={() => setShowForfaitSelector(false)}
+        productName={formData.name || 'votre annonce'}
+        isLoading={forfaitStatus === 'loading'}
       />
 
       <PaymentModal
@@ -1060,7 +1066,7 @@ if (!validateCameroonPhone(formData.telephone)) {
         forfaitType={selectedForfaitType}
         forfaitPrice={selectedForfaitPrice}
         onPaymentInitiated={handlePaymentInitiated}
-        onClose={() => setShowPaymentModal(false)}
+        onClose={handlePaymentCancel}
       />
 
       <PaymentStatusModal
@@ -1068,7 +1074,7 @@ if (!validateCameroonPhone(formData.telephone)) {
         paymentId={currentPaymentId}
         onSuccess={handlePaymentSuccess}
         onError={handlePaymentError}
-        onClose={() => setShowPaymentStatusModal(false)}
+        onClose={handlePaymentCancel}
       />
       </KeyboardAvoidingView>
     </SafeAreaView>

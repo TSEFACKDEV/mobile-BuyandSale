@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,6 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 
 import { useAppSelector, useAppDispatch } from '../../../hooks/store';
-import { useTranslation } from '../../../hooks/useTranslation';
 import { useProducts } from '../../../hooks/useProducts';
 import { useSellerReviews } from '../../../hooks/useSellerReviews';
 import { useTheme, useThemeColors } from '../../../contexts/ThemeContext';
@@ -22,25 +21,62 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { logoutAction, getUserProfileAction, updateUserAction } from '../../../store/authentification/actions';
+import { getAllForfaitsAction } from '../../../store/forfait/actions';
+import {
+  selectForfaits,
+  selectForfaitStatus,
+} from '../../../store/forfait/slice';
 import { LoadingType } from '../../../models/store';
 import { getImageUrl, PLACEHOLDER_IMAGE } from '../../../utils/imageUtils';
 import EditProductModal from '../../../components/EditProductModal';
 import PaymentHistory from '../../../components/UserProfile/PaymentHistory';
+import {
+  ForfaitSelectorModal,
+  PaymentModal,
+  PaymentStatusModal,
+} from '../../../components/modals';
 import { Loading, ProductCardSkeleton } from '../../../components/LoadingVariants';
 import PhoneInput from '../../../components/PhoneInput';
 import { styles } from './styles';
 
 type TabType = 'active' | 'pending' | 'payments' | 'profile';
 
+// Constantes pour la hiérarchie des forfaits
+const FORFAIT_PRIORITY: Record<string, number> = {
+  PREMIUM: 1,
+  TOP_ANNONCE: 2,
+  URGENT: 3,
+};
+
+const FORFAIT_LABELS: Record<string, string> = {
+  PREMIUM: 'Premium',
+  TOP_ANNONCE: 'Top',
+  URGENT: 'Urgent',
+};
+
+const FORFAIT_COLORS: Record<string, string> = {
+  PREMIUM: '#9333ea',
+  TOP_ANNONCE: '#3b82f6',
+  URGENT: '#ef4444',
+};
+
+// Helper: Trouver le forfait actif d'un produit
+const getActiveForfait = (product: any) => {
+  return product?.productForfaits?.find(
+    (pf: any) => pf.isActive && new Date(pf.expiresAt) > new Date()
+  );
+};
+
 const UserProfile: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const { t } = useTranslation();
   const { theme } = useTheme();
   const colors = useThemeColors();
   const isDark = theme.isDark;
 
   const authState = useAppSelector((state) => state.authentification);
+  const forfaits = useAppSelector(selectForfaits);
+  const forfaitStatus = useAppSelector(selectForfaitStatus);
   const user = authState.auth.entities;
   const isAuthenticated = user !== null;
   const isLoggingOut = authState.auth.status === LoadingType.PENDING && !user;
@@ -51,6 +87,18 @@ const UserProfile: React.FC = () => {
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  
+  // States pour le boost
+  const [showForfaitSelector, setShowForfaitSelector] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showPaymentStatusModal, setShowPaymentStatusModal] = useState(false);
+  const [boostingProductId, setBoostingProductId] = useState<string | null>(null);
+  const [boostingProductName, setBoostingProductName] = useState<string>('');
+  const [selectedForfaitId, setSelectedForfaitId] = useState<string | null>(null);
+  const [selectedForfaitType, setSelectedForfaitType] = useState<string | null>(null);
+  const [selectedForfaitPrice, setSelectedForfaitPrice] = useState<number>(0);
+  const [currentPaymentId, setCurrentPaymentId] = useState<string | null>(null);
+  
   const [profileData, setProfileData] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
@@ -71,6 +119,13 @@ const UserProfile: React.FC = () => {
 
   const { userRating, totalReviews: userTotalReviews } = useSellerReviews(user?.id, false);
 
+  // Charger les forfaits au montage
+  React.useEffect(() => {
+    if (forfaitStatus === 'idle') {
+      dispatch(getAllForfaitsAction());
+    }
+  }, [dispatch, forfaitStatus]);
+
   const refreshData = useCallback(async () => {
     setRefreshing(true);
     try {
@@ -78,6 +133,7 @@ const UserProfile: React.FC = () => {
         refetchUserProducts(),
         refetchPendingProducts(),
         dispatch(getUserProfileAction()),
+        dispatch(getAllForfaitsAction()),
       ]);
     } finally {
       setRefreshing(false);
@@ -225,6 +281,132 @@ const UserProfile: React.FC = () => {
       setIsUploadingAvatar(false);
     }
   }, [user, dispatch]);
+
+  // Handlers pour le boost
+  const handleBoostProduct = useCallback((productId: string, productName: string) => {
+    const product = userProducts.find((p: any) => p.id === productId);
+    
+    if (!product) {
+      Alert.alert('Erreur', 'Produit non trouvé');
+      return;
+    }
+    
+    const activeForfait = getActiveForfait(product);
+    const currentForfaitType = activeForfait?.forfait?.type;
+    
+    // Vérifier si l'annonce a déjà le forfait PREMIUM (niveau max)
+    if (currentForfaitType === 'PREMIUM') {
+      Alert.alert(
+        'Forfait maximum atteint',
+        'Cette annonce possède déjà le forfait Premium, qui est le niveau le plus élevé. Vous ne pouvez plus la booster.'
+      );
+      return;
+    }
+    
+    // Si l'annonce a un forfait actif, informer l'utilisateur
+    if (currentForfaitType) {
+      const currentPriority = FORFAIT_PRIORITY[currentForfaitType];
+      const availableForfaits = currentPriority === 2 
+        ? 'Premium uniquement' 
+        : 'Top Annonce ou Premium';
+      
+      Alert.alert(
+        'Améliorer le forfait',
+        `Cette annonce possède actuellement le forfait ${FORFAIT_LABELS[currentForfaitType]}.\n\nVous pouvez la booster avec : ${availableForfaits}`,
+        [
+          { text: 'Annuler', style: 'cancel' },
+          {
+            text: 'Continuer',
+            onPress: () => {
+              setBoostingProductId(productId);
+              setBoostingProductName(productName);
+              setShowForfaitSelector(true);
+            },
+          },
+        ]
+      );
+    } else {
+      // Pas de forfait actif, permettre tous les forfaits
+      setBoostingProductId(productId);
+      setBoostingProductName(productName);
+      setShowForfaitSelector(true);
+    }
+  }, [userProducts]);
+
+  const handleForfaitSelected = useCallback((forfaitType: string, forfaitId: string) => {
+    try {
+      if (!boostingProductId) {
+        throw new Error('ID du produit non disponible');
+      }
+
+      const selectedForfait = Array.isArray(forfaits) ? forfaits.find((f: any) => f.id === forfaitId) : null;
+      if (!selectedForfait) {
+        throw new Error(`Forfait avec ID ${forfaitId} non trouvé`);
+      }
+
+      setSelectedForfaitId(forfaitId);
+      setSelectedForfaitType(forfaitType);
+      setSelectedForfaitPrice(selectedForfait.price);
+      setShowForfaitSelector(false);
+      setShowPaymentModal(true);
+    } catch (error: any) {
+      Alert.alert('Erreur', error.message);
+      setShowForfaitSelector(false);
+    }
+  }, [boostingProductId, forfaits]);
+
+  const handleSkipForfait = useCallback(() => {
+    setShowForfaitSelector(false);
+    setBoostingProductId(null);
+    setBoostingProductName('');
+  }, []);
+
+  const handlePaymentInitiated = useCallback((paymentId: string) => {
+    setCurrentPaymentId(paymentId);
+    setShowPaymentModal(false);
+    setShowPaymentStatusModal(true);
+  }, []);
+
+  const handlePaymentSuccess = useCallback(() => {
+    setShowPaymentStatusModal(false);
+    setShowPaymentModal(false);
+    setShowForfaitSelector(false);
+    setBoostingProductId(null);
+    setBoostingProductName('');
+    setSelectedForfaitId(null);
+    setSelectedForfaitType(null);
+    setSelectedForfaitPrice(0);
+    setCurrentPaymentId(null);
+    
+    refetchUserProducts();
+    navigation.navigate('HomeTab' as never);
+  }, [refetchUserProducts, navigation]);
+
+  const handlePaymentError = useCallback(() => {
+    setShowPaymentStatusModal(false);
+    setShowPaymentModal(false);
+    setShowForfaitSelector(false);
+    setBoostingProductId(null);
+    setBoostingProductName('');
+    setSelectedForfaitId(null);
+    setSelectedForfaitType(null);
+    setSelectedForfaitPrice(0);
+    setCurrentPaymentId(null);
+    
+    navigation.navigate('HomeTab' as never);
+  }, [navigation]);
+
+  const handlePaymentCancel = useCallback(() => {
+    setShowPaymentModal(false);
+    setShowPaymentStatusModal(false);
+    setShowForfaitSelector(false);
+    setBoostingProductId(null);
+    setBoostingProductName('');
+    setSelectedForfaitId(null);
+    setSelectedForfaitType(null);
+    setSelectedForfaitPrice(0);
+    setCurrentPaymentId(null);
+  }, []);
 
   if (!isAuthenticated || !user) {
     return <Loading fullScreen message="Chargement du profil..." />;
@@ -415,24 +597,8 @@ const UserProfile: React.FC = () => {
               ) : (
                 <View style={styles.productsGrid}>
                   {userProducts.map((product: any) => {
-                    // Trouver le forfait actif s'il existe
-                    const activeForfait = product.productForfaits?.find(
-                      (pf: any) => pf.isActive && new Date(pf.expiresAt) > new Date()
-                    );
+                    const activeForfait = getActiveForfait(product);
                     const forfaitType = activeForfait?.forfait?.type;
-                    
-                    // Configuration des couleurs de forfait
-                    const forfaitColors: Record<string, string> = {
-                      PREMIUM: '#9333ea',
-                      TOP_ANNONCE: '#3b82f6',
-                      URGENT: '#ef4444',
-                    };
-                    
-                    const forfaitLabels: Record<string, string> = {
-                      PREMIUM: 'Premium',
-                      TOP_ANNONCE: 'Top',
-                      URGENT: 'Urgent',
-                    };
                     
                     return (
                       <View key={product.id} style={[styles.productCard, isDark && styles.productCardDark]}>
@@ -449,12 +615,12 @@ const UserProfile: React.FC = () => {
                           <View 
                             style={[
                               styles.forfaitBadge, 
-                              { backgroundColor: forfaitColors[forfaitType] }
+                              { backgroundColor: FORFAIT_COLORS[forfaitType] }
                             ]}
                           >
                             <Icon name="star" size={10} color="#FFFFFF" />
                             <Text style={styles.forfaitBadgeText}>
-                              {forfaitLabels[forfaitType]}
+                              {FORFAIT_LABELS[forfaitType]}
                             </Text>
                           </View>
                         )}
@@ -510,9 +676,14 @@ const UserProfile: React.FC = () => {
                             </TouchableOpacity>
                             <TouchableOpacity
                               style={styles.productActionButton}
-                              onPress={() => Alert.alert('Info', `Booster le produit ${product.name}`)}
+                              onPress={() => handleBoostProduct(product.id, product.name)}
+                              disabled={forfaitType === 'PREMIUM'}
                             >
-                              <Icon name="rocket-outline" size={18} color="#10B981" />
+                              <Icon 
+                                name="rocket-outline" 
+                                size={18} 
+                                color={forfaitType === 'PREMIUM' ? '#9CA3AF' : '#10B981'} 
+                              />
                             </TouchableOpacity>
                           </View>
                         </View>
@@ -758,6 +929,52 @@ const UserProfile: React.FC = () => {
           }}
         />
       )}
+
+      {/* Modals pour le boost */}
+      <ForfaitSelectorModal
+        visible={showForfaitSelector}
+        forfaits={useMemo(() => {
+          if (!Array.isArray(forfaits) || !boostingProductId) return forfaits || [];
+          
+          const product = userProducts.find((p: any) => p.id === boostingProductId);
+          if (!product) return forfaits;
+          
+          const activeForfait = getActiveForfait(product);
+          const currentForfaitType = activeForfait?.forfait?.type;
+          
+          if (!currentForfaitType) return forfaits;
+          
+          const currentPriority = FORFAIT_PRIORITY[currentForfaitType];
+          
+          return forfaits.filter((f: any) => {
+            const forfaitTypePriority = FORFAIT_PRIORITY[f.type];
+            return forfaitTypePriority < currentPriority;
+          });
+        }, [forfaits, boostingProductId, userProducts])}
+        onSelect={handleForfaitSelected}
+        onSkip={handleSkipForfait}
+        onClose={() => setShowForfaitSelector(false)}
+        productName={boostingProductName || 'votre annonce'}
+        isLoading={forfaitStatus === 'loading'}
+      />
+
+      <PaymentModal
+        visible={showPaymentModal}
+        productId={boostingProductId}
+        forfaitId={selectedForfaitId}
+        forfaitType={selectedForfaitType}
+        forfaitPrice={selectedForfaitPrice}
+        onPaymentInitiated={handlePaymentInitiated}
+        onClose={handlePaymentCancel}
+      />
+
+      <PaymentStatusModal
+        visible={showPaymentStatusModal}
+        paymentId={currentPaymentId}
+        onSuccess={handlePaymentSuccess}
+        onError={handlePaymentError}
+        onClose={handlePaymentCancel}
+      />
     </View>
   );
 };

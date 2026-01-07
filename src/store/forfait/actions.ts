@@ -4,8 +4,8 @@
  */
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import API_CONFIG from '../../config/api.config';
+import Utils from '../../utils';
 import {
   GetAllForfaitsResponse,
   GetProductForfaitsResponse,
@@ -23,7 +23,7 @@ const apiRequest = async <T>(
   method: 'GET' | 'POST' = 'GET',
   body?: any
 ): Promise<T> => {
-  const token = await AsyncStorage.getItem('buyAndSale-token');
+  const token = Utils.getAccessToken();
   
   const headers: HeadersInit = {
     'Content-Type': 'application/json',

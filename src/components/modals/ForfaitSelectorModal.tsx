@@ -14,6 +14,10 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 const { width } = Dimensions.get('window');
 
+const COLORS = {
+  primary: '#FF6B35',
+};
+
 interface Forfait {
   id: string;
   type: string;
@@ -28,6 +32,8 @@ interface ForfaitSelectorModalProps {
   onSelect: (forfaitType: string, forfaitId: string) => void;
   onSkip: () => void;
   onClose: () => void;
+  productName?: string;
+  isLoading?: boolean;
 }
 
 const ForfaitSelectorModal: React.FC<ForfaitSelectorModalProps> = ({
@@ -36,6 +42,8 @@ const ForfaitSelectorModal: React.FC<ForfaitSelectorModalProps> = ({
   onSelect,
   onSkip,
   onClose,
+  productName = 'votre annonce',
+  isLoading = false,
 }) => {
   const colors = useThemeColors();
 
@@ -88,12 +96,19 @@ const ForfaitSelectorModal: React.FC<ForfaitSelectorModalProps> = ({
       <View style={styles.overlay}>
         <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
           {/* Header */}
-          <View style={styles.header}>
-            <Text style={[styles.title, { color: colors.text }]}>
-              Choisissez un forfait
-            </Text>
+          <View style={[styles.header, { borderBottomColor: colors.border }]}>
+            <View style={styles.headerContent}>
+              <Text style={[styles.title, { color: colors.text }]}>
+                Choisir un forfait de boost
+              </Text>
+              {productName && (
+                <Text style={[styles.productName, { color: colors.textSecondary }]} numberOfLines={1}>
+                  Pour : {productName}
+                </Text>
+              )}
+            </View>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Icon name="close" size={24} color={colors.text} />
+              <Icon name="close" size={24} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
 
@@ -103,37 +118,45 @@ const ForfaitSelectorModal: React.FC<ForfaitSelectorModalProps> = ({
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            {forfaits.length === 0 ? (
+            {isLoading ? (
               <View style={styles.emptyContainer}>
-                <Icon name="information-circle-outline" size={64} color="#CBD5E1" />
+                <ActivityIndicator size="large" color="#FF6B35" />
+                <Text style={[styles.emptyTitle, { color: colors.text }]}>
+                  Chargement des forfaits...
+                </Text>
+              </View>
+            ) : forfaits.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <Icon name="pricetags-outline" size={64} color="#CBD5E1" />
                 <Text style={[styles.emptyTitle, { color: colors.text }]}>
                   Aucun forfait disponible
                 </Text>
                 <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
                   Les forfaits de boost ne sont pas disponibles pour le moment.
-                  Vous pourrez en ajouter plus tard depuis votre profil.
+                  Vous pourrez booster votre annonce plus tard depuis votre profil.
                 </Text>
               </View>
             ) : (
-              forfaits.map((forfait) => (
-                <TouchableOpacity
-                  key={forfait.id}
-                  style={[
-                    styles.forfaitCard,
-                    { backgroundColor: colors.background, borderColor: colors.border },
-                  ]}
-                  onPress={() => onSelect(forfait.type, forfait.id)}
-                >
+              <>
+                {forfaits.map((forfait) => (
+                  <TouchableOpacity
+                    key={forfait.id}
+                    style={[
+                      styles.forfaitCard,
+                      { backgroundColor: colors.surface, borderColor: colors.border },
+                    ]}
+                    onPress={() => onSelect(forfait.type, forfait.id)}
+                  >
                   <View style={styles.forfaitHeader}>
                     <View
                       style={[
                         styles.iconBadge,
-                        { backgroundColor: `${getForfaitColor(forfait.type)}20` },
+                        { backgroundColor: `${getForfaitColor(forfait.type)}15` },
                       ]}
                     >
                       <Icon
                         name={getForfaitIcon(forfait.type)}
-                        size={24}
+                        size={28}
                         color={getForfaitColor(forfait.type)}
                       />
                     </View>
@@ -142,11 +165,16 @@ const ForfaitSelectorModal: React.FC<ForfaitSelectorModalProps> = ({
                         {getForfaitLabel(forfait.type)}
                       </Text>
                       <Text style={[styles.forfaitDuration, { color: colors.textSecondary }]}>
-                        {forfait.duration} jours
+                        {forfait.duration} jours de visibilité
                       </Text>
+                      {forfait.description && (
+                        <Text style={[styles.forfaitDescription, { color: colors.textSecondary }]} numberOfLines={2}>
+                          {forfait.description}
+                        </Text>
+                      )}
                     </View>
                     <View style={styles.priceContainer}>
-                      <Text style={[styles.price, { color: colors.text }]}>
+                      <Text style={[styles.price, { color: COLORS.primary }]}>
                         {forfait.price.toLocaleString()}
                       </Text>
                       <Text style={[styles.currency, { color: colors.textSecondary }]}>
@@ -154,26 +182,23 @@ const ForfaitSelectorModal: React.FC<ForfaitSelectorModalProps> = ({
                       </Text>
                     </View>
                   </View>
-
-                  {forfait.description && (
-                    <Text style={[styles.forfaitDescription, { color: colors.textSecondary }]}>
-                      {forfait.description}
-                    </Text>
-                  )}
-                </TouchableOpacity>
-              ))
+                  </TouchableOpacity>
+                ))}
+              </>
             )}
           </ScrollView>
 
           {/* Skip Button */}
-          <TouchableOpacity
-            style={[styles.skipButton, { borderColor: colors.border }]}
-            onPress={onSkip}
-          >
-            <Text style={[styles.skipButtonText, { color: colors.text }]}>
-              Passer cette étape
-            </Text>
-          </TouchableOpacity>
+          <View style={styles.footer}>
+            <TouchableOpacity
+              style={[styles.skipButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
+              onPress={onSkip}
+            >
+              <Text style={[styles.skipButtonText, { color: colors.textSecondary }]}>
+                Continuer sans forfait
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </Modal>
@@ -189,8 +214,9 @@ const styles = StyleSheet.create({
   modalContainer: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: '80%',
+    height: '80%',
     paddingBottom: 20,
+    flexDirection: 'column',
   },
   header: {
     flexDirection: 'row',
@@ -199,21 +225,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+  },
+  headerContent: {
+    flex: 1,
+    marginRight: 12,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  productName: {
+    fontSize: 13,
+    fontWeight: '400',
   },
   closeButton: {
-    padding: 4,
+    padding: 8,
   },
   scrollView: {
-    flex: 1,
+    flexGrow: 0,
+    flexShrink: 1,
   },
   scrollContent: {
-    padding: 20,
-    gap: 12,
+    padding: 16,
   },
   emptyContainer: {
     alignItems: 'center',
@@ -237,16 +271,17 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
+    marginBottom: 12,
   },
   forfaitHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 12,
   },
   iconBadge: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -254,38 +289,40 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   forfaitName: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '600',
-    marginBottom: 2,
+    marginBottom: 4,
   },
   forfaitDuration: {
-    fontSize: 14,
+    fontSize: 13,
+    marginBottom: 4,
+  },
+  forfaitDescription: {
+    fontSize: 12,
+    lineHeight: 16,
   },
   priceContainer: {
     alignItems: 'flex-end',
   },
   price: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
   },
   currency: {
-    fontSize: 12,
+    fontSize: 11,
   },
-  forfaitDescription: {
-    fontSize: 14,
-    marginTop: 12,
-    lineHeight: 20,
+  footer: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
   },
   skipButton: {
-    marginHorizontal: 20,
-    marginTop: 12,
     paddingVertical: 14,
     borderRadius: 8,
     borderWidth: 1,
     alignItems: 'center',
   },
   skipButtonText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '500',
   },
 });
