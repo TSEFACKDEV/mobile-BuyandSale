@@ -11,6 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import { normalizePhoneNumber, validateCameroonPhone } from '../../../../utils/phoneUtils';
+import PhoneInput from '../../../../components/PhoneInput';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '../../../../contexts/ThemeContext';
 import { useAppDispatch } from '../../../../hooks/store';
@@ -112,37 +113,14 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
           {/* Phone Input */}
           <View style={styles.inputContainer}>
-            <Text style={[styles.label, { color: colors.text }]}>
-              Numéro de téléphone
-            </Text>
-            <View style={styles.phoneInputContainer}>
-              <View
-                style={[
-                  styles.countryCode,
-                  { backgroundColor: colors.backgroundSecondary },
-                ]}
-              >
-                <Text style={[styles.countryCodeText, { color: colors.text }]}>
-                  +237
-                </Text>
-              </View>
-              <TextInput
-                style={[
-                  styles.phoneInput,
-                  {
-                    backgroundColor: colors.background,
-                    color: colors.text,
-                    borderColor: colors.border,
-                  },
-                ]}
-                placeholder="6XX XX XX XX"
-                placeholderTextColor={colors.textSecondary}
-                value={phoneNumber}
-                onChangeText={(text) => setPhoneNumber(normalizePhoneNumber(text))}
-                keyboardType="phone-pad"
-                editable={!isProcessing}
-              />
-            </View>
+            <PhoneInput
+              label="Numéro de téléphone"
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+              placeholder="6XX XX XX XX"
+              disabled={isProcessing}
+              required
+            />
           </View>
 
           {/* Info */}

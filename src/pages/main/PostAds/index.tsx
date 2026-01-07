@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useThemeColors } from '../../../contexts/ThemeContext';
 import { useAppSelector, useAppDispatch } from '../../../hooks/store';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -26,6 +26,7 @@ import { fetchCitiesAction } from '../../../store/city/actions';
 import { createProductAction } from '../../../store/product/actions';
 import { getAllForfaitsAction } from '../../../store/forfait/actions';
 import { normalizePhoneNumber, validateCameroonPhone } from '../../../utils/phoneUtils';
+import PhoneInput from '../../../components/PhoneInput';
 
 // Redux Selectors
 import {
@@ -134,6 +135,16 @@ const PostAds: React.FC = () => {
       isMountedRef.current = false;
     };
   }, [dispatch, categoryStatus, cityStatus]);
+
+  // Réinitialiser le formulaire quand on quitte la page
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        // Cleanup: réinitialiser le formulaire quand on quitte la page
+        resetForm();
+      };
+    }, [])
+  );
 
   // Recharger les forfaits quand le modal s'ouvre
   useEffect(() => {
@@ -401,7 +412,6 @@ if (!validateCameroonPhone(formData.telephone)) {
   const handleDeclineBoost = () => {
     if (!isMountedRef.current) return;
     setShowBoostOffer(false);
-    resetForm();
 
     Alert.alert('Succès', 'Annonce créée avec succès !', [
       {
@@ -443,7 +453,6 @@ if (!validateCameroonPhone(formData.telephone)) {
 
     setShowForfaitSelector(false);
     setShowBoostOffer(false);
-    resetForm();
 
     Alert.alert('Info', 'Annonce publiée sans forfait. Vous pourrez en ajouter un plus tard.', [
       {
@@ -470,7 +479,6 @@ if (!validateCameroonPhone(formData.telephone)) {
     setShowPaymentModal(false);
     setShowForfaitSelector(false);
     setShowBoostOffer(false);
-    resetForm();
 
     Alert.alert('Parfait !', 'Votre annonce est maintenant boostée !', [
       {
@@ -487,7 +495,6 @@ if (!validateCameroonPhone(formData.telephone)) {
     setShowPaymentModal(false);
     setShowForfaitSelector(false);
     setShowBoostOffer(false);
-    resetForm();
 
     Alert.alert('Erreur', 'Le paiement a échoué. Vous pourrez booster votre annonce plus tard.', [
       {
@@ -528,9 +535,19 @@ if (!validateCameroonPhone(formData.telephone)) {
           multiline
           numberOfLines={5}
         />
-        <Text style={[styles.helperText, { color: colors.textSecondary }]}>
-          {formData.description.length}/10 caractères minimum
-        </Text>
+        <View style={styles.characterCounter}>
+          <Text style={[styles.helperText, { color: colors.textSecondary }]}>
+            {formData.description.length}/10 caractères minimum
+          </Text>
+          {formData.description.length < 10 && formData.description.length > 0 && (
+            <Text style={styles.warningText}>
+              ⚠️ {10 - formData.description.length} caractères manquants
+            </Text>
+          )}
+          {formData.description.length >= 10 && (
+            <Text style={styles.validText}>✅</Text>
+          )}
+        </View>
       </View>
 
       {/* Prix */}
@@ -708,22 +725,13 @@ if (!validateCameroonPhone(formData.telephone)) {
     <View>
       {/* Téléphone */}
       <View style={styles.inputGroup}>
-        <Text style={[styles.label, { color: colors.text }]}>
-          Numéro de téléphone <Text style={styles.required}>*</Text>
-        </Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <View style={[styles.input, { backgroundColor: colors.backgroundSecondary, width: 70, marginRight: 10, justifyContent: 'center' }]}>
-            <Text style={[{ color: colors.text, fontWeight: '600' }]}>+237</Text>
-          </View>
-          <TextInput
-            style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border, flex: 1 }]}
-            placeholder="6XX XX XX XX"
-            placeholderTextColor={colors.textSecondary}
-            value={formData.telephone}
-            onChangeText={(text) => handleInputChange('telephone', normalizePhoneNumber(text))}
-            keyboardType="phone-pad"
-          />
-        </View>
+        <PhoneInput
+          label="Numéro de téléphone"
+          value={formData.telephone}
+          onChangeText={(text) => handleInputChange('telephone', text)}
+          placeholder="6XX XX XX XX"
+          required
+        />
       </View>
 
       {/* Quantité */}
@@ -877,7 +885,7 @@ if (!validateCameroonPhone(formData.telephone)) {
       {/* Content avec Card */}
       <ScrollView
         style={styles.content}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={[styles.contentContainer, { paddingBottom: 100 }]}
         keyboardShouldPersistTaps="handled"
       >
         <View style={[styles.formCard, { backgroundColor: colors.surface }]}>

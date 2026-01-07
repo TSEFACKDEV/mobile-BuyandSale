@@ -28,6 +28,7 @@ import { normalizePhoneNumber } from '../../../utils/phoneUtils';
 import EditProductModal from '../../../components/EditProductModal';
 import PaymentHistory from '../../../components/UserProfile/PaymentHistory';
 import { Loading, ProductCardSkeleton } from '../../../components/LoadingVariants';
+import PhoneInput from '../../../components/PhoneInput';
 import { styles } from './styles';
 
 type TabType = 'active' | 'pending' | 'payments' | 'profile';
@@ -334,7 +335,7 @@ const UserProfile: React.FC = () => {
     <View style={[styles.container, { backgroundColor: isDark ? '#111827' : '#F9FAFB' }]}>
       <ScrollView
         style={styles.container}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 100 }]}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={refreshData} colors={[colors.primary]} />
         }
@@ -730,16 +731,11 @@ const UserProfile: React.FC = () => {
                   </View>
 
                   <View style={styles.profileField}>
-                    <Text style={[styles.profileLabel, isDark && styles.profileLabelDark]}>
-                      Téléphone
-                    </Text>
-                    <TextInput
-                      style={[styles.profileInput, isDark && styles.profileInputDark]}
+                    <PhoneInput
+                      label="Téléphone"
                       value={profileData.phone}
-                      onChangeText={(text) => setProfileData({ ...profileData, phone: normalizePhoneNumber(text) })}
+                      onChangeText={(text) => setProfileData({ ...profileData, phone: text })}
                       placeholder="6XX XX XX XX"
-                      placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
-                      keyboardType="phone-pad"
                     />
                   </View>
 

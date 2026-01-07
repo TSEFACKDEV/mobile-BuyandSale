@@ -88,11 +88,25 @@ const Notifications = () => {
       // Navigation vers le lien si présent
       if (notification.link) {
         // Parser le lien pour navigation React Native
-        const linkParts = notification.link.split('/');
-        const screen = linkParts[linkParts.length - 1];
-        
-        if (screen) {
-          (navigation as any).navigate(screen);
+        // Formats possibles: /annonce/:id, /products/:id, /product/:id
+        if (notification.link.includes('/annonce/') || 
+            notification.link.includes('/product/') || 
+            notification.link.includes('/products/')) {
+          // Extraire l'ID du produit
+          const productId = notification.link.split('/').pop();
+          if (productId) {
+            // Naviguer vers le nested navigator HomeTab puis ProductDetails
+            (navigation as any).navigate('MainTab', {
+              screen: 'HomeTab',
+              params: {
+                screen: 'ProductDetails',
+                params: { productId }
+              }
+            });
+          }
+        } else {
+          // Pour d'autres types de liens, on pourrait ajouter d'autres cas ici
+          console.log('Type de lien non géré:', notification.link);
         }
       }
     },

@@ -18,6 +18,8 @@ import type { UserRegisterForm } from '../../../models/user'
 import { GoogleAuthService } from '../../../services/googleAuthService'
 import { Loading } from '../../../components/LoadingVariants'
 import { normalizePhoneNumber, validateCameroonPhone } from '../../../utils/phoneUtils'
+import PasswordStrengthIndicator from '../../../components/PasswordStrengthIndicator'
+import PhoneInput from '../../../components/PhoneInput'
 
 type RegisterNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Register'>
 type AuthNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Auth'>
@@ -187,15 +189,21 @@ const Register = () => {
       isValid = false
     }
 
-    // Validation Mot de passe
+    // Validation Mot de passe (8 caractères minimum, avec minuscule, majuscule et chiffre)
     if (!password.trim()) {
       setPasswordError('Mot de passe requis')
       isValid = false
-    } else if (password.length < 6) {
-      setPasswordError('Minimum 6 caractères')
+    } else if (password.length < 8) {
+      setPasswordError('Minimum 8 caractères requis')
       isValid = false
-    } else if (!/(?=.*[A-Za-z])(?=.*\d)/.test(password)) {
-      setPasswordError('Au moins 1 lettre et 1 chiffre requis')
+    } else if (!/(?=.*[a-z])/.test(password)) {
+      setPasswordError('Au moins une lettre minuscule requise')
+      isValid = false
+    } else if (!/(?=.*[A-Z])/.test(password)) {
+      setPasswordError('Au moins une lettre majuscule requise')
+      isValid = false
+    } else if (!/(?=.*\d)/.test(password)) {
+      setPasswordError('Au moins un chiffre requis')
       isValid = false
     }
 
@@ -348,15 +356,14 @@ const Register = () => {
           />
 
           {/* Phone Input */}
-          <TextInput
+          <PhoneInput
             label="Téléphone"
-            type="phone"
             value={phone}
             onChangeText={(text) => {
               setPhone(text)
               setPhoneError('')
             }}
-            placeholder="+237 6XX XXX XXX"
+            placeholder="6XX XX XX XX"
             error={phoneError}
             required
           />
@@ -374,6 +381,9 @@ const Register = () => {
             error={passwordError}
             required
           />
+
+          {/* Password Strength Indicator */}
+          <PasswordStrengthIndicator password={password} />
 
           {/* Confirm Password Input */}
           <TextInput
