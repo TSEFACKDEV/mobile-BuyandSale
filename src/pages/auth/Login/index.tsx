@@ -248,7 +248,7 @@ const Login = () => {
               setIdentifier(text)
               setIdentifierError('')
             }}
-            placeholder="exemple@email.com ou +237 6XX XXX XXX"
+            placeholder="@email.com ou 6XX"
             error={identifierError}
             required
           />

@@ -157,46 +157,40 @@ const Register = () => {
 
     // Validation Prénom
     if (!firstName.trim()) {
-      setFirstNameError('Prénom requis')
-      isValid = false
-    } else if (firstName.trim().length < 2) {
-      setFirstNameError('Minimum 2 caractères')
+      setFirstNameError(t('auth.errors.validation.firstNameRequired'))
       isValid = false
     }
 
     // Validation Nom
     if (!lastName.trim()) {
-      setLastNameError('Nom requis')
-      isValid = false
-    } else if (lastName.trim().length < 2) {
-      setLastNameError('Minimum 2 caractères')
+      setLastNameError(t('auth.errors.validation.lastNameRequired'))
       isValid = false
     }
 
     // Validation Email
     if (!email.trim()) {
-      setEmailError('Email requis')
+      setEmailError(t('auth.errors.validation.emailRequired'))
       isValid = false
     } else if (!validateEmail(email)) {
-      setEmailError('Email invalide')
+      setEmailError(t('auth.errors.validation.emailInvalid'))
       isValid = false
     }
 
     // Validation Téléphone
     if (!phone) {
-      setPhoneError('Téléphone requis')
+      setPhoneError(t('auth.errors.validation.identifierRequired'))
       isValid = false
     } else if (!validateCameroonPhone(phone)) {
-      setPhoneError('Numéro de téléphone camerounais invalide (format: 6XX XX XX XX)')
+      setPhoneError(t('auth.errors.validation.identifierInvalid'))
       isValid = false
     }
 
-    // Validation Mot de passe (8 caractères minimum, avec minuscule, majuscule et chiffre)
+    // Validation Mot de passe (6 caractères minimum, avec minuscule, majuscule et chiffre)
     if (!password.trim()) {
-      setPasswordError('Mot de passe requis')
+      setPasswordError(t('auth.errors.validation.passwordRequired'))
       isValid = false
-    } else if (password.length < 8) {
-      setPasswordError('Minimum 8 caractères requis')
+    } else if (password.length < 6) {
+      setPasswordError(t('auth.errors.validation.passwordMinLength'))
       isValid = false
     } else if (!/(?=.*[a-z])/.test(password)) {
       setPasswordError('Au moins une lettre minuscule requise')
@@ -211,10 +205,10 @@ const Register = () => {
 
     // Validation Confirmation Mot de passe
     if (!confirmPassword.trim()) {
-      setConfirmPasswordError('Confirmez votre mot de passe')
+      setConfirmPasswordError(t('auth.errors.validation.confirmPasswordRequired'))
       isValid = false
     } else if (password !== confirmPassword) {
-      setConfirmPasswordError('Les mots de passe ne correspondent pas')
+      setConfirmPasswordError(t('auth.errors.validation.confirmPasswordMismatch'))
       isValid = false
     }
 
@@ -271,14 +265,12 @@ const Register = () => {
         }
 
         // Messages d'erreur spécifiques
-        if (errorMessage.includes('existe déjà') || errorMessage.includes('already exists')) {
-          if (errorMessage.includes('email')) {
-            setEmailError(t('auth.errors.validation.emailExists'))
-          } else if (errorMessage.includes('téléphone') || errorMessage.includes('phone')) {
-            setPhoneError(t('auth.errors.validation.phoneExists'))
-          } else {
-            Alert.alert(t('auth.errors.title'), errorMessage, [{ text: 'OK' }])
-          }
+        const lowerErrorMessage = errorMessage.toLowerCase();
+        
+        if (lowerErrorMessage.includes('email') && (lowerErrorMessage.includes('existe') || lowerErrorMessage.includes('already exists'))) {
+          setEmailError(t('auth.errors.validation.emailExists'))
+        } else if ((lowerErrorMessage.includes('téléphone') || lowerErrorMessage.includes('phone')) && (lowerErrorMessage.includes('existe') || lowerErrorMessage.includes('already exists'))) {
+          setPhoneError(t('auth.errors.validation.phoneExists'))
         } else {
           Alert.alert(t('auth.errors.title'), errorMessage, [{ text: 'OK' }])
         }
@@ -322,7 +314,7 @@ const Register = () => {
               setFirstName(text)
               setFirstNameError('')
             }}
-            placeholder="TSEFACK"
+            placeholder="JOHN"
             error={firstNameError}
             required
             leftIcon="person-outline"
@@ -337,7 +329,7 @@ const Register = () => {
               setLastName(text)
               setLastNameError('')
             }}
-            placeholder="KLEIN"
+            placeholder="DOE"
             error={lastNameError}
             required
             leftIcon="person-outline"

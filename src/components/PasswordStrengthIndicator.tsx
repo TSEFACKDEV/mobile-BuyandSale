@@ -14,8 +14,8 @@ interface PasswordRequirement {
 const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps> = ({ password }) => {
   const requirements: PasswordRequirement[] = [
     {
-      label: 'Au moins 8 caractères',
-      met: password.length >= 8,
+      label: 'Au moins 6 caractères',
+      met: password.length >= 6,
     },
     {
       label: 'Une lettre minuscule (a-z)',

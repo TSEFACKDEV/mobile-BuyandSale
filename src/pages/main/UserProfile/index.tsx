@@ -9,6 +9,8 @@ import {
   TextInput,
   Image,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
@@ -512,14 +514,20 @@ const UserProfile: React.FC = () => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: isDark ? '#111827' : '#F9FAFB' }]}>
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: 100 }]}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={refreshData} colors={[colors.primary]} />
-        }
-      >
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+    >
+      <View style={[styles.container, { backgroundColor: isDark ? '#111827' : '#F9FAFB' }]}>
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: 100 }]}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={refreshData} colors={[colors.primary]} />
+          }
+          keyboardShouldPersistTaps="handled"
+        >
         {/* Header */}
         <View style={[styles.header, isDark && styles.headerDark]}>
           <View style={styles.headerContent}>
@@ -981,7 +989,8 @@ const UserProfile: React.FC = () => {
             </View>
           )}
         </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
 
       {/* Modal d'édition */}
       {editingProductId && (
@@ -1043,7 +1052,7 @@ const UserProfile: React.FC = () => {
         onError={handlePaymentError}
         onClose={handlePaymentCancel}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

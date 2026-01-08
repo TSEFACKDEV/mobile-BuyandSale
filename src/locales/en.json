@@ -53,6 +53,7 @@
   },
   "auth": {
     "errors": {
+      "title": "Error",
       "google": {
         "authFailed": "Google authentication failed",
         "tokenNotReceived": "Google token not received",
@@ -66,9 +67,11 @@
         "identifierInvalid": "Invalid email or Cameroonian phone number (format: 6XX XX XX XX)",
         "passwordRequired": "Password required",
         "passwordMinLength": "Minimum 6 characters",
-        "passwordComplexity": "At least 1 letter and 1 digit required",
+        "passwordComplexity": "Password must contain at least one lowercase letter, one uppercase letter and one number",
         "confirmPasswordRequired": "Confirm your password",
         "confirmPasswordMismatch": "Passwords do not match",
+        "firstNameRequired": "First name required",
+        "lastNameRequired": "Last name required",
         "emailRequired": "Email required",
         "emailInvalid": "Invalid email",
         "emailExists": "This email is already in use",
