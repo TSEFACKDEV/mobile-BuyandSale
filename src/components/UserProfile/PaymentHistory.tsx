@@ -75,7 +75,7 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.meta?.message || 'Erreur lors du chargement des paiements');
+        throw new Error(errorData.meta?.message || t('userProfile.messages.error'));
       }
       
       const data = await response.json();
@@ -94,7 +94,7 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
       if (Platform.OS === 'android') {
         ToastAndroid.show(errorMessage, ToastAndroid.SHORT);
       } else {
-        Alert.alert('Erreur', errorMessage);
+        Alert.alert(t('userProfile.messages.error'), errorMessage);
       }
     } finally {
       setIsLoading(false);
@@ -128,13 +128,13 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
       EXPIRED: '#f97316',
     },
     labels: {
-      SUCCESS: 'Payé',
-      PENDING: 'En attente',
-      FAILED: 'Échoué',
-      CANCELLED: 'Annulé',
-      EXPIRED: 'Expiré',
+      SUCCESS: t('userProfile.paymentHistory.statusSuccess'),
+      PENDING: t('userProfile.paymentHistory.statusPending'),
+      FAILED: t('userProfile.paymentHistory.statusFailed'),
+      CANCELLED: t('userProfile.paymentHistory.statusCancelled'),
+      EXPIRED: t('userProfile.paymentHistory.statusExpired'),
     },
-  }), []);
+  }), [t]);
 
   const forfaitConfig = useMemo(() => ({
     labels: {
@@ -184,7 +184,7 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
           <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
-            Chargement...
+            {t('userProfile.paymentHistory.loading')}
           </Text>
         </View>
       </View>
@@ -203,7 +203,7 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
         <View style={styles.emptyContainer}>
           <Icon name="alert-circle-outline" size={64} color={colors.error} />
           <Text style={[styles.emptyTitle, { color: colors.text }]}>
-            Erreur de chargement
+            {t('userProfile.paymentHistory.loadingError')}
           </Text>
           <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
             {error}
@@ -216,7 +216,7 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
             ]}
           >
             <Text style={[styles.paginationButtonText, { color: '#FFFFFF' }]}>
-              Réessayer
+              {t('userProfile.paymentHistory.retry')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -235,10 +235,10 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
         <View style={styles.emptyContainer}>
           <Icon name="card-outline" size={64} color={colors.textSecondary} />
           <Text style={[styles.emptyTitle, { color: colors.text }]}>
-            Aucun paiement
+            {t('userProfile.paymentHistory.noPayments')}
           </Text>
           <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-            Votre historique de paiements apparaîtra ici
+            {t('userProfile.paymentHistory.noPaymentsDescription')}
           </Text>
         </View>
       </ScrollView>
@@ -254,10 +254,10 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
     >
       <View style={styles.header}>
         <Text style={[styles.headerTitle, { color: colors.text }]}>
-          Historique des paiements
+          {t('userProfile.paymentHistory.title')}
         </Text>
         <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
-          {payments.length} paiement(s)
+          {payments.length} {t('userProfile.paymentHistory.payments')}
         </Text>
       </View>
 
@@ -330,10 +330,10 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
                   <View style={styles.progressContainer}>
                     <View style={styles.progressHeader}>
                       <Text style={[styles.progressLabel, { color: colors.textSecondary }]}>
-                        Forfait actif
+                        {t('userProfile.paymentHistory.forfaitActive')}
                       </Text>
                       <Text style={[styles.progressDays, { color: payment.remainingDays < 7 ? '#f59e0b' : '#10b981' }]}>
-                        {payment.remainingDays}j restants
+                        {payment.remainingDays}{t('userProfile.paymentHistory.daysRemaining')}
                       </Text>
                     </View>
                     <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
@@ -362,7 +362,7 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
             onPress={() => fetchPayments(currentPage - 1)}
             disabled={currentPage === 1}
             accessible={true}
-            accessibilityLabel="Page précédente"
+            accessibilityLabel={t('userProfile.paymentHistory.previousPage')}
             accessibilityRole="button"
             accessibilityState={{ disabled: currentPage === 1 }}
             style={[
@@ -375,14 +375,14 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
             ]}
           >
             <Text style={[styles.paginationButtonText, { color: colors.text }]}>
-              Précédent
+              {t('userProfile.paymentHistory.previousPage')}
             </Text>
           </TouchableOpacity>
 
           <Text 
             style={[styles.paginationText, { color: colors.textSecondary }]}
             accessible={true}
-            accessibilityLabel={`Page ${currentPage} sur ${totalPages}`}
+            accessibilityLabel={`Page ${currentPage} ${t('userProfile.paymentHistory.pageOf')} ${totalPages}`}
           >
             {currentPage} / {totalPages}
           </Text>
@@ -391,7 +391,7 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
             onPress={() => fetchPayments(currentPage + 1)}
             disabled={currentPage === totalPages}
             accessible={true}
-            accessibilityLabel="Page suivante"
+            accessibilityLabel={t('userProfile.paymentHistory.nextPage')}
             accessibilityRole="button"
             accessibilityState={{ disabled: currentPage === totalPages }}
             style={[
@@ -404,7 +404,7 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
             ]}
           >
             <Text style={[styles.paginationButtonText, { color: colors.text }]}>
-              Suivant
+              {t('userProfile.paymentHistory.nextPage')}
             </Text>
           </TouchableOpacity>
         </View>

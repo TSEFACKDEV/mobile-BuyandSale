@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useThemeColors } from '../../contexts/ThemeContext';
+import { useTranslation } from '../../hooks/useTranslation';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const { width } = Dimensions.get('window');
@@ -46,6 +47,7 @@ const ForfaitSelectorModal: React.FC<ForfaitSelectorModalProps> = ({
   isLoading = false,
 }) => {
   const colors = useThemeColors();
+  const { t } = useTranslation();
 
   const getForfaitIcon = (type: string) => {
     switch (type) {
@@ -99,11 +101,11 @@ const ForfaitSelectorModal: React.FC<ForfaitSelectorModalProps> = ({
           <View style={[styles.header, { borderBottomColor: colors.border }]}>
             <View style={styles.headerContent}>
               <Text style={[styles.title, { color: colors.text }]}>
-                Choisir un forfait de boost
+                {t('userProfile.forfaitSelector.title')}
               </Text>
               {productName && (
                 <Text style={[styles.productName, { color: colors.textSecondary }]} numberOfLines={1}>
-                  Pour : {productName}
+                  {t('userProfile.forfaitSelector.for')} {productName}
                 </Text>
               )}
             </View>
@@ -122,18 +124,17 @@ const ForfaitSelectorModal: React.FC<ForfaitSelectorModalProps> = ({
               <View style={styles.emptyContainer}>
                 <ActivityIndicator size="large" color="#FF6B35" />
                 <Text style={[styles.emptyTitle, { color: colors.text }]}>
-                  Chargement des forfaits...
+                  {t('userProfile.forfaitSelector.loading')}
                 </Text>
               </View>
             ) : forfaits.length === 0 ? (
               <View style={styles.emptyContainer}>
                 <Icon name="pricetags-outline" size={64} color="#CBD5E1" />
                 <Text style={[styles.emptyTitle, { color: colors.text }]}>
-                  Aucun forfait disponible
+                  {t('userProfile.forfaitSelector.noForfaits')}
                 </Text>
                 <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                  Les forfaits de boost ne sont pas disponibles pour le moment.
-                  Vous pourrez booster votre annonce plus tard depuis votre profil.
+                  {t('userProfile.forfaitSelector.noForfaitsMessage')}
                 </Text>
               </View>
             ) : (
@@ -165,7 +166,7 @@ const ForfaitSelectorModal: React.FC<ForfaitSelectorModalProps> = ({
                         {getForfaitLabel(forfait.type)}
                       </Text>
                       <Text style={[styles.forfaitDuration, { color: colors.textSecondary }]}>
-                        {forfait.duration} jours de visibilité
+                        {forfait.duration} {t('userProfile.forfaitSelector.daysVisibility')}
                       </Text>
                       {forfait.description && (
                         <Text style={[styles.forfaitDescription, { color: colors.textSecondary }]} numberOfLines={2}>
@@ -178,7 +179,7 @@ const ForfaitSelectorModal: React.FC<ForfaitSelectorModalProps> = ({
                         {forfait.price.toLocaleString()}
                       </Text>
                       <Text style={[styles.currency, { color: colors.textSecondary }]}>
-                        FCFA
+                        {t('userProfile.forfaitSelector.currency')}
                       </Text>
                     </View>
                   </View>
@@ -195,7 +196,7 @@ const ForfaitSelectorModal: React.FC<ForfaitSelectorModalProps> = ({
               onPress={onSkip}
             >
               <Text style={[styles.skipButtonText, { color: colors.textSecondary }]}>
-                Continuer sans forfait
+                {t('userProfile.forfaitSelector.continueWithout')}
               </Text>
             </TouchableOpacity>
           </View>

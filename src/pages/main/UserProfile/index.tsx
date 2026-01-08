@@ -16,6 +16,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useAppSelector, useAppDispatch } from '../../../hooks/store';
 import { useProducts } from '../../../hooks/useProducts';
 import { useSellerReviews } from '../../../hooks/useSellerReviews';
+import { useTranslation } from '../../../hooks/useTranslation';
 import { useTheme, useThemeColors } from '../../../contexts/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -72,6 +73,7 @@ const UserProfile: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const { theme } = useTheme();
   const colors = useThemeColors();
+  const { t, language } = useTranslation();
   const isDark = theme.isDark;
 
   const authState = useAppSelector((state) => state.authentification);
@@ -99,11 +101,6 @@ const UserProfile: React.FC = () => {
     if (!productForfaits || productForfaits.length === 0) return [];
 
     const now = new Date();
-    const FORFAIT_PRIORITY = {
-      PREMIUM: 1,
-      TOP_ANNONCE: 2,
-      URGENT: 3,
-    };
 
     return productForfaits
       .filter((pf: any) => {
@@ -211,12 +208,12 @@ const UserProfile: React.FC = () => {
 
   const handleLogout = useCallback(async () => {
     Alert.alert(
-      'Déconnexion',
-      'Voulez-vous vraiment vous déconnecter ?',
+      t('userProfile.messages.logoutConfirm'),
+      t('userProfile.actions.logout') + ' ?',
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('userProfile.actions.cancel'), style: 'cancel' },
         {
-          text: 'Déconnecter',
+          text: t('userProfile.actions.logout'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -266,13 +263,13 @@ const UserProfile: React.FC = () => {
       ).unwrap();
 
       if (result) {
-        Alert.alert('Succès', 'Profil mis à jour avec succès');
+        Alert.alert(t('userProfile.messages.profileUpdateSuccess'), t('userProfile.messages.profileUpdateSuccess'));
         setIsEditingProfile(false);
         // Rafraîchir le profil
         await dispatch(getUserProfileAction());
       }
     } catch (error: any) {
-      Alert.alert('Erreur', error.message || 'Échec de la mise à jour du profil');
+      Alert.alert(t('userProfile.messages.profileUpdateError'), error.message || t('userProfile.messages.profileUpdateError'));
     }
   }, [profileData, user?.id, dispatch]);
 
@@ -282,7 +279,7 @@ const UserProfile: React.FC = () => {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       
       if (status !== 'granted') {
-        Alert.alert('Permission refusée', 'Nous avons besoin de votre permission pour accéder à la galerie');
+        Alert.alert(t('userProfile.messages.permissionDenied'), t('userProfile.messages.permissionGallery'));
         return;
       }
 
@@ -342,10 +339,10 @@ const UserProfile: React.FC = () => {
         throw new Error(data.meta?.message || 'Échec de la mise à jour de l\'avatar');
       }
 
-      Alert.alert('Succès', 'Avatar mis à jour avec succès');
+      Alert.alert(t('userProfile.messages.avatarUpdateSuccess'), t('userProfile.messages.avatarUpdateSuccess'));
       await dispatch(getUserProfileAction());
     } catch (error: any) {
-      Alert.alert('Erreur', error.message || 'Échec de la mise à jour de l\'avatar');
+      Alert.alert(t('userProfile.messages.avatarUpdateError'), error.message || t('userProfile.messages.avatarUpdateError'));
     } finally {
       setIsUploadingAvatar(false);
     }
@@ -356,7 +353,7 @@ const UserProfile: React.FC = () => {
     const product = userProducts.find((p: any) => p.id === productId);
     
     if (!product) {
-      Alert.alert('Erreur', 'Produit non trouvé');
+      Alert.alert(t('userProfile.messages.error'), t('userProfile.messages.productNotFound'));
       return;
     }
     
@@ -366,8 +363,8 @@ const UserProfile: React.FC = () => {
     // Vérifier si l'annonce a déjà le forfait PREMIUM (niveau max)
     if (currentForfaitType === 'PREMIUM') {
       Alert.alert(
-        'Forfait maximum atteint',
-        'Cette annonce possède déjà le forfait Premium, qui est le niveau le plus élevé. Vous ne pouvez plus la booster.'
+        t('userProfile.messages.maxForfaitReached'),
+        t('userProfile.messages.maxForfaitMessage')
       );
       return;
     }
@@ -376,16 +373,18 @@ const UserProfile: React.FC = () => {
     if (currentForfaitType) {
       const currentPriority = FORFAIT_PRIORITY[currentForfaitType];
       const availableForfaits = currentPriority === 2 
-        ? 'Premium uniquement' 
-        : 'Top Annonce ou Premium';
+        ? t('userProfile.messages.premiumOnly')
+        : t('userProfile.messages.topOrPremium');
       
       Alert.alert(
-        'Améliorer le forfait',
-        `Cette annonce possède actuellement le forfait ${FORFAIT_LABELS[currentForfaitType]}.\n\nVous pouvez la booster avec : ${availableForfaits}`,
+        t('userProfile.messages.upgradeForfait'),
+        `${language === 'fr' 
+          ? `Cette annonce possède actuellement le forfait ${FORFAIT_LABELS[currentForfaitType]}.\n\nVous pouvez la booster avec : ${availableForfaits}`
+          : `This ad currently has the ${FORFAIT_LABELS[currentForfaitType]} package.\n\nYou can boost it with: ${availableForfaits}`}`,
         [
-          { text: 'Annuler', style: 'cancel' },
+          { text: t('common.cancel'), style: 'cancel' },
           {
-            text: 'Continuer',
+            text: t('userProfile.messages.continue'),
             onPress: () => {
               setBoostingProductId(productId);
               setBoostingProductName(productName);
@@ -419,7 +418,7 @@ const UserProfile: React.FC = () => {
       setShowForfaitSelector(false);
       setShowPaymentModal(true);
     } catch (error: any) {
-      Alert.alert('Erreur', error.message);
+      Alert.alert(t('userProfile.messages.error'), error.message);
       setShowForfaitSelector(false);
     }
   }, [boostingProductId, forfaits]);
@@ -486,10 +485,10 @@ const UserProfile: React.FC = () => {
   }
 
   const tabs = [
-    { id: 'active' as TabType, label: 'Actifs', icon: 'cube-outline', count: userProducts.length },
-    { id: 'pending' as TabType, label: 'En attente', icon: 'time-outline', count: userPendingProducts.length },
-    { id: 'payments' as TabType, label: 'Paiements', icon: 'card-outline', count: null },
-    { id: 'profile' as TabType, label: 'Profil', icon: 'person-outline', count: null },
+    { id: 'active' as TabType, label: t('userProfile.tabs.activeProducts'), icon: 'cube-outline', count: userProducts.length },
+    { id: 'pending' as TabType, label: t('userProfile.tabs.pendingProducts'), icon: 'time-outline', count: userPendingProducts.length },
+    { id: 'payments' as TabType, label: t('userProfile.tabs.payments'), icon: 'card-outline', count: null },
+    { id: 'profile' as TabType, label: t('userProfile.tabs.profile'), icon: 'person-outline', count: null },
   ];
 
   const formatDate = (dateString: string) => {
@@ -565,14 +564,14 @@ const UserProfile: React.FC = () => {
                   {userRating > 0 ? userRating.toFixed(1) : '0.0'}
                 </Text>
                 <Text style={[styles.ratingCount, isDark && styles.ratingCountDark]}>
-                  ({userTotalReviews > 0 ? `${userTotalReviews} avis` : 'Aucun avis'})
+                  ({userTotalReviews > 0 ? `${userTotalReviews} ${t('userProfile.stats.reviews')}` : t('userProfile.stats.noReviews')})
                 </Text>
               </View>
             </View>
           </View>
           <View style={[styles.memberSince, isDark && styles.memberSinceDark]}>
             <Text style={[styles.memberSinceLabel, isDark && styles.memberSinceLabelDark]}>
-              Membre depuis
+              {t('userProfile.profile.memberSince')}
             </Text>
             <Text style={[styles.memberSinceDate, isDark && styles.memberSinceDateDark]}>
               {formatDate(user.createdAt)}
@@ -632,14 +631,14 @@ const UserProfile: React.FC = () => {
             <View>
               <View style={styles.tabHeader}>
                 <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
-                  Mes annonces actives ({userProducts.length})
+                  {t('userProfile.labels.myActiveAds')} ({userProducts.length})
                 </Text>
                 <TouchableOpacity
                   style={styles.createButton}
                   onPress={() => (navigation as any).navigate('PostAd')}
                 >
                   <Icon name="add-circle" size={20} color="#FFFFFF" />
-                  <Text style={styles.createButtonText}>Créer</Text>
+                  <Text style={styles.createButtonText}>{t('userProfile.actions.create')}</Text>
                 </TouchableOpacity>
               </View>
               {isLoadingUserProducts ? (
@@ -650,17 +649,17 @@ const UserProfile: React.FC = () => {
                 <View style={styles.emptyState}>
                   <Icon name="cube-outline" size={64} color="#9CA3AF" />
                   <Text style={[styles.emptyStateTitle, isDark && styles.emptyStateTitleDark]}>
-                    Aucune annonce active
+                    {t('userProfile.emptyStates.noActiveAds')}
                   </Text>
                   <Text style={[styles.emptyStateDescription, isDark && styles.emptyStateDescriptionDark]}>
-                    Créez votre première annonce pour commencer à vendre
+                    {t('userProfile.messages.createFirstAd')}
                   </Text>
                   <TouchableOpacity
                     style={styles.emptyStateButton}
                     onPress={() => (navigation as any).navigate('PostAd')}
                   >
                     <Icon name="add-circle-outline" size={20} color="#FFFFFF" />
-                    <Text style={styles.emptyStateButtonText}>Créer ma première annonce</Text>
+                    <Text style={styles.emptyStateButtonText}>{t('userProfile.messages.createFirstAdButton')}</Text>
                   </TouchableOpacity>
                 </View>
               ) : (
@@ -721,20 +720,20 @@ const UserProfile: React.FC = () => {
                             <TouchableOpacity
                               style={styles.productActionButton}
                               onPress={() => Alert.alert(
-                                'Confirmation',
-                                `Voulez-vous supprimer "${product.name}" ?`,
+                                t('userProfile.messages.confirmation'),
+                                `${t('userProfile.messages.deleteConfirmText')} "${product.name}" ?`,
                                 [
-                                  { text: 'Annuler', style: 'cancel' },
+                                  { text: t('userProfile.actions.cancel'), style: 'cancel' },
                                   { 
-                                    text: 'Supprimer', 
+                                    text: t('userProfile.actions.delete'), 
                                     style: 'destructive',
                                     onPress: async () => {
                                       try {
                                         await deleteUserProduct(product.id);
-                                        Alert.alert('Succès', 'Produit supprimé avec succès');
+                                        Alert.alert(t('userProfile.messages.success'), t('userProfile.messages.productDeleted'));
                                         await refetchUserProducts();
                                       } catch (error: any) {
-                                        Alert.alert('Erreur', error.message || 'Échec de la suppression');
+                                        Alert.alert(t('userProfile.messages.error'), error.message || t('userProfile.messages.deleteFailed'));
                                       }
                                     }
                                   }
@@ -768,14 +767,14 @@ const UserProfile: React.FC = () => {
             <View>
               <View style={styles.tabHeader}>
                 <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
-                  Annonces en attente ({userPendingProducts.length})
+                  {t('userProfile.labels.pendingAds')} ({userPendingProducts.length})
                 </Text>
                 <TouchableOpacity
                   style={styles.createButton}
                   onPress={() => (navigation as any).navigate('PostAd')}
                 >
                   <Icon name="add-circle" size={20} color="#FFFFFF" />
-                  <Text style={styles.createButtonText}>Créer</Text>
+                  <Text style={styles.createButtonText}>{t('userProfile.actions.create')}</Text>
                 </TouchableOpacity>
               </View>
               {isLoadingPendingProducts ? (
@@ -786,17 +785,17 @@ const UserProfile: React.FC = () => {
                 <View style={styles.emptyState}>
                   <Icon name="time-outline" size={64} color="#9CA3AF" />
                   <Text style={[styles.emptyStateTitle, isDark && styles.emptyStateTitleDark]}>
-                    Aucune annonce en attente
+                    {t('userProfile.emptyStates.noPendingAds')}
                   </Text>
                   <Text style={[styles.emptyStateDescription, isDark && styles.emptyStateDescriptionDark]}>
-                    Vos annonces en cours de modération apparaîtront ici
+                    {t('userProfile.messages.pendingAdsInfo')}
                   </Text>
                   <TouchableOpacity
                     style={styles.emptyStateButton}
                     onPress={() => (navigation as any).navigate('PostAd')}
                   >
                     <Icon name="add-circle-outline" size={20} color="#FFFFFF" />
-                    <Text style={styles.emptyStateButtonText}>Créer une annonce</Text>
+                    <Text style={styles.emptyStateButtonText}>{t('userProfile.actions.createAd')}</Text>
                   </TouchableOpacity>
                 </View>
               ) : (
@@ -813,7 +812,7 @@ const UserProfile: React.FC = () => {
                       />
                       <View style={styles.pendingBadge}>
                         <Icon name="time-outline" size={14} color="#FFFFFF" />
-                        <Text style={styles.pendingBadgeText}>En attente</Text>
+                        <Text style={styles.pendingBadgeText}>{t('userProfile.labels.pending')}</Text>
                       </View>
                       <View style={styles.productInfo}>
                         <Text style={[styles.productName, isDark && styles.productNameDark]} numberOfLines={2}>
@@ -848,7 +847,7 @@ const UserProfile: React.FC = () => {
             <View>
               <View style={styles.profileHeader}>
                 <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
-                  Informations personnelles
+                  {t('userProfile.labels.personalInfo')}
                 </Text>
                 {!isEditingProfile && (
                   <TouchableOpacity style={styles.editProfileButton} onPress={handleStartEdit}>
@@ -861,39 +860,39 @@ const UserProfile: React.FC = () => {
                 <View style={styles.profileForm}>
                   <View style={styles.profileField}>
                     <Text style={[styles.profileLabel, isDark && styles.profileLabelDark]}>
-                      Prénom
+                      {t('userProfile.profile.firstName')}
                     </Text>
                     <TextInput
                       style={[styles.profileInput, isDark && styles.profileInputDark]}
                       value={profileData.firstName}
                       onChangeText={(text) => setProfileData({ ...profileData, firstName: text })}
-                      placeholder="Prénom"
+                      placeholder={t('userProfile.profile.firstName')}
                       placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
                     />
                   </View>
 
                   <View style={styles.profileField}>
                     <Text style={[styles.profileLabel, isDark && styles.profileLabelDark]}>
-                      Nom
+                      {t('userProfile.profile.lastName')}
                     </Text>
                     <TextInput
                       style={[styles.profileInput, isDark && styles.profileInputDark]}
                       value={profileData.lastName}
                       onChangeText={(text) => setProfileData({ ...profileData, lastName: text })}
-                      placeholder="Nom"
+                      placeholder={t('userProfile.profile.lastName')}
                       placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
                     />
                   </View>
 
                   <View style={styles.profileField}>
                     <Text style={[styles.profileLabel, isDark && styles.profileLabelDark]}>
-                      Email
+                      {t('userProfile.profile.email')}
                     </Text>
                     <TextInput
                       style={[styles.profileInput, isDark && styles.profileInputDark]}
                       value={profileData.email}
                       onChangeText={(text) => setProfileData({ ...profileData, email: text })}
-                      placeholder="Email"
+                      placeholder={t('userProfile.profile.email')}
                       placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
                       keyboardType="email-address"
                       autoCapitalize="none"
@@ -902,7 +901,7 @@ const UserProfile: React.FC = () => {
 
                   <View style={styles.profileField}>
                     <PhoneInput
-                      label="Téléphone"
+                      label={t('userProfile.profile.phone')}
                       value={profileData.phone}
                       onChangeText={(text) => setProfileData({ ...profileData, phone: text })}
                       placeholder="6XX XX XX XX"
@@ -911,10 +910,10 @@ const UserProfile: React.FC = () => {
 
                   <View style={styles.profileActions}>
                     <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
-                      <Text style={styles.profileButtonText}>Enregistrer</Text>
+                      <Text style={styles.profileButtonText}>{t('userProfile.actions.saveProfile')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.cancelButton} onPress={handleCancelEdit}>
-                      <Text style={styles.profileButtonText}>Annuler</Text>
+                      <Text style={styles.profileButtonText}>{t('userProfile.actions.cancel')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -922,7 +921,7 @@ const UserProfile: React.FC = () => {
                 <View style={styles.profileForm}>
                   <View style={styles.profileField}>
                     <Text style={[styles.profileLabel, isDark && styles.profileLabelDark]}>
-                      Nom complet
+                      {t('userProfile.labels.fullName')}
                     </Text>
                     <View style={[styles.profileValue, isDark && styles.profileValueDark]}>
                       <Text style={[styles.profileValueText, isDark && styles.profileValueTextDark]}>
@@ -933,7 +932,7 @@ const UserProfile: React.FC = () => {
 
                   <View style={styles.profileField}>
                     <Text style={[styles.profileLabel, isDark && styles.profileLabelDark]}>
-                      Email
+                      {t('userProfile.profile.email')}
                     </Text>
                     <View style={[styles.profileValue, isDark && styles.profileValueDark]}>
                       <Text style={[styles.profileValueText, isDark && styles.profileValueTextDark]}>
@@ -944,18 +943,18 @@ const UserProfile: React.FC = () => {
 
                   <View style={styles.profileField}>
                     <Text style={[styles.profileLabel, isDark && styles.profileLabelDark]}>
-                      Téléphone
+                      {t('userProfile.profile.phone')}
                     </Text>
                     <View style={[styles.profileValue, isDark && styles.profileValueDark]}>
                       <Text style={[styles.profileValueText, isDark && styles.profileValueTextDark]}>
-                        {user.phone || 'Non renseigné'}
+                        {user.phone || t('userProfile.messages.notSpecified')}
                       </Text>
                     </View>
                   </View>
 
                   <View style={styles.profileField}>
                     <Text style={[styles.profileLabel, isDark && styles.profileLabelDark]}>
-                      Membre depuis
+                      {t('userProfile.profile.memberSince')}
                     </Text>
                     <View style={[styles.profileValue, isDark && styles.profileValueDark]}>
                       <Text style={[styles.profileValueText, isDark && styles.profileValueTextDark]}>
@@ -970,11 +969,11 @@ const UserProfile: React.FC = () => {
                       onPress={() => navigation.navigate('Settings' as never)}
                     >
                       <Icon name="settings-outline" size={20} color="#FFFFFF" />
-                      <Text style={styles.profileButtonText}>Paramètres</Text>
+                      <Text style={styles.profileButtonText}>{t('userProfile.tabs.settings')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
                       <Icon name="log-out-outline" size={20} color="#FFFFFF" />
-                      <Text style={styles.profileButtonText}>Se déconnecter</Text>
+                      <Text style={styles.profileButtonText}>{t('userProfile.actions.logout')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>

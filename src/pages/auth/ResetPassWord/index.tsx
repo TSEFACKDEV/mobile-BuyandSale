@@ -14,6 +14,7 @@ import { resetPasswordAction } from '../../../store/password/actions'
 import { selectResetPassword } from '../../../store/password/slice'
 import { LoadingType } from '../../../models/store'
 import { Loading } from '../../../components/LoadingVariants'
+import { useTranslation } from '../../../hooks/useTranslation'
 
 type ResetPasswordNavigationProp = NativeStackNavigationProp<
   AuthStackParamList,
@@ -26,6 +27,7 @@ const ResetPassword = () => {
   const navigation = useNavigation<ResetPasswordNavigationProp>()
   const route = useRoute<ResetPasswordRouteProp>()
   const dispatch = useAppDispatch()
+  const { t } = useTranslation()
 
   // ✅ Pattern Redux standardisé avec hooks typés
   const resetPasswordState = useAppSelector(selectResetPassword)
@@ -46,26 +48,26 @@ const ResetPassword = () => {
     let isValid = true
 
     if (!password.trim()) {
-      setPasswordError('Mot de passe requis')
+      setPasswordError(t('auth.errors.validation.passwordRequired'))
       isValid = false
     } else if (password.length < 6) {
-      setPasswordError('Minimum 6 caractères')
+      setPasswordError(t('auth.errors.validation.passwordMinLength'))
       isValid = false
     } else if (!/(?=.*[A-Za-z])(?=.*\d)/.test(password)) {
-      setPasswordError('Au moins 1 lettre et 1 chiffre requis')
+      setPasswordError(t('auth.errors.validation.passwordComplexity'))
       isValid = false
     }
 
     if (!confirmPassword.trim()) {
-      setConfirmPasswordError('Confirmez votre mot de passe')
+      setConfirmPasswordError(t('auth.errors.validation.confirmPasswordRequired'))
       isValid = false
     } else if (password !== confirmPassword) {
-      setConfirmPasswordError('Les mots de passe ne correspondent pas')
+      setConfirmPasswordError(t('auth.errors.validation.confirmPasswordMismatch'))
       isValid = false
     }
 
     if (!token) {
-      Alert.alert('Erreur', 'Token de réinitialisation manquant', [{ text: 'OK' }])
+      Alert.alert(t('auth.errors.title'), t('auth.errors.account.tokenMissing'), [{ text: 'OK' }])
       return
     }
 
@@ -81,8 +83,8 @@ const ResetPassword = () => {
 
         // 🎉 Réinitialisation réussie
         Alert.alert(
-          'Succès',
-          'Votre mot de passe a été réinitialisé avec succès',
+          t('auth.success.title'),
+          t('auth.success.passwordReset'),
           [
             {
               text: 'OK',
@@ -94,7 +96,7 @@ const ResetPassword = () => {
         )
       } catch (error: unknown) {
         // 🚨 Gestion d'erreurs
-        let errorMessage = 'Erreur lors de la réinitialisation'
+        let errorMessage = t('auth.errors.generic.resetFailed')
 
         if (error instanceof Error) {
           errorMessage = error.message
@@ -113,8 +115,8 @@ const ResetPassword = () => {
         // Messages d'erreur spécifiques
         if (errorMessage.includes('expiré') || errorMessage.includes('expired')) {
           Alert.alert(
-            'Token expiré',
-            'Le lien de réinitialisation a expiré. Veuillez refaire une demande.',
+            t('auth.titles.tokenExpired'),
+            t('auth.errors.token.expiredMessage'),
             [
               {
                 text: 'OK',
@@ -125,16 +127,16 @@ const ResetPassword = () => {
             ]
           )
         } else if (errorMessage.includes('invalide') || errorMessage.includes('invalid')) {
-          Alert.alert('Erreur', 'Lien de réinitialisation invalide', [{ text: 'OK' }])
+          Alert.alert(t('auth.errors.title'), t('auth.errors.token.invalid'), [{ text: 'OK' }])
         } else {
-          Alert.alert('Erreur', errorMessage, [{ text: 'OK' }])
+          Alert.alert(t('auth.errors.title'), errorMessage, [{ text: 'OK' }])
         }
       }
     }
   }
 
   if (isLoading) {
-    return <Loading fullScreen message="Réinitialisation en cours..." />;
+    return <Loading fullScreen message={t('auth.loading.sending')} />;
   }
 
   return (

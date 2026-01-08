@@ -20,32 +20,128 @@
     "loadingCategories": "Chargement des catégories...",
     "loadingProducts": "Chargement des annonces...",
     "noProducts": "Aucune annonce disponible",
-    "noCategories": "Aucune catégorie disponible"
+    "noCategories": "Aucune catégorie disponible",
+    "noSellers": "Aucun vendeur disponible"
+  },
+  "categories": {
+    "Électronique": "Électronique",
+    "Maison": "Maison",
+    "Automobile": "Automobile",
+    "Immobilier": "Immobilier",
+    "Mode": "Mode",
+    "Enfants": "Enfants",
+    "Sport": "Sport",
+    "Animaux": "Animaux",
+    "Loisirs": "Loisirs",
+    "Services": "Services",
+    "Rencontres": "Rencontres",
+    "Événements": "Événements",
+    "Divers": "Divers"
   },
   "common": {
     "views": "vues",
     "products": "annonces",
     "reviews": "avis",
-    "rating": "Note"
+    "rating": "Note",
+    "error": "Erreur",
+    "success": "Succès",
+    "loading": "Chargement...",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "previous": "Précédent",
+    "next": "Suivant"
+  },
+  "auth": {
+    "errors": {
+      "google": {
+        "authFailed": "Échec de l'authentification Google",
+        "tokenNotReceived": "Token Google non reçu",
+        "configMissing": "L'authentification Google n'est pas configurée. Veuillez contacter l'administrateur.",
+        "notAvailable": "Authentification Google non disponible pour le moment.",
+        "initFailed": "Impossible d'initier l'authentification Google",
+        "profileFailed": "Échec de récupération du profil utilisateur"
+      },
+      "validation": {
+        "identifierRequired": "Email ou téléphone requis",
+        "identifierInvalid": "Email invalide ou numéro Camerounais invalide (format: 6XX XX XX XX)",
+        "passwordRequired": "Mot de passe requis",
+        "passwordMinLength": "Minimum 6 caractères",
+        "passwordComplexity": "Au moins 1 lettre et 1 chiffre requis",
+        "confirmPasswordRequired": "Confirmez votre mot de passe",
+        "confirmPasswordMismatch": "Les mots de passe ne correspondent pas",
+        "emailRequired": "Email requis",
+        "emailInvalid": "Email invalide",
+        "emailExists": "Cet email est déjà utilisé",
+        "phoneExists": "Ce numéro est déjà utilisé",
+        "otpRequired": "Code OTP requis",
+        "otpLength": "Le code doit contenir 6 chiffres",
+        "otpDigitsOnly": "Le code ne doit contenir que des chiffres",
+        "otpExpired": "Code expiré. Demandez un nouveau code",
+        "otpInvalid": "Code OTP incorrect"
+      },
+      "account": {
+        "notVerified": "Compte non vérifié",
+        "verifyPrompt": "Veuillez vérifier votre email ou SMS.",
+        "suspended": "Compte suspendu",
+        "suspendedMessage": "Votre compte a été temporairement suspendu. Contactez le support.",
+        "userIdMissing": "ID utilisateur manquant",
+        "tokenMissing": "Token de réinitialisation manquant",
+        "emailNotFound": "Aucun compte associé à cet email"
+      },
+      "generic": {
+        "loginFailed": "Erreur de connexion",
+        "incorrectCredentials": "Identifiants incorrects",
+        "registrationFailed": "Erreur lors de l'inscription",
+        "resetFailed": "Erreur lors de la réinitialisation",
+        "sendEmailFailed": "Erreur lors de l'envoi de l'email",
+        "resendCodeFailed": "Erreur lors du renvoi du code"
+      },
+      "token": {
+        "expired": "Token expiré",
+        "expiredMessage": "Le lien de réinitialisation a expiré. Veuillez refaire une demande.",
+        "invalid": "Lien de réinitialisation invalide"
+      }
+    },
+    "success": {
+      "googleLogin": "Connexion Google réussie !",
+      "googleRegistration": "Inscription Google réussie !",
+      "registration": "Inscription réussie",
+      "verificationSent": "Un code de vérification vous a été envoyé",
+      "codeResent": "Un nouveau code a été envoyé",
+      "passwordReset": "Votre mot de passe a été réinitialisé avec succès",
+      "emailSent": "Un lien de réinitialisation a été envoyé à votre adresse email."
+    },
+    "loading": {
+      "login": "Connexion en cours...",
+      "verification": "Vérification en cours...",
+      "sending": "Envoi en cours..."
+    },
+    "titles": {
+      "configMissing": "Configuration manquante",
+      "emailSent": "Email envoyé",
+      "tokenExpired": "Token expiré"
+    }
   },
   "userProfile": {
     "title": "Mon Profil",
     "tabs": {
-      "activeProducts": "Annonces Actives",
-      "pendingProducts": "Annonces en Attente",
+      "activeProducts": "Actifs",
+      "pendingProducts": "En attente",
+      "payments": "Paiements",
       "profile": "Profil",
       "settings": "Paramètres"
     },
     "stats": {
       "products": "Annonces",
       "reviews": "Avis",
-      "rating": "Note"
+      "noReviews": "Aucun avis"
     },
     "actions": {
       "editProfile": "Modifier le Profil",
       "logout": "Déconnexion",
       "dashboard": "Tableau de bord",
       "createAd": "Créer une annonce",
+      "create": "Créer",
       "saveProfile": "Enregistrer",
       "cancel": "Annuler",
       "boostAd": "Booster",
@@ -62,44 +158,119 @@
       "phone": "Téléphone",
       "location": "Localisation"
     },
-    "settings": {
-      "title": "Paramètres",
-      "theme": "Thème",
-      "themeLight": "Clair",
-      "themeDark": "Sombre",
-      "themeSystem": "Système",
-      "language": "Langue",
-      "languageFr": "Français",
-      "languageEn": "English",
-      "notifications": "Notifications",
-      "privacy": "Confidentialité"
-    },
     "messages": {
       "loading": "Chargement...",
       "noProducts": "Aucune annonce pour le moment",
       "noPendingProducts": "Aucune annonce en attente",
+      "noActiveProducts": "Aucune annonce active",
       "profileUpdateSuccess": "Profil mis à jour avec succès",
       "profileUpdateError": "Erreur lors de la mise à jour du profil",
       "avatarUpdateSuccess": "Avatar mis à jour avec succès",
       "avatarUpdateError": "Erreur lors de la mise à jour de l'avatar",
       "deleteConfirm": "Supprimer cette annonce ?",
+      "deleteConfirmText": "Voulez-vous supprimer",
       "deleteSuccess": "Annonce supprimée avec succès",
       "deleteError": "Erreur lors de la suppression",
       "logoutConfirm": "Voulez-vous vous déconnecter ?",
       "constraintError": "Impossible de supprimer l'annonce avec des dépendances",
       "productNotFound": "Annonce non trouvée",
       "permissionDenied": "Permission refusée",
-      "networkError": "Erreur réseau"
-    }
-  },
-  "sellerProfile": {
-    "locationNotSpecified": "Localisation non spécifiée",
-    "memberSinceRecently": "Membre depuis récemment",
-    "reportModal": {
-      "reasonFraud": "Fraude ou arnaque",
-      "reasonSpam": "Spam ou publicité",
-      "reasonAbuse": "Comportement abusif",
-      "reasonOther": "Autre raison"
+      "permissionGallery": "Nous avons besoin de votre permission pour accéder à la galerie",
+      "networkError": "Erreur réseau",
+      "success": "Succès",
+      "error": "Erreur",
+      "confirmation": "Confirmation",
+      "productDeleted": "Produit supprimé avec succès",
+      "deleteFailed": "Échec de la suppression",
+      "createFirstAd": "Créez votre première annonce pour commencer à vendre",
+      "createFirstAdButton": "Créer ma première annonce",
+      "pendingAdsInfo": "Vos annonces en cours de modération apparaîtront ici",
+      "notSpecified": "Non renseigné",
+      "maxForfaitReached": "Forfait maximum atteint",
+      "maxForfaitMessage": "Cette annonce possède déjà le forfait Premium, qui est le niveau le plus élevé. Vous ne pouvez plus la booster.",
+      "upgradeForfait": "Améliorer le forfait",
+      "premiumOnly": "Premium uniquement",
+      "topOrPremium": "Top Annonce ou Premium",
+      "continue": "Continuer"
+    },
+    "emptyStates": {
+      "noActiveAds": "Aucune annonce active",
+      "noPendingAds": "Aucune annonce en attente",
+      "createFirstAd": "Créez votre première annonce pour commencer à vendre",
+      "pendingInfo": "Vos annonces en cours de modération apparaîtront ici"
+    },
+    "labels": {
+      "myActiveAds": "Mes annonces actives",
+      "pendingAds": "Annonces en attente",
+      "pending": "En attente",
+      "personalInfo": "Informations personnelles",
+      "fullName": "Nom complet"
+    },
+    "paymentHistory": {
+      "title": "Historique des paiements",
+      "payments": "paiement(s)",
+      "loading": "Chargement...",
+      "loadingError": "Erreur de chargement",
+      "retry": "Réessayer",
+      "noPayments": "Aucun paiement",
+      "noPaymentsDescription": "Votre historique de paiements apparaîtra ici",
+      "statusSuccess": "Payé",
+      "statusPending": "En attente",
+      "statusFailed": "Échoué",
+      "statusCancelled": "Annulé",
+      "statusExpired": "Expiré",
+      "forfaitActive": "Forfait actif",
+      "daysRemaining": "j restants",
+      "previousPage": "Précédent",
+      "nextPage": "Suivant",
+      "pageOf": "sur"
+    },
+    "paymentStatus": {
+      "pending": "Paiement en cours...",
+      "success": "Paiement réussi !",
+      "failed": "Paiement échoué",
+      "cancelled": "Paiement annulé",
+      "verifying": "Vérification...",
+      "pendingMessage": "Veuillez valider le paiement sur votre téléphone.\nLe forfait sera activé automatiquement.",
+      "successMessage": "Merci pour votre paiement !\nVotre forfait a été activé avec succès.",
+      "failedMessage": "Le paiement n'a pas pu être effectué.\nVeuillez réessayer.",
+      "cancelledMessage": "Le paiement a été annulé.\nVous pouvez réessayer.",
+      "redirecting": "Redirection dans",
+      "second": "seconde",
+      "seconds": "secondes",
+      "backToHome": "Retour à l'accueil",
+      "close": "Fermer",
+      "cancel": "Annuler"
+    },
+
+    "forfaitSelector": {
+      "title": "Choisir un forfait de boost",
+      "for": "Pour :",
+      "loading": "Chargement des forfaits...",
+      "noForfaits": "Aucun forfait disponible",
+      "noForfaitsMessage": "Les forfaits de boost ne sont pas disponibles pour le moment.\nVous pourrez booster votre annonce plus tard depuis votre profil.",
+      "daysVisibility": "jours de visibilité",
+      "continueWithout": "Continuer sans forfait",
+      "currency": "FCFA"
+    },
+    "payment": {
+      "title": "Paiement du forfait",
+      "forfait": "Forfait",
+      "amount": "Montant",
+      "methodTitle": "Paiement Mobile Money",
+      "methodDescription": "Entrez votre numéro de téléphone pour recevoir une notification de paiement",
+      "phoneNumber": "Numéro de téléphone",
+      "required": "*",
+      "phonePlaceholder": "6xxxxxxxx",
+      "infoMessage": "Vous recevrez une notification sur votre téléphone. Validez le paiement pour activer le forfait.",
+      "cancel": "Annuler",
+      "pay": "Payer",
+      "errorPhone": "Veuillez saisir votre numéro de téléphone",
+      "errorInvalidPhone": "Numéro invalide (ex: 6xxxxxxxx )",
+      "errorMissingInfo": "Informations manquantes pour le paiement",
+      "errorPaymentInfo": "Impossible de récupérer les informations de paiement",
+      "errorPaymentFailed": "Erreur lors de l'initiation du paiement",
+      "error": "Erreur"
     }
   },
   "howItWorks": {
@@ -117,6 +288,48 @@
       "title": "Vendez en toute sécurité",
       "description": "Profitez de nos outils de protection et de notre support"
     }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "sections": {
+      "appearance": "Apparence",
+      "language": "Langue",
+      "notifications": "Notifications",
+      "infoLegal": "Informations & Légal"
+    },
+    "darkMode": {
+      "title": "Mode sombre",
+      "enabled": "Activé",
+      "disabled": "Désactivé"
+    },
+    "languageOption": {
+      "title": "Langue",
+      "french": "Français",
+      "english": "English"
+    },
+    "notificationsOption": {
+      "title": "Notifications",
+      "enabled": "Activées",
+      "disabled": "Désactivées"
+    },
+    "about": {
+      "title": "À propos",
+      "description": "Découvrez notre mission et nos valeurs"
+    },
+    "contact": {
+      "title": "Contact",
+      "description": "Envoyez-nous un message"
+    },
+    "terms": {
+      "title": "Conditions d'utilisation",
+      "description": "Règles et conditions de la plateforme"
+    },
+    "privacy": {
+      "title": "Politique de confidentialité",
+      "description": "Protection de vos données personnelles"
+    },
+    "version": "Version",
+    "copyright": "BuyAndSale ©"
   },
   "about": {
     "hero": {
@@ -382,5 +595,192 @@
       "availability": "Lun-Ven, 8h-18h",
       "location": "Douala, Cameroun"
     }
+  },
+  "productDetails": {
+      "loading": "Chargement du produit...",
+      "sessionExpired": "Session expirée",
+      "sessionExpiredMessage": "Votre session a expiré. Veuillez vous reconnecter.",
+      "reconnect": "Se reconnecter",
+      "notFound": "Produit introuvable",
+      "back": "Retour",
+      "noImage": "Aucune image",
+      "description": "Description",
+      "state": "État",
+      "views": "Vues",
+      "notSpecified": "Non spécifié",
+      "stateNew": "Neuf",
+      "stateUsed": "Occasion",
+      "stateFair": "Correct",
+      "security": "Sécurité",
+      "securityTip1": "Rencontrez en public",
+      "securityTip2": "Vérifiez le produit",
+      "securityTip3": "Pas de paiement à l'avance",
+      "securityTip4": "Signalez toute activité suspecte",
+      "seller": "Vendeur",
+      "showNumber": "Voir le numéro",
+      "whatsapp": "WhatsApp",
+      "favoriteError": "Impossible de modifier les favoris",
+      "whatsappError": "Impossible d'ouvrir WhatsApp",
+      "interestedMessage": "Bonjour, je suis intéressé(e) par votre produit",
+      "today": "Aujourd'hui",
+      "yesterday": "Hier",
+      "daysAgo": "Il y a {days} jours"
+    },
+    "postAds": {
+      "title": "Créer une annonce",
+      "step1Title": "Informations principales",
+      "step1Subtitle": "Renseignez les informations principales de votre annonce",
+      "step2Title": "Ajoutez des photos et localisez",
+      "step2Subtitle": "Ajoutez des photos et indiquez la localisation",
+      "step3Title": "Coordonnées et validation",
+      "step3Subtitle": "Finalisez avec vos coordonnées et vérifiez les informations",
+      "productName": "Nom du produit",
+      "productNamePlaceholder": "Ex: iPhone 13 Pro Max",
+      "description": "Description",
+      "descriptionPlaceholder": "Décrivez votre produit en détail...",
+      "price": "Prix (FCFA)",
+      "pricePlaceholder": "500000",
+      "category": "Catégorie",
+      "selectCategory": "Sélectionner une catégorie",
+      "selectCategoryPlaceholder": "Sélectionnez une catégorie",
+      "productState": "État du produit",
+      "stateNew": "Neuf",
+      "stateUsed": "Occasion",
+      "stateFair": "Correct",
+      "required": "*",
+      "characterCounter": "{count}/10 caractères minimum",
+      "charactersMissing": "⚠️ {count} caractères manquants",
+      "validated": "✅",
+      "addPhotos": "Ajouter des photos",
+      "photosSubtitle": "Ajoutez jusqu'à {max} photos de votre produit",
+      "noPhotos": "Aucune photo ajoutée",
+      "addPhotoButton": "Ajouter des photos",
+      "city": "Ville",
+      "selectCity": "Sélectionner une ville",
+      "selectCityPlaceholder": "Sélectionnez une ville",
+      "neighborhood": "Quartier",
+      "neighborhoodPlaceholder": "Ex: Bonamoussadi",
+      "phone": "Numéro de téléphone",
+      "phonePlaceholder": "6XX XX XX XX",
+      "quantity": "Quantité disponible",
+      "quantityPlaceholder": "1",
+      "negotiable": "Le prix est négociable",
+      "summary": "Résumé de votre annonce",
+      "summaryProduct": "Produit",
+      "summaryPrice": "Prix",
+      "summaryState": "État",
+      "summaryCategory": "Catégorie",
+      "summaryCity": "Ville",
+      "summaryNeighborhood": "Quartier",
+      "summaryImages": "Images",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "publish": "Publier",
+      "maxImagesReached": "Limite atteinte",
+      "maxImagesMessage": "Vous avez déjà {max} images. Supprimez-en une pour en ajouter.",
+      "permissionRequired": "Permission requise",
+      "permissionMessage": "Nous avons besoin de votre permission pour accéder aux photos.",
+      "imagesAdded": "Succès",
+      "imagesAddedMessage": "{count} image(s) ajoutée(s) !",
+      "validationError": "Validation",
+      "fillRequired": "Veuillez remplir tous les champs requis.",
+      "validationErrors": "Erreurs de validation",
+      "errorProductId": "Erreur",
+      "errorProductIdMessage": "Impossible de récupérer l'identifiant du produit créé.",
+      "successCreated": "Succès",
+      "successCreatedMessage": "Annonce créée avec succès !",
+      "errorCreating": "Erreur lors de la création du produit",
+      "errorGeneric": "Erreur",
+      "validations": {
+        "nameRequired": "Le nom est requis",
+        "nameMinLength": "Le nom doit contenir au moins 3 caractères",
+        "descriptionRequired": "La description est requise",
+        "descriptionMinLength": "La description doit contenir au moins 10 caractères",
+        "priceRequired": "Le prix est requis",
+        "pricePositive": "Le prix doit être supérieur à 0",
+        "categoryRequired": "La catégorie est requise",
+        "stateRequired": "L'état est requis",
+        "cityRequired": "La ville est requise",
+        "neighborhoodRequired": "Le quartier est requis",
+        "phoneRequired": "Le numéro de téléphone est requis",
+        "phoneInvalid": "Le numéro de téléphone camerounais n'est pas valide",
+        "quantityRequired": "La quantité est requise",
+        "quantityPositive": "La quantité doit être supérieure à 0",
+        "imagesRequired": "Au moins une image est requise"
+      },
+    "deleteImage": "Supprimer l'image",
+    "deleteImageConfirm": "Voulez-vous vraiment supprimer cette image ?",
+    "delete": "Supprimer",
+    "publishedWithoutForfait": "Annonce publiée sans forfait. Vous pourrez en ajouter un plus tard.",
+    "ok": "OK"
+  },
+  "sellerProfile": {
+    "noPhone": "Aucun numéro de téléphone",
+    "checkOut": "Découvrez",
+    "reportSuccess": "Signalement envoyé",
+    "locationNotSpecified": "Localisation non précisée",
+    "memberSinceRecently": "Membre récemment",
+    "contactInfo": "Informations de contact",
+    "noProducts": "Aucun produit",
+    "whatsappError": "Impossible d'ouvrir WhatsApp",
+    "whatsapp": "WhatsApp",
+    "actions": {
+      "rate": "Noter",
+      "report": "Signaler"
+    },
+    "reportModal": {
+      "reasonFraud": "Fraude ou arnaque",
+      "reasonSpam": "Spam ou publicité",
+      "reasonAbuse": "Comportement abusif",
+      "reasonOther": "Autre raison"
+    }
+  },
+  "products": {
+    "searchPlaceholder": "Rechercher un produit...",
+    "resultsCount": "{count} résultat",
+    "resultsCountPlural": "{count} résultats",
+    "clearFilters": "Effacer ({count})",
+    "filters": "Filtres",
+    "noProductsFound": "Aucun produit trouvé",
+    "noResultsFor": "Aucun résultat pour \"{query}\"",
+    "noProductsAvailable": "Aucun produit disponible pour le moment",
+    "clearSearch": "Effacer la recherche",
+    "loading": "Chargement...",
+    "loadingProducts": "Chargement des produits...",
+    "errorLoading": "Erreur de chargement",
+    "errorMessage": "Impossible de charger les produits",
+    "retry": "Réessayer",
+    "loadingError": "Erreur chargement produits"
+  },
+  "sellers": {
+    "searchPlaceholder": "Rechercher un vendeur par nom...",
+    "sellersFound": "{count} vendeur trouvé",
+    "sellersFoundPlural": "{count} vendeurs trouvés",
+    "noSellersFound": "Aucun vendeur trouvé",
+    "noSellersAvailable": "Aucun vendeur n'est disponible pour le moment",
+    "loadingSellers": "Chargement des vendeurs...",
+    "errorLoading": "Erreur de chargement",
+    "errorMessage": "Une erreur est survenue lors du chargement des vendeurs."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllAsRead": "Tout lire",
+    "markAllAsReadTitle": "Marquer tout comme lu",
+    "markAllAsReadMessage": "Voulez-vous marquer toutes les notifications comme lues ?",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "allRead": "Toutes les notifications sont déjà lues",
+    "info": "Info",
+    "all": "Toutes",
+    "unread": "Non lues",
+    "noNotifications": "Aucune notification",
+    "noUnreadNotifications": "Vous n'avez aucune notification non lue",
+    "noNotificationsYet": "Vous n'avez pas encore de notifications",
+    "loading": "Chargement..."
+  },
+  "favorites": {
+    "title": "Favoris",
+    "noFavorites": "Aucun favori",
+    "noFavoritesMessage": "Vous n'avez pas encore ajouté de favoris"
   }
 }

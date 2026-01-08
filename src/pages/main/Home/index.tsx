@@ -264,7 +264,7 @@ const Home = () => {
           ) : topSellers.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Icon name="people-outline" size={48} color={theme.colors.textSecondary} />
-              <Text style={styles.emptyText}>Aucun vendeur disponible</Text>
+              <Text style={styles.emptyText}>{t('home.noSellers')}</Text>
             </View>
           ) : (
             <ScrollView 

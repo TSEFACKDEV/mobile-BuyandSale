@@ -9,6 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { useThemeColors } from '../../contexts/ThemeContext';
+import { useTranslation } from '../../hooks/useTranslation';
 import { useAppDispatch } from '../../hooks/store';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { checkPaymentStatusAction } from '../../store/payment/actions';
@@ -33,6 +34,7 @@ const PaymentStatusModal: React.FC<PaymentStatusModalProps> = ({
   onClose,
 }) => {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
 
   const [status, setStatus] = useState<PaymentStatus>('PENDING');
@@ -150,28 +152,28 @@ const PaymentStatusModal: React.FC<PaymentStatusModalProps> = ({
   const getStatusTitle = () => {
     switch (status) {
       case 'PENDING':
-        return 'Paiement en cours...';
+        return t('userProfile.paymentStatus.pending');
       case 'SUCCESS':
-        return 'Paiement réussi !';
+        return t('userProfile.paymentStatus.success');
       case 'FAILED':
-        return 'Paiement échoué';
+        return t('userProfile.paymentStatus.failed');
       case 'CANCELLED':
-        return 'Paiement annulé';
+        return t('userProfile.paymentStatus.cancelled');
       default:
-        return 'Vérification...';
+        return t('userProfile.paymentStatus.verifying');
     }
   };
 
   const getStatusMessage = () => {
     switch (status) {
       case 'PENDING':
-        return 'Veuillez valider le paiement sur votre téléphone.\nLe forfait sera activé automatiquement.';
+        return t('userProfile.paymentStatus.pendingMessage');
       case 'SUCCESS':
-        return `Merci pour votre paiement !\nVotre forfait a été activé avec succès.\n\nRedirection dans ${countdownDisplay} seconde${countdownDisplay > 1 ? 's' : ''}...`;
+        return `${t('userProfile.paymentStatus.successMessage')}\n\n${t('userProfile.paymentStatus.redirecting')} ${countdownDisplay} ${countdownDisplay > 1 ? t('userProfile.paymentStatus.seconds') : t('userProfile.paymentStatus.second')}...`;
       case 'FAILED':
-        return 'Le paiement n\'a pas pu être effectué.\nVeuillez réessayer.';
+        return t('userProfile.paymentStatus.failedMessage');
       case 'CANCELLED':
-        return 'Le paiement a été annulé.\nVous pouvez réessayer.';
+        return t('userProfile.paymentStatus.cancelledMessage');
       default:
         return '';
     }
@@ -227,7 +229,7 @@ const PaymentStatusModal: React.FC<PaymentStatusModalProps> = ({
               } : onError}
             >
               <Text style={styles.buttonText}>
-                {status === 'SUCCESS' ? 'Retour à l\'accueil' : 'Fermer'}
+                {status === 'SUCCESS' ? t('userProfile.paymentStatus.backToHome') : t('userProfile.paymentStatus.close')}
               </Text>
             </TouchableOpacity>
           )}
@@ -239,7 +241,7 @@ const PaymentStatusModal: React.FC<PaymentStatusModalProps> = ({
               onPress={onClose}
             >
               <Text style={[styles.cancelButtonText, { color: colors.text }]}>
-                Annuler
+                {t('userProfile.paymentStatus.cancel')}
               </Text>
             </TouchableOpacity>
           )}

@@ -16,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useThemeColors } from '../../../contexts/ThemeContext';
+import { useTranslation } from '../../../hooks/useTranslation';
 import { useAppSelector, useAppDispatch } from '../../../hooks/store';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { RootNavigationProp } from '../../../types/navigation';
@@ -75,6 +76,7 @@ const PostAds: React.FC = () => {
   const navigation = useNavigation<RootNavigationProp>();
   const dispatch = useAppDispatch();
   const colors = useThemeColors();
+  const { t } = useTranslation();
 
   // Redux state
   const categories = useAppSelector(selectCategories);
@@ -182,12 +184,12 @@ const PostAds: React.FC = () => {
 
   const getCategoryName = () => {
     const category = categories.find(c => c.id === formData.categoryId);
-    return category?.name || 'Sélectionner une catégorie';
+    return category?.name || t('postAds.selectCategoryPlaceholder');
   };
 
   const getCityName = () => {
     const city = cities.find(c => c.id === formData.cityId);
-    return city?.name || 'Sélectionner une ville';
+    return city?.name || t('postAds.selectCityPlaceholder');
   };
 
   // Sélection d'images
@@ -195,14 +197,14 @@ const PostAds: React.FC = () => {
     const availableSlots = MAX_IMAGES - formData.images.length;
 
     if (availableSlots === 0) {
-      Alert.alert('Limite atteinte', `Vous avez déjà ${MAX_IMAGES} images. Supprimez-en une pour en ajouter.`);
+      Alert.alert(t('postAds.maxImagesReached'), t('postAds.maxImagesMessage').replace('{max}', MAX_IMAGES.toString()));
       return;
     }
 
     // Demander la permission
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert('Permission requise', 'Nous avons besoin de votre permission pour accéder aux photos.');
+      Alert.alert(t('postAds.permissionRequired'), t('postAds.permissionMessage'));
       return;
     }
 
@@ -226,19 +228,19 @@ const PostAds: React.FC = () => {
         images: [...prev.images, ...newImages],
       }));
 
-      Alert.alert('Succès', `${newImages.length} image(s) ajoutée(s) !`);
+      Alert.alert(t('postAds.imagesAdded'), t('postAds.imagesAddedMessage').replace('{count}', newImages.length.toString()));
     }
   };
 
   // Supprimer une image
   const handleImageRemove = (index: number) => {
     Alert.alert(
-      'Supprimer l\'image',
-      'Voulez-vous vraiment supprimer cette image ?',
+      t('postAds.deleteImage'),
+      t('postAds.deleteImageConfirm'),
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Supprimer',
+          text: t('postAds.delete'),
           style: 'destructive',
           onPress: () => {
             const newImages = formData.images.filter((_, i) => i !== index);
@@ -284,7 +286,7 @@ const PostAds: React.FC = () => {
     if (isStepValid(currentStep)) {
       setCurrentStep((prev) => Math.min(prev + 1, 3));
     } else {
-      Alert.alert('Validation', 'Veuillez remplir tous les champs requis.');
+      Alert.alert(t('postAds.validationError'), t('postAds.fillRequired'));
     }
   };
 
@@ -303,43 +305,43 @@ const PostAds: React.FC = () => {
       const validationErrors = [];
 
       if (!formData.name || formData.name.trim().length < 2) {
-        validationErrors.push('Le nom doit contenir au moins 2 caractères');
+        validationErrors.push(t('postAds.validations.nameMinLength'));
       }
 
       if (!formData.description || formData.description.trim().length < 10) {
-        validationErrors.push('La description doit contenir au moins 10 caractères');
+        validationErrors.push(t('postAds.validations.descriptionMinLength'));
       }
 
       if (!formData.price || Number(formData.price) <= 0) {
-        validationErrors.push('Le prix doit être positif');
+        validationErrors.push(t('postAds.validations.pricePositive'));
       }
 
       if (!formData.quantity || Number(formData.quantity) <= 0) {
-        validationErrors.push('La quantité doit être positive');
+        validationErrors.push(t('postAds.validations.quantityPositive'));
       }
 
       if (!formData.categoryId) {
-        validationErrors.push('Veuillez sélectionner une catégorie');
+        validationErrors.push(t('postAds.validations.categoryRequired'));
       }
 
       if (!formData.cityId) {
-        validationErrors.push('Veuillez sélectionner une ville');
+        validationErrors.push(t('postAds.validations.cityRequired'));
       }
 
       if (!formData.quartier || formData.quartier.trim().length === 0) {
-        validationErrors.push('Veuillez renseigner le quartier');
+        validationErrors.push(t('postAds.validations.neighborhoodRequired'));
       }
 
 if (!validateCameroonPhone(formData.telephone)) {
-      validationErrors.push('Numéro de téléphone camerounais invalide (format: 6XX XX XX XX)');
+      validationErrors.push(t('postAds.validations.phoneInvalid'));
       }
 
       if (!formData.images || formData.images.length === 0) {
-        validationErrors.push('Veuillez ajouter au moins une image');
+        validationErrors.push(t('postAds.validations.imagesRequired'));
       }
 
       if (validationErrors.length > 0) {
-        Alert.alert('Erreurs de validation', validationErrors.join('\n'));
+        Alert.alert(t('postAds.validationErrors'), validationErrors.join('\n'));
         setIsSubmitting(false);
         return;
       }
@@ -365,7 +367,7 @@ if (!validateCameroonPhone(formData.telephone)) {
         const createdProduct = (result.payload as any)?.product;
 
         if (!createdProduct?.id) {
-          Alert.alert('Erreur', 'Impossible de récupérer l\'identifiant du produit créé.');
+          Alert.alert(t('postAds.errorProductId'), t('postAds.errorProductIdMessage'));
           setIsSubmitting(false);
           return;
         }
@@ -380,7 +382,7 @@ if (!validateCameroonPhone(formData.telephone)) {
             }
           }, 500);
         } else {
-          Alert.alert('Succès', 'Annonce créée avec succès !', [
+          Alert.alert(t('postAds.successCreated'), t('postAds.successCreatedMessage'), [
             {
               text: 'OK',
               onPress: () => navigation.navigate('HomeTab'),
@@ -388,11 +390,11 @@ if (!validateCameroonPhone(formData.telephone)) {
           ]);
         }
       } else {
-        const errorMsg = (result.payload as any)?.message || 'Erreur lors de la création du produit';
-        Alert.alert('Erreur', errorMsg);
+        const errorMsg = (result.payload as any)?.message || t('postAds.errorCreating');
+        Alert.alert(t('postAds.errorGeneric'), errorMsg);
       }
     } catch (error: any) {
-      Alert.alert('Erreur', error.message || 'Erreur lors de la création du produit');
+      Alert.alert(t('postAds.errorGeneric'), error.message || t('postAds.errorCreating'));
     } finally {
       setIsSubmitting(false);
     }
@@ -413,9 +415,9 @@ if (!validateCameroonPhone(formData.telephone)) {
     if (!isMountedRef.current) return;
     setShowBoostOffer(false);
 
-    Alert.alert('Succès', 'Annonce créée avec succès !', [
+    Alert.alert(t('postAds.successCreated'), t('postAds.successCreatedMessage'), [
       {
-        text: 'OK',
+        text: t('postAds.ok'),
         onPress: () => navigation.navigate('HomeTab'),
       },
     ]);
@@ -443,7 +445,7 @@ if (!validateCameroonPhone(formData.telephone)) {
         }
       }, 100);
     } catch (error: any) {
-      Alert.alert('Erreur', error.message);
+      Alert.alert(t('common.error'), error.message);
       setShowForfaitSelector(false);
     }
   };
@@ -454,9 +456,9 @@ if (!validateCameroonPhone(formData.telephone)) {
     setShowForfaitSelector(false);
     setShowBoostOffer(false);
 
-    Alert.alert('Info', 'Annonce publiée sans forfait. Vous pourrez en ajouter un plus tard.', [
+    Alert.alert(t('notifications.info'), t('postAds.publishedWithoutForfait'), [
       {
-        text: 'OK',
+        text: t('postAds.ok'),
         onPress: () => navigation.navigate('HomeTab'),
       },
     ]);
@@ -514,11 +516,11 @@ if (!validateCameroonPhone(formData.telephone)) {
       {/* Nom du produit */}
       <View style={styles.inputGroup}>
         <Text style={[styles.label, { color: colors.text }]}>
-          Nom du produit <Text style={styles.required}>*</Text>
+          {t('postAds.productName')} <Text style={styles.required}>*</Text>
         </Text>
         <TextInput
           style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
-          placeholder="Ex: iPhone 13 Pro Max"
+          placeholder={t('postAds.productNamePlaceholder')}
           placeholderTextColor={colors.textSecondary}
           value={formData.name}
           onChangeText={(text) => handleInputChange('name', text)}
@@ -528,11 +530,11 @@ if (!validateCameroonPhone(formData.telephone)) {
       {/* Description */}
       <View style={styles.inputGroup}>
         <Text style={[styles.label, { color: colors.text }]}>
-          Description <Text style={styles.required}>*</Text>
+          {t('postAds.description')} <Text style={styles.required}>*</Text>
         </Text>
         <TextInput
           style={[styles.textArea, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
-          placeholder="Décrivez votre produit en détail..."
+          placeholder={t('postAds.descriptionPlaceholder')}
           placeholderTextColor={colors.textSecondary}
           value={formData.description}
           onChangeText={(text) => handleInputChange('description', text)}
@@ -541,15 +543,15 @@ if (!validateCameroonPhone(formData.telephone)) {
         />
         <View style={styles.characterCounter}>
           <Text style={[styles.helperText, { color: colors.textSecondary }]}>
-            {formData.description.length}/10 caractères minimum
+            {t('postAds.characterCounter').replace('{count}', formData.description.length.toString())}
           </Text>
           {formData.description.length < 10 && formData.description.length > 0 && (
             <Text style={styles.warningText}>
-              ⚠️ {10 - formData.description.length} caractères manquants
+              {t('postAds.charactersMissing').replace('{count}', (10 - formData.description.length).toString())}
             </Text>
           )}
           {formData.description.length >= 10 && (
-            <Text style={styles.validText}>✅</Text>
+            <Text style={styles.validText}>{t('postAds.validated')}</Text>
           )}
         </View>
       </View>
@@ -557,12 +559,12 @@ if (!validateCameroonPhone(formData.telephone)) {
       {/* Prix */}
       <View style={styles.inputGroup}>
         <Text style={[styles.label, { color: colors.text }]}>
-          Prix (FCFA) <Text style={styles.required}>*</Text>
+          {t('postAds.price')} <Text style={styles.required}>*</Text>
         </Text>
         <View style={styles.priceInputContainer}>
           <TextInput
             style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border, paddingRight: 60 }]}
-            placeholder="500000"
+            placeholder={t('postAds.pricePlaceholder')}
             placeholderTextColor={colors.textSecondary}
             value={formData.price}
             onChangeText={(text) => handleInputChange('price', text)}
@@ -575,7 +577,7 @@ if (!validateCameroonPhone(formData.telephone)) {
       {/* Catégorie */}
       <View style={styles.inputGroup}>
         <Text style={[styles.label, { color: colors.text }]}>
-          Catégorie <Text style={styles.required}>*</Text>
+          {t('postAds.category')} <Text style={styles.required}>*</Text>
         </Text>
         <TouchableOpacity
           style={[styles.picker, { backgroundColor: colors.surface, borderColor: colors.border }]}
@@ -591,7 +593,7 @@ if (!validateCameroonPhone(formData.telephone)) {
       {/* État du produit */}
       <View style={styles.inputGroup}>
         <Text style={[styles.label, { color: colors.text }]}>
-          État du produit <Text style={styles.required}>*</Text>
+          {t('postAds.productState')} <Text style={styles.required}>*</Text>
         </Text>
         <View style={styles.conditionContainer}>
           {CONDITIONS.map((condition) => (
@@ -611,7 +613,7 @@ if (!validateCameroonPhone(formData.telephone)) {
                   formData.etat === condition.value && styles.conditionButtonTextActive,
                 ]}
               >
-                {condition.label}
+                {condition.value === 'NEUF' ? t('postAds.stateNew') : condition.value === 'OCCASION' ? t('postAds.stateUsed') : t('postAds.stateFair')}
               </Text>
             </TouchableOpacity>
           ))}
@@ -625,10 +627,10 @@ if (!validateCameroonPhone(formData.telephone)) {
       {/* Photos du produit */}
       <View style={styles.inputGroup}>
         <Text style={[styles.label, { color: colors.text }]}>
-          Photos <Text style={styles.required}>*</Text>
+          {t('postAds.addPhotos')} <Text style={styles.required}>*</Text>
         </Text>
         <Text style={[styles.helperText, { color: colors.textSecondary, marginBottom: 10 }]}>
-          Ajoutez jusqu'à {MAX_IMAGES} photos de votre produit
+          {t('postAds.photosSubtitle').replace('{max}', MAX_IMAGES.toString())}
         </Text>
         
         {/* Zone d'upload */}
@@ -651,19 +653,19 @@ if (!validateCameroonPhone(formData.telephone)) {
           {formData.images.length >= MAX_IMAGES ? (
             <>
               <Text style={[styles.uploadTitle, { color: colors.textSecondary }]}>
-                Limite atteinte
+                {t('postAds.maxImagesReached')}
               </Text>
               <Text style={[styles.uploadSubtitle, { color: colors.textSecondary }]}>
-                Vous avez ajouté le maximum de {MAX_IMAGES} images
+                {t('postAds.maxImagesMessage').replace('{max}', MAX_IMAGES.toString())}
               </Text>
             </>
           ) : (
             <>
               <Text style={[styles.uploadTitle, { color: colors.text }]}>
-                Cliquez pour ajouter des photos
+                {t('postAds.addPhotoButton')}
               </Text>
               <Text style={[styles.uploadSubtitle, { color: colors.textSecondary }]}>
-                ou glissez-déposez vos images ici
+                {t('postAds.noPhotos')}
               </Text>
               <Text style={[styles.uploadCount, { color: '#FF6B35' }]}>
                 {formData.images.length}/{MAX_IMAGES} images
@@ -696,7 +698,7 @@ if (!validateCameroonPhone(formData.telephone)) {
       {/* Ville */}
       <View style={styles.inputGroup}>
         <Text style={[styles.label, { color: colors.text }]}>
-          Ville <Text style={styles.required}>*</Text>
+          {t('postAds.city')} <Text style={styles.required}>*</Text>
         </Text>
         <TouchableOpacity
           style={[styles.picker, { backgroundColor: colors.surface, borderColor: colors.border }]}
@@ -712,11 +714,11 @@ if (!validateCameroonPhone(formData.telephone)) {
       {/* Quartier */}
       <View style={styles.inputGroup}>
         <Text style={[styles.label, { color: colors.text }]}>
-          Quartier <Text style={styles.required}>*</Text>
+          {t('postAds.neighborhood')} <Text style={styles.required}>*</Text>
         </Text>
         <TextInput
           style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
-          placeholder="Ex: Bonamoussadi"
+          placeholder={t('postAds.neighborhoodPlaceholder')}
           placeholderTextColor={colors.textSecondary}
           value={formData.quartier}
           onChangeText={(text) => handleInputChange('quartier', text)}
@@ -730,10 +732,10 @@ if (!validateCameroonPhone(formData.telephone)) {
       {/* Téléphone */}
       <View style={styles.inputGroup}>
         <PhoneInput
-          label="Numéro de téléphone"
+          label={t('postAds.phone')}
           value={formData.telephone}
           onChangeText={(text) => handleInputChange('telephone', text)}
-          placeholder="6XX XX XX XX"
+          placeholder={t('postAds.phonePlaceholder')}
           required
         />
       </View>
@@ -741,11 +743,11 @@ if (!validateCameroonPhone(formData.telephone)) {
       {/* Quantité */}
       <View style={styles.inputGroup}>
         <Text style={[styles.label, { color: colors.text }]}>
-          Quantité disponible <Text style={styles.required}>*</Text>
+          {t('postAds.quantity')} <Text style={styles.required}>*</Text>
         </Text>
         <TextInput
           style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
-          placeholder="1"
+          placeholder={t('postAds.quantityPlaceholder')}
           placeholderTextColor={colors.textSecondary}
           value={formData.quantity}
           onChangeText={(text) => handleInputChange('quantity', text)}
@@ -768,39 +770,39 @@ if (!validateCameroonPhone(formData.telephone)) {
           )}
         </View>
         <Text style={[styles.checkboxLabel, { color: colors.text }]}>
-          Le prix est négociable
+          {t('postAds.negotiable')}
         </Text>
       </TouchableOpacity>
 
       {/* Résumé */}
       <View style={[styles.summaryCard, { backgroundColor: colors.backgroundSecondary }]}>
         <Text style={[styles.summaryTitle, { color: colors.text }]}>
-          Résumé de votre annonce
+          {t('postAds.summary')}
         </Text>
         
         <View style={styles.summaryRow}>
-          <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Produit</Text>
+          <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>{t('postAds.summaryProduct')}</Text>
           <Text style={[styles.summaryValue, { color: colors.text }]} numberOfLines={1}>
             {formData.name || '-'}
           </Text>
         </View>
         
         <View style={styles.summaryRow}>
-          <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Prix</Text>
+          <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>{t('postAds.summaryPrice')}</Text>
           <Text style={[styles.summaryValue, { color: '#FF6B35' }]}>
             {formData.price ? `${formData.price} FCFA` : '-'}
           </Text>
         </View>
         
         <View style={styles.summaryRow}>
-          <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>État</Text>
+          <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>{t('postAds.summaryState')}</Text>
           <Text style={[styles.summaryValue, { color: colors.text }]}>
-            {formData.etat === 'NEUF' ? 'Neuf' : formData.etat === 'OCCASION' ? 'Occasion' : 'Correct'}
+            {formData.etat === 'NEUF' ? t('postAds.stateNew') : formData.etat === 'OCCASION' ? t('postAds.stateUsed') : t('postAds.stateFair')}
           </Text>
         </View>
         
         <View style={[styles.summaryRow, styles.summaryRowLast]}>
-          <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Images</Text>
+          <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>{t('postAds.summaryImages')}</Text>
           <Text style={[styles.summaryValue, { color: colors.text }]}>
             {formData.images.length}/{MAX_IMAGES}
           </Text>
@@ -823,7 +825,7 @@ if (!validateCameroonPhone(formData.telephone)) {
           </TouchableOpacity>
           <View style={{ flex: 1, alignItems: 'center' }}>
             <Text style={[styles.headerTitle, { color: colors.text }]}>
-              Publier une annonce
+              {t('postAds.title')}
             </Text>
             <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
               Étape {currentStep} sur 3
@@ -896,14 +898,14 @@ if (!validateCameroonPhone(formData.telephone)) {
           {/* Step titles */}
           <View style={styles.stepTitleContainer}>
             <Text style={[styles.formStepTitle, { color: colors.text }]}>
-              {currentStep === 1 && 'Décrivez votre produit'}
-              {currentStep === 2 && 'Ajoutez des photos et localisez'}
-              {currentStep === 3 && 'Coordonnées et validation'}
+              {currentStep === 1 && t('postAds.step1Title')}
+              {currentStep === 2 && t('postAds.step2Title')}
+              {currentStep === 3 && t('postAds.step3Title')}
             </Text>
             <Text style={[styles.formStepSubtitle, { color: colors.textSecondary }]}>
-              {currentStep === 1 && 'Renseignez les informations principales de votre annonce'}
-              {currentStep === 2 && 'Ajoutez des photos et indiquez la localisation'}
-              {currentStep === 3 && 'Finalisez avec vos coordonnées et vérifiez les informations'}
+              {currentStep === 1 && t('postAds.step1Subtitle')}
+              {currentStep === 2 && t('postAds.step2Subtitle')}
+              {currentStep === 3 && t('postAds.step3Subtitle')}
             </Text>
           </View>
 
@@ -922,7 +924,7 @@ if (!validateCameroonPhone(formData.telephone)) {
           >
             <Icon name="arrow-back" size={20} color={colors.text} />
             <Text style={[styles.footerButtonText, { color: colors.text }]}>
-              Précédent
+              {t('postAds.previous')}
             </Text>
           </TouchableOpacity>
         )}
@@ -938,7 +940,7 @@ if (!validateCameroonPhone(formData.telephone)) {
             onPress={handleNextStep}
             disabled={!isStepValid(currentStep)}
           >
-            <Text style={styles.footerButtonTextWhite}>Suivant</Text>
+            <Text style={styles.footerButtonTextWhite}>{t('postAds.next')}</Text>
             <Icon name="arrow-forward" size={20} color="#FFF" />
           </TouchableOpacity>
         ) : (
@@ -957,7 +959,7 @@ if (!validateCameroonPhone(formData.telephone)) {
             ) : (
               <>
                 <Text style={styles.footerButtonTextWhite}>
-                  Publier
+                  {t('postAds.publish')}
                 </Text>
                 <Icon name="checkmark" size={20} color="#FFF" />
               </>
@@ -973,7 +975,7 @@ if (!validateCameroonPhone(formData.telephone)) {
           <View style={[styles.pickerModal, { backgroundColor: colors.surface }]}>
             <View style={[styles.pickerHeader, { borderBottomColor: colors.border }]}>
               <Text style={[styles.pickerHeaderTitle, { color: colors.text }]}>
-                Sélectionner une catégorie
+                {t('postAds.selectCategory')}
               </Text>
               <TouchableOpacity onPress={() => setShowCategoryPicker(false)}>
                 <Icon name="close" size={24} color={colors.text} />
@@ -1011,7 +1013,7 @@ if (!validateCameroonPhone(formData.telephone)) {
           <View style={[styles.pickerModal, { backgroundColor: colors.surface }]}>
             <View style={[styles.pickerHeader, { borderBottomColor: colors.border }]}>
               <Text style={[styles.pickerHeaderTitle, { color: colors.text }]}>
-                Sélectionner une ville
+                {t('postAds.selectCity')}
               </Text>
               <TouchableOpacity onPress={() => setShowCityPicker(false)}>
                 <Icon name="close" size={24} color={colors.text} />

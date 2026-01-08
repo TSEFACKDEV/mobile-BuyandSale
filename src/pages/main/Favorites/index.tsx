@@ -3,6 +3,7 @@ import { View, FlatList, Text, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAppDispatch, useAppSelector } from '../../../hooks/store';
 import { useThemeColors } from '../../../contexts/ThemeContext';
+import { useTranslation } from '../../../hooks/useTranslation';
 import { getUserFavoritesAction } from '../../../store/favorite/actions';
 import { selectValidFavorites, LoadingType } from '../../../store/favorite/slice';
 import ProductCard from '../../../components/ProductCard';
@@ -10,6 +11,7 @@ import ProductCard from '../../../components/ProductCard';
 const Favorites = () => {
   const dispatch = useAppDispatch();
   const colors = useThemeColors();
+  const { t } = useTranslation();
   
   const validFavorites = useAppSelector(selectValidFavorites);
   const status = useAppSelector((state) => state.favorite.status);
@@ -42,10 +44,10 @@ const Favorites = () => {
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 100 }}>
           <Icon name="heart-outline" size={80} color={colors.textSecondary} />
           <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.text, marginTop: 16 }}>
-            Aucun favori
+            {t('favorites.noFavorites')}
           </Text>
           <Text style={{ fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginTop: 8 }}>
-            Les produits que vous ajoutez à vos favoris apparaîtront ici
+            {t('favorites.noFavoritesMessage')}
           </Text>
         </View>
       }

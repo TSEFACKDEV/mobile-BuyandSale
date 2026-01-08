@@ -155,12 +155,12 @@ const Confidentiality: React.FC = () => {
             styles.summaryCard,
             {
               backgroundColor: colors.backgroundSecondary,
-              borderColor: '#3B82F6',
+              borderColor: colors.border,
             },
           ]}
         >
           <View style={styles.summaryHeader}>
-            <Icon name="document-text" size={24} color="#3B82F6" />
+            <Icon name="file-tray-outline" size={24} color="#6B7280" />
             <Text style={[styles.summaryTitle, { color: colors.text }]}>
               {t('privacy.summary.title') || 'Résumé en bref'}
             </Text>
@@ -174,7 +174,7 @@ const Confidentiality: React.FC = () => {
         {/* Section 1: Collecte d'informations */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Icon name="folder-open" size={26} color="#FF6B35" />
+            <Icon name="folder-outline" size={26} color="#6B7280" />
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
               {t('privacy.collection.title') || 'Collecte d\'informations'}
             </Text>
@@ -219,7 +219,7 @@ const Confidentiality: React.FC = () => {
           ]}
         >
           <View style={styles.sectionHeader}>
-            <Icon name="settings" size={26} color="#3B82F6" />
+            <Icon name="settings-outline" size={26} color="#6B7280" />
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
               {t('privacy.usage.title') || 'Utilisation de vos données'}
             </Text>

@@ -16,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { useTranslation } from '../../../hooks/useTranslation';
 import { useAppDispatch, useAppSelector } from '../../../hooks/store';
 import { toggleFavoriteAction } from '../../../store/favorite/actions';
 import { 
@@ -38,6 +39,7 @@ const { width } = Dimensions.get('window');
 
 const ProductDetails = () => {
   const { theme } = useTheme();
+  const { t, language } = useTranslation();
   const navigation = useNavigation();
   const route = useRoute<ProductDetailsRouteProp>();
   const dispatch = useAppDispatch();
@@ -64,11 +66,11 @@ const ProductDetails = () => {
   useEffect(() => {
     if (productStatus === 'failed' && !product) {
       Alert.alert(
-        'Session expirée',
-        'Votre session a expiré. Veuillez vous reconnecter.',
+        t('productDetails.sessionExpired'),
+        t('productDetails.sessionExpiredMessage'),
         [
           {
-            text: 'Se reconnecter',
+            text: t('productDetails.reconnect'),
             onPress: () => {
               navigation.reset({
                 index: 0,
@@ -79,7 +81,7 @@ const ProductDetails = () => {
         ]
       );
     }
-  }, [productStatus, product, navigation]);
+  }, [productStatus, product, navigation, t]);
 
   const isFavorite = product?.id
     ? allFavorites.some((fav) => fav.productId === product.id)
@@ -98,7 +100,7 @@ const ProductDetails = () => {
 
   // Helpers
   const formatPrice = (price: number) => {
-    return `${price.toLocaleString('fr-FR')} FCFA`;
+    return `${price.toLocaleString(language === 'fr' ? 'fr-FR' : 'en-US')} FCFA`;
   };
 
   const formatDate = (dateString: string) => {
@@ -107,10 +109,22 @@ const ProductDetails = () => {
     const diffInMs = now.getTime() - date.getTime();
     const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
-    if (diffInDays === 0) return 'Aujourd\'hui';
-    if (diffInDays === 1) return 'Hier';
-    if (diffInDays < 7) return `Il y a ${diffInDays} jours`;
-    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
+    if (diffInDays === 0) return t('productDetails.today');
+    if (diffInDays === 1) return t('productDetails.yesterday');
+    if (diffInDays < 7) return t('productDetails.daysAgo').replace('{days}', diffInDays.toString());
+    return date.toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', { day: 'numeric', month: 'long' });
+  };
+
+  const formatState = (state: string) => {
+    const stateMap: { [key: string]: string } = {
+      'Neuf': 'productDetails.stateNew',
+      'Occasion': 'productDetails.stateUsed',
+      'Correct': 'productDetails.stateFair',
+      'new': 'productDetails.stateNew',
+      'used': 'productDetails.stateUsed',
+      'fair': 'productDetails.stateFair'
+    };
+    return stateMap[state] ? t(stateMap[state]) : state;
   };
 
   // Handlers
@@ -126,7 +140,7 @@ const ProductDetails = () => {
         })
       ).unwrap();
     } catch (error) {
-      Alert.alert('Erreur', 'Impossible de modifier les favoris');
+      Alert.alert(t('productDetails.favoriteError'), '');
     } finally {
       setIsTogglingFavorite(false);
     }
@@ -150,12 +164,12 @@ const ProductDetails = () => {
 
     const normalizedPhone = normalizePhoneForWhatsApp(phoneNumber);
     const message = encodeURIComponent(
-      `Bonjour, je suis intéressé(e) par votre produit "${product.name}"`
+      `${t('productDetails.interestedMessage')} "${product.name}"`
     );
     const whatsappUrl = `https://wa.me/${normalizedPhone}?text=${message}`;
 
     Linking.openURL(whatsappUrl)
-      .catch(() => Alert.alert('Erreur', 'Impossible d\'ouvrir WhatsApp'));
+      .catch(() => Alert.alert(t('productDetails.whatsappError'), ''));
   };
 
   const handleCallSeller = () => {
@@ -196,7 +210,7 @@ const ProductDetails = () => {
           </View>
           <View style={styles.errorContent}>
             <Icon name="time-outline" size={64} color={theme.colors.primary} />
-            <Text style={styles.errorText}>Chargement du produit...</Text>
+            <Text style={styles.errorText}>{t('productDetails.loading')}</Text>
           </View>
         </View>
       </SafeAreaView>
@@ -215,9 +229,9 @@ const ProductDetails = () => {
           </View>
           <View style={styles.errorContent}>
             <Icon name="alert-circle-outline" size={64} color={theme.colors.textTertiary} />
-            <Text style={styles.errorText}>Produit introuvable</Text>
+            <Text style={styles.errorText}>{t('productDetails.notFound')}</Text>
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.errorButton}>
-              <Text style={styles.errorButtonText}>Retour</Text>
+              <Text style={styles.errorButtonText}>{t('productDetails.back')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -307,7 +321,7 @@ const ProductDetails = () => {
           ) : (
             <View style={styles.placeholderContainer}>
               <Icon name="image-outline" size={48} color="#9CA3AF" />
-              <Text style={styles.placeholderText}>Aucune image</Text>
+              <Text style={styles.placeholderText}>{t('productDetails.noImage')}</Text>
             </View>
           )}
 
@@ -345,7 +359,7 @@ const ProductDetails = () => {
               <View style={[styles.badge, styles.badgeCategory]}>
                 <Icon name="pricetag" size={14} color="#D97706" />
                 <Text style={[styles.badgeText, { color: '#D97706' }]}>
-                  {product.category.name}
+                  {t(`categories.${product.category.name}`)}
                 </Text>
               </View>
             )}
@@ -397,7 +411,7 @@ const ProductDetails = () => {
           {/* Description */}
           <View style={styles.descriptionContainer}>
             <Text style={styles.sectionTitle}>
-              Description
+              {t('productDetails.description')}
             </Text>
             <Text style={styles.descriptionText}>
               {product.description}
@@ -410,13 +424,13 @@ const ProductDetails = () => {
               {/* État et Vues - Côté gauche */}
               <View style={styles.specsLeft}>
                 <View style={styles.specItem}>
-                  <Text style={styles.specLabel}>État</Text>
+                  <Text style={styles.specLabel}>{t('productDetails.state')}</Text>
                   <Text style={styles.specValue}>
-                    {product.etat || 'Non spécifié'}
+                    {product.etat ? formatState(product.etat) : t('productDetails.notSpecified')}
                   </Text>
                 </View>
                 <View style={styles.specItem}>
-                  <Text style={styles.specLabel}>Vues</Text>
+                  <Text style={styles.specLabel}>{t('productDetails.views')}</Text>
                   <Text style={styles.specValue}>
                     {product.viewCount || 0}
                   </Text>
@@ -428,14 +442,14 @@ const ProductDetails = () => {
                 <View style={styles.warningHeader}>
                   <Icon name="shield-checkmark" size={16} color="#EA580C" />
                   <Text style={styles.warningTitle}>
-                    Sécurité
+                    {t('productDetails.security')}
                   </Text>
                 </View>
                 <Text style={styles.warningText}>
-                  • Rencontrez en public{'\n'}
-                  • Vérifiez le produit{'\n'}
-                  • Pas de paiement à l'avance{'\n'}
-                  • Signalez toute activité suspecte
+                  • {t('productDetails.securityTip1')}{'\n'}
+                  • {t('productDetails.securityTip2')}{'\n'}
+                  • {t('productDetails.securityTip3')}{'\n'}
+                  • {t('productDetails.securityTip4')}
                 </Text>
               </View>
             </View>
@@ -465,7 +479,7 @@ const ProductDetails = () => {
                       {product.user.firstName} {product.user.lastName}
                     </Text>
                     <Text style={styles.sellerRole}>
-                      Vendeur
+                      {t('productDetails.seller')}
                     </Text>
                   </View>
 
@@ -483,7 +497,7 @@ const ProductDetails = () => {
                     >
                       <Icon name="call-outline" size={17} color={theme.colors.text} />
                       <Text style={[styles.buttonText, { color: theme.colors.text }]}>
-                        Voir le numéro
+                        {t('productDetails.showNumber')}
                       </Text>
                     </TouchableOpacity>
                   ) : (
@@ -504,7 +518,7 @@ const ProductDetails = () => {
                   >
                     <Icon name="logo-whatsapp" size={17} color="#FFFFFF" />
                     <Text style={[styles.buttonText, { color: '#FFFFFF' }]}>
-                      WhatsApp
+                      {t('productDetails.whatsapp')}
                     </Text>
                   </TouchableOpacity>
                 </View>

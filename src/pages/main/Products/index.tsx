@@ -19,6 +19,7 @@ import ProductCard from '../../../components/ProductCard';
 import FilterModal from '../../../components/FilterModal';
 import TopNavigation from '../../../components/TopNavigation';
 import { useThemeColors } from '../../../contexts/ThemeContext';
+import { useTranslation } from '../../../hooks/useTranslation';
 import { getAllCategoriesAction } from '../../../store/category/actions';
 import { fetchCitiesAction } from '../../../store/city/actions';
 import styles from './style';
@@ -26,6 +27,7 @@ import styles from './style';
 const Products = () => {
   const dispatch = useAppDispatch();
   const theme = useThemeColors();
+  const { t, language } = useTranslation();
   const route = useRoute();
   const routeParams = route.params as { categoryId?: string } | undefined;
 
@@ -109,7 +111,7 @@ const Products = () => {
         })
       ).unwrap();
     } catch (error) {
-      console.error('Erreur chargement produits:', error);
+      console.error(t('products.loadingError'), error);
     }
   };
 
@@ -219,7 +221,7 @@ const Products = () => {
         <Ionicons name="search-outline" size={20} color={theme.textSecondary} />
         <TextInput
           style={[styles.searchInput, { color: theme.text }]}
-          placeholder="Rechercher un produit..."
+          placeholder={t('products.searchPlaceholder')}
           placeholderTextColor={theme.textSecondary}
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -239,7 +241,9 @@ const Products = () => {
           <View style={styles.statItem}>
             <Ionicons name="cube-outline" size={18} color={theme.primary} />
             <Text style={[styles.statText, { color: theme.textSecondary }]}>
-              {filteredProducts.length} résultat{filteredProducts.length !== 1 ? 's' : ''}
+              {filteredProducts.length} {filteredProducts.length !== 1 
+                ? (language === 'fr' ? 'résultats' : 'results')
+                : (language === 'fr' ? 'résultat' : 'result')}
             </Text>
           </View>
         </View>
@@ -251,7 +255,7 @@ const Products = () => {
             >
               <Ionicons name="close-circle" size={16} color="#FFFFFF" />
               <Text style={styles.clearFiltersButtonText}>
-                Effacer ({activeFiltersCount})
+                {language === 'fr' ? `Effacer (${activeFiltersCount})` : `Clear (${activeFiltersCount})`}
               </Text>
             </TouchableOpacity>
           )}
@@ -260,7 +264,7 @@ const Products = () => {
             onPress={() => setShowFilters(true)}
           >
             <Ionicons name="filter-outline" size={16} color="#FFFFFF" />
-            <Text style={styles.filterButtonText}>Filtres</Text>
+            <Text style={styles.filterButtonText}>{t('products.filters')}</Text>
             {activeFiltersCount > 0 && (
               <View style={styles.filterBadge}>
                 <Text style={styles.filterBadgeText}>{activeFiltersCount}</Text>
@@ -281,18 +285,18 @@ const Products = () => {
     return (
       <View style={styles.emptyContainer}>
         <Ionicons name="search-outline" size={64} color={theme.textSecondary} />
-        <Text style={[styles.emptyTitle, { color: theme.text }]}>Aucun produit trouvé</Text>
+        <Text style={[styles.emptyTitle, { color: theme.text }]}>{t('products.noProductsFound')}</Text>
         <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
           {searchQuery
-            ? `Aucun résultat pour "${searchQuery}"`
-            : 'Aucun produit disponible pour le moment'}
+            ? (language === 'fr' ? `Aucun résultat pour "${searchQuery}"` : `No results for "${searchQuery}"`)
+            : t('products.noProductsAvailable')}
         </Text>
         {searchQuery && (
           <TouchableOpacity
             style={[styles.clearButton, { backgroundColor: theme.primary }]}
             onPress={() => setSearchQuery('')}
           >
-            <Text style={styles.clearButtonText}>Effacer la recherche</Text>
+            <Text style={styles.clearButtonText}>{t('products.clearSearch')}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -309,7 +313,7 @@ const Products = () => {
       <View style={styles.footerLoader}>
         <ActivityIndicator size="small" color={theme.primary} />
         <Text style={[styles.footerText, { color: theme.textSecondary }]}>
-          Chargement...
+          {t('products.loading')}
         </Text>
       </View>
     );
@@ -321,7 +325,7 @@ const Products = () => {
       <View style={[styles.container, styles.centerContent, { backgroundColor: theme.background }]}>
         <ActivityIndicator size="large" color={theme.primary} />
         <Text style={[styles.loadingText, { color: theme.textSecondary }]}>
-          Chargement des produits...
+          {t('products.loadingProducts')}
         </Text>
       </View>
     );
@@ -332,15 +336,15 @@ const Products = () => {
     return (
       <View style={[styles.container, styles.centerContent, { backgroundColor: theme.background }]}>
         <Ionicons name="alert-circle-outline" size={64} color="#EF4444" />
-        <Text style={[styles.errorTitle, { color: theme.text }]}>Erreur de chargement</Text>
+        <Text style={[styles.errorTitle, { color: theme.text }]}>{t('products.errorLoading')}</Text>
         <Text style={[styles.errorText, { color: theme.textSecondary }]}>
-          Impossible de charger les produits
+          {t('products.errorMessage')}
         </Text>
         <TouchableOpacity
           style={[styles.retryButton, { backgroundColor: theme.primary }]}
           onPress={handleRefresh}
         >
-          <Text style={styles.retryButtonText}>Réessayer</Text>
+          <Text style={styles.retryButtonText}>{t('products.retry')}</Text>
         </TouchableOpacity>
       </View>
     );
