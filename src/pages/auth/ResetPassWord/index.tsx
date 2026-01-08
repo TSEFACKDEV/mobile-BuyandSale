@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Alert } from 'react-native'
+import { View, Text, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native'
 import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -141,10 +141,16 @@ const ResetPassword = () => {
 
   return (
     <LinearGradient colors={[COLORS.white, '#FFF9F0']} style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
         {/* Header Section */}
         <View style={styles.header}>
           <View style={styles.headerIcon}>
@@ -236,6 +242,7 @@ const ResetPassword = () => {
           </Text>
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </LinearGradient>
   )
 }

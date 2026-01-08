@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Alert, ActivityIndicator, TouchableOpacity } from 'react-native'
+import { View, Text, Pressable, ScrollView, Alert, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -157,46 +157,40 @@ const Register = () => {
 
     // Validation Prénom
     if (!firstName.trim()) {
-      setFirstNameError('Prénom requis')
-      isValid = false
-    } else if (firstName.trim().length < 2) {
-      setFirstNameError('Minimum 2 caractères')
+      setFirstNameError(t('auth.errors.validation.firstNameRequired'))
       isValid = false
     }
 
     // Validation Nom
     if (!lastName.trim()) {
-      setLastNameError('Nom requis')
-      isValid = false
-    } else if (lastName.trim().length < 2) {
-      setLastNameError('Minimum 2 caractères')
+      setLastNameError(t('auth.errors.validation.lastNameRequired'))
       isValid = false
     }
 
     // Validation Email
     if (!email.trim()) {
-      setEmailError('Email requis')
+      setEmailError(t('auth.errors.validation.emailRequired'))
       isValid = false
     } else if (!validateEmail(email)) {
-      setEmailError('Email invalide')
+      setEmailError(t('auth.errors.validation.emailInvalid'))
       isValid = false
     }
 
     // Validation Téléphone
     if (!phone) {
-      setPhoneError('Téléphone requis')
+      setPhoneError(t('auth.errors.validation.identifierRequired'))
       isValid = false
     } else if (!validateCameroonPhone(phone)) {
-      setPhoneError('Numéro de téléphone camerounais invalide (format: 6XX XX XX XX)')
+      setPhoneError(t('auth.errors.validation.identifierInvalid'))
       isValid = false
     }
 
-    // Validation Mot de passe (8 caractères minimum, avec minuscule, majuscule et chiffre)
+    // Validation Mot de passe (6 caractères minimum, avec minuscule, majuscule et chiffre)
     if (!password.trim()) {
-      setPasswordError('Mot de passe requis')
+      setPasswordError(t('auth.errors.validation.passwordRequired'))
       isValid = false
-    } else if (password.length < 8) {
-      setPasswordError('Minimum 8 caractères requis')
+    } else if (password.length < 6) {
+      setPasswordError(t('auth.errors.validation.passwordMinLength'))
       isValid = false
     } else if (!/(?=.*[a-z])/.test(password)) {
       setPasswordError('Au moins une lettre minuscule requise')
@@ -211,10 +205,10 @@ const Register = () => {
 
     // Validation Confirmation Mot de passe
     if (!confirmPassword.trim()) {
-      setConfirmPasswordError('Confirmez votre mot de passe')
+      setConfirmPasswordError(t('auth.errors.validation.confirmPasswordRequired'))
       isValid = false
     } else if (password !== confirmPassword) {
-      setConfirmPasswordError('Les mots de passe ne correspondent pas')
+      setConfirmPasswordError(t('auth.errors.validation.confirmPasswordMismatch'))
       isValid = false
     }
 
@@ -270,16 +264,27 @@ const Register = () => {
           }
         }
 
-        // Messages d'erreur spécifiques
-        if (errorMessage.includes('existe déjà') || errorMessage.includes('already exists')) {
-          if (errorMessage.includes('email')) {
-            setEmailError(t('auth.errors.validation.emailExists'))
-          } else if (errorMessage.includes('téléphone') || errorMessage.includes('phone')) {
-            setPhoneError(t('auth.errors.validation.phoneExists'))
-          } else {
-            Alert.alert(t('auth.errors.title'), errorMessage, [{ text: 'OK' }])
-          }
+        // Messages d'erreur spécifiques avec Alert pour meilleure visibilité
+        const lowerErrorMessage = errorMessage.toLowerCase();
+        
+        if (lowerErrorMessage.includes('email') && (lowerErrorMessage.includes('existe') || lowerErrorMessage.includes('already exists'))) {
+          const emailExistsMessage = t('auth.errors.validation.emailExists')
+          setEmailError(emailExistsMessage)
+          Alert.alert(
+            t('auth.errors.title'), 
+            emailExistsMessage + '\n\nVeuillez utiliser un autre email ou vous connecter si vous avez déjà un compte.',
+            [{ text: 'OK' }]
+          )
+        } else if ((lowerErrorMessage.includes('téléphone') || lowerErrorMessage.includes('phone') || lowerErrorMessage.includes('numéro')) && (lowerErrorMessage.includes('existe') || lowerErrorMessage.includes('already exists'))) {
+          const phoneExistsMessage = t('auth.errors.validation.phoneExists')
+          setPhoneError(phoneExistsMessage)
+          Alert.alert(
+            t('auth.errors.title'), 
+            phoneExistsMessage + '\n\nVeuillez utiliser un autre numéro de téléphone.',
+            [{ text: 'OK' }]
+          )
         } else {
+          // Pour toute autre erreur, afficher le message complet
           Alert.alert(t('auth.errors.title'), errorMessage, [{ text: 'OK' }])
         }
       }
@@ -292,10 +297,16 @@ const Register = () => {
 
   return (
     <LinearGradient colors={[COLORS.white, '#FFF9F0']} style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
         {/* Header Section */}
         <View style={styles.header}>
           <View style={styles.headerIcon}>
@@ -322,7 +333,7 @@ const Register = () => {
               setFirstName(text)
               setFirstNameError('')
             }}
-            placeholder="TSEFACK"
+            placeholder="JOHN"
             error={firstNameError}
             required
             leftIcon="person-outline"
@@ -337,7 +348,7 @@ const Register = () => {
               setLastName(text)
               setLastNameError('')
             }}
-            placeholder="KLEIN"
+            placeholder="DOE"
             error={lastNameError}
             required
             leftIcon="person-outline"
@@ -531,6 +542,7 @@ const Register = () => {
           </Text>
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </LinearGradient>
   )
 }

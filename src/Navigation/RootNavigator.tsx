@@ -3,6 +3,7 @@ import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { ActivityIndicator, View, Linking, Image, Text, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 // Pages
@@ -309,6 +310,7 @@ const MainTabNavigator = () => {
   const colors = useThemeColors();
   const authState = useAppSelector((state) => state.authentification);
   const user = authState.auth.entities;
+  const insets = useSafeAreaInsets();
 
   return (
     <BottomTab.Navigator
@@ -381,26 +383,31 @@ const MainTabNavigator = () => {
           return <Icon name={iconName} size={iconSize} color={color} />;
         },
         tabBarActiveTintColor: '#FF6B35',
-        tabBarInactiveTintColor: colors.textTertiary,
+        tabBarInactiveTintColor: '#6B7280',
         tabBarStyle: {
           position: 'absolute',
           bottom: 0,
           left: 0,
           right: 0,
-          height: Platform.OS === 'ios' ? 85 : 70,
-          paddingBottom: Platform.OS === 'ios' ? 25 : 10,
-          paddingTop: 10,
-          backgroundColor: 'rgba(255, 255, 255, 0.75)',
+          height: Platform.OS === 'ios' ? 85 : 58 + (insets.bottom > 0 ? insets.bottom : 0),
+          paddingBottom: Platform.OS === 'ios' ? 25 : Math.max(insets.bottom, 10),
+          paddingTop: 6,
+          backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
-          borderTopColor: 'rgba(255, 255, 255, 0.2)',
+          borderTopColor: '#E5E7EB',
           shadowColor: '#000',
           shadowOffset: {
             width: 0,
-            height: -10,
+            height: -4,
           },
-          shadowOpacity: 0.25,
-          shadowRadius: 25,
-          elevation: 20,
+          shadowOpacity: 0.15,
+          shadowRadius: 12,
+          elevation: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '600',
+          marginTop: -2,
         },
         headerShown: false,
         lazy: true,

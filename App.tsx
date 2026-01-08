@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -57,14 +58,16 @@ function AppContent() {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <AuthProvider>
-        <ThemeProvider>
-          <LanguageProvider>
-            <StatusBar style="dark" />
-            <RootNavigator />
-          </LanguageProvider>
-        </ThemeProvider>
-      </AuthProvider>
+      <SafeAreaProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <LanguageProvider>
+              <StatusBar style="dark" />
+              <RootNavigator />
+            </LanguageProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

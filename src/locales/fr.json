@@ -53,6 +53,7 @@
   },
   "auth": {
     "errors": {
+      "title": "Erreur",
       "google": {
         "authFailed": "Échec de l'authentification Google",
         "tokenNotReceived": "Token Google non reçu",
@@ -66,9 +67,11 @@
         "identifierInvalid": "Email invalide ou numéro Camerounais invalide (format: 6XX XX XX XX)",
         "passwordRequired": "Mot de passe requis",
         "passwordMinLength": "Minimum 6 caractères",
-        "passwordComplexity": "Au moins 1 lettre et 1 chiffre requis",
+        "passwordComplexity": "Le mot de passe doit contenir au moins une lettre minuscule, une lettre majuscule et un chiffre",
         "confirmPasswordRequired": "Confirmez votre mot de passe",
         "confirmPasswordMismatch": "Les mots de passe ne correspondent pas",
+        "firstNameRequired": "Prénom requis",
+        "lastNameRequired": "Nom requis",
         "emailRequired": "Email requis",
         "emailInvalid": "Email invalide",
         "emailExists": "Cet email est déjà utilisé",

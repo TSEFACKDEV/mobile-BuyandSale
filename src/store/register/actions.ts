@@ -28,7 +28,8 @@ export const registerAction = createAsyncThunk<
     const data = await response.json()
 
     if (!response.ok) {
-      const errorMessage = data?.message || 'Erreur lors de l\'inscription'
+      // ✅ Extraction correcte du message depuis data.meta.message (structure backend)
+      const errorMessage = data?.meta?.message || data?.message || 'Erreur lors de l\'inscription'
       throw new Error(errorMessage)
     }
 
