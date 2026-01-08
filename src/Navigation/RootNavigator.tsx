@@ -31,6 +31,7 @@ import PostAds from '../pages/main/PostAds/index';
 
 // Guards
 import Authenticated from '../Guards/Authenticated';
+import NotSuspended from '../Guards/NotSuspended';
 
 // Components
 import TopNavigation from '../components/TopNavigation';
@@ -47,6 +48,7 @@ import {
 // Context
 import { useAuth } from '../contexts/AuthContext';
 import { useThemeColors } from '../contexts/ThemeContext';
+import { useTranslation } from '../hooks/useTranslation';
 import { useAppSelector } from '../hooks/store';
 import { getImageUrl } from '../utils/imageUtils';
 
@@ -58,6 +60,21 @@ const ProductsStack = createNativeStackNavigator<ProductsStackParamList>();
 const SellersStack = createNativeStackNavigator();
 const BottomTab = createBottomTabNavigator<BottomTabParamList>();
 const MainStack = createNativeStackNavigator();
+
+// Composant wrapper pour UserProfile avec navigation
+const UserProfileWithNav = () => {
+  const { t } = useTranslation();
+  return (
+    <View style={{ flex: 1 }}>
+      <Authenticated>
+        <NotSuspended>
+          <TopNavigation showBackButton title={t('userProfile.title')} />
+          <UserProfile />
+        </NotSuspended>
+      </Authenticated>
+    </View>
+  );
+};
 
 // =====================
 // Auth Navigator
@@ -158,14 +175,8 @@ const HomeStackNavigator = () => {
         options={{
           title: 'Mon profil',
         }}
-      >
-        {() => (
-          <Authenticated>
-            <TopNavigation showBackButton title="Mon profil" />
-            <UserProfile />
-          </Authenticated>
-        )}
-      </HomeStack.Screen>
+        component={UserProfileWithNav}
+      />
       <HomeStack.Screen
         name="Favorites"
         options={{

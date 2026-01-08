@@ -14,6 +14,7 @@ import { forgotPasswordAction } from '../../../store/password/actions'
 import { selectForgotPassword } from '../../../store/password/slice'
 import { LoadingType } from '../../../models/store'
 import { Loading } from '../../../components/LoadingVariants'
+import { useTranslation } from '../../../hooks/useTranslation'
 
 type ForgotPasswordNavigationProp = NativeStackNavigationProp<
   AuthStackParamList,
@@ -23,6 +24,7 @@ type ForgotPasswordNavigationProp = NativeStackNavigationProp<
 const ForgotPassword = () => {
   const navigation = useNavigation<ForgotPasswordNavigationProp>()
   const dispatch = useAppDispatch()
+  const { t } = useTranslation()
 
   // ✅ Pattern Redux standardisé avec hooks typés
   const forgotPasswordState = useAppSelector(selectForgotPassword)
@@ -40,12 +42,12 @@ const ForgotPassword = () => {
     setEmailError('')
 
     if (!email.trim()) {
-      setEmailError('Email requis')
+      setEmailError(t('auth.errors.validation.emailRequired'))
       return
     }
 
     if (!validateEmail(email)) {
-      setEmailError('Email invalide')
+      setEmailError(t('auth.errors.validation.emailInvalid'))
       return
     }
 
@@ -59,8 +61,8 @@ const ForgotPassword = () => {
 
       // 🎉 Email envoyé avec succès
       Alert.alert(
-        'Email envoyé',
-        'Un lien de réinitialisation a été envoyé à votre adresse email.',
+        t('auth.titles.emailSent'),
+        t('auth.success.emailSent'),
         [
           {
             text: 'OK',
@@ -73,7 +75,7 @@ const ForgotPassword = () => {
       )
     } catch (error: unknown) {
       // 🚨 Gestion d'erreurs
-      let errorMessage = 'Erreur lors de l\'envoi de l\'email'
+      let errorMessage = t('auth.errors.generic.sendEmailFailed')
 
       if (error instanceof Error) {
         errorMessage = error.message
@@ -91,15 +93,15 @@ const ForgotPassword = () => {
 
       // Messages d'erreur spécifiques
       if (errorMessage.includes('introuvable') || errorMessage.includes('not found')) {
-        setEmailError('Aucun compte associé à cet email')
+        setEmailError(t('auth.errors.account.emailNotFound'))
       } else {
-        Alert.alert('Erreur', errorMessage, [{ text: 'OK' }])
+        Alert.alert(t('auth.errors.title'), errorMessage, [{ text: 'OK' }])
       }
     }
   }
 
   if (isLoading) {
-    return <Loading fullScreen message="Envoi en cours..." />;
+    return <Loading fullScreen message={t('auth.loading.sending')} />;
   }
 
   return (

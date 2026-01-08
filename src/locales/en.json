@@ -20,32 +20,128 @@
     "loadingCategories": "Loading categories...",
     "loadingProducts": "Loading ads...",
     "noProducts": "No ads available",
-    "noCategories": "No categories available"
+    "noCategories": "No categories available",
+    "noSellers": "No sellers available"
+  },
+  "categories": {
+    "Électronique": "Electronics",
+    "Maison": "Home",
+    "Automobile": "Automotive",
+    "Immobilier": "Real Estate",
+    "Mode": "Fashion",
+    "Enfants": "Children",
+    "Sport": "Sports",
+    "Animaux": "Animals",
+    "Loisirs": "Hobbies",
+    "Services": "Services",
+    "Rencontres": "Dating",
+    "Événements": "Events",
+    "Divers": "Miscellaneous"
   },
   "common": {
     "views": "views",
     "products": "ads",
     "reviews": "reviews",
-    "rating": "Rating"
+    "rating": "Rating",
+    "error": "Error",
+    "success": "Success",
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "auth": {
+    "errors": {
+      "google": {
+        "authFailed": "Google authentication failed",
+        "tokenNotReceived": "Google token not received",
+        "configMissing": "Google authentication is not configured. Please contact the administrator.",
+        "notAvailable": "Google authentication is currently unavailable.",
+        "initFailed": "Unable to initiate Google authentication",
+        "profileFailed": "Failed to retrieve user profile"
+      },
+      "validation": {
+        "identifierRequired": "Email or phone required",
+        "identifierInvalid": "Invalid email or Cameroonian phone number (format: 6XX XX XX XX)",
+        "passwordRequired": "Password required",
+        "passwordMinLength": "Minimum 6 characters",
+        "passwordComplexity": "At least 1 letter and 1 digit required",
+        "confirmPasswordRequired": "Confirm your password",
+        "confirmPasswordMismatch": "Passwords do not match",
+        "emailRequired": "Email required",
+        "emailInvalid": "Invalid email",
+        "emailExists": "This email is already in use",
+        "phoneExists": "This phone number is already in use",
+        "otpRequired": "OTP code required",
+        "otpLength": "Code must contain 6 digits",
+        "otpDigitsOnly": "Code must contain only digits",
+        "otpExpired": "Code expired. Request a new code",
+        "otpInvalid": "Incorrect OTP code"
+      },
+      "account": {
+        "notVerified": "Account not verified",
+        "verifyPrompt": "Please verify your email or SMS.",
+        "suspended": "Account suspended",
+        "suspendedMessage": "Your account has been temporarily suspended. Contact support.",
+        "userIdMissing": "User ID missing",
+        "tokenMissing": "Reset token missing",
+        "emailNotFound": "No account associated with this email"
+      },
+      "generic": {
+        "loginFailed": "Login error",
+        "incorrectCredentials": "Incorrect credentials",
+        "registrationFailed": "Registration error",
+        "resetFailed": "Reset error",
+        "sendEmailFailed": "Error sending email",
+        "resendCodeFailed": "Error resending code"
+      },
+      "token": {
+        "expired": "Token expired",
+        "expiredMessage": "The reset link has expired. Please make a new request.",
+        "invalid": "Invalid reset link"
+      }
+    },
+    "success": {
+      "googleLogin": "Google login successful!",
+      "googleRegistration": "Google registration successful!",
+      "registration": "Registration successful",
+      "verificationSent": "A verification code has been sent to you",
+      "codeResent": "A new code has been sent",
+      "passwordReset": "Your password has been successfully reset",
+      "emailSent": "A reset link has been sent to your email address."
+    },
+    "loading": {
+      "login": "Logging in...",
+      "verification": "Verifying...",
+      "sending": "Sending..."
+    },
+    "titles": {
+      "configMissing": "Configuration Missing",
+      "emailSent": "Email Sent",
+      "tokenExpired": "Token Expired"
+    }
   },
   "userProfile": {
     "title": "My Profile",
     "tabs": {
-      "activeProducts": "Active Ads",
-      "pendingProducts": "Pending Ads",
+      "activeProducts": "Active",
+      "pendingProducts": "Pending",
+      "payments": "Payments",
       "profile": "Profile",
       "settings": "Settings"
     },
     "stats": {
       "products": "Ads",
       "reviews": "Reviews",
-      "rating": "Rating"
+      "noReviews": "No reviews"
     },
     "actions": {
       "editProfile": "Edit Profile",
       "logout": "Logout",
       "dashboard": "Dashboard",
       "createAd": "Create Ad",
+      "create": "Create",
       "saveProfile": "Save",
       "cancel": "Cancel",
       "boostAd": "Boost",
@@ -62,44 +158,120 @@
       "phone": "Phone",
       "location": "Location"
     },
-    "settings": {
-      "title": "Settings",
-      "theme": "Theme",
-      "themeLight": "Light",
-      "themeDark": "Dark",
-      "themeSystem": "System",
-      "language": "Language",
-      "languageFr": "Français",
-      "languageEn": "English",
-      "notifications": "Notifications",
-      "privacy": "Privacy"
-    },
     "messages": {
       "loading": "Loading...",
       "noProducts": "No ads yet",
       "noPendingProducts": "No pending ads",
+      "noActiveProducts": "No active ads",
       "profileUpdateSuccess": "Profile updated successfully",
       "profileUpdateError": "Error updating profile",
       "avatarUpdateSuccess": "Avatar updated successfully",
       "avatarUpdateError": "Error updating avatar",
       "deleteConfirm": "Delete this ad?",
+      "deleteConfirmText": "Do you want to delete",
       "deleteSuccess": "Ad deleted successfully",
       "deleteError": "Error deleting ad",
       "logoutConfirm": "Do you want to logout?",
       "constraintError": "Cannot delete ad with dependencies",
       "productNotFound": "Ad not found",
       "permissionDenied": "Permission denied",
-      "networkError": "Network error"
-    }
-  },
-  "sellerProfile": {
-    "locationNotSpecified": "Location not specified",
-    "memberSinceRecently": "Member since recently",
-    "reportModal": {
-      "reasonFraud": "Fraud or scam",
-      "reasonSpam": "Spam or advertising",
-      "reasonAbuse": "Abusive behavior",
-      "reasonOther": "Other reason"
+      "permissionGallery": "We need your permission to access the gallery",
+      "networkError": "Network error",
+      "success": "Success",
+      "error": "Error",
+      "confirmation": "Confirmation",
+      "productDeleted": "Product deleted successfully",
+      "deleteFailed": "Deletion failed",
+      "createFirstAd": "Create your first ad to start selling",
+      "createFirstAdButton": "Create my first ad",
+      "pendingAdsInfo": "Your ads under review will appear here",
+      "notSpecified": "Not specified",
+      "maxForfaitReached": "Maximum package reached",
+      "maxForfaitMessage": "This ad already has the Premium package, which is the highest level. You cannot boost it further.",
+      "upgradeForfait": "Upgrade package",
+      "premiumOnly": "Premium only",
+      "topOrPremium": "Top Ad or Premium",
+      "continue": "Continue"
+    },
+    "emptyStates": {
+      "noActiveAds": "No active ads",
+      "noPendingAds": "No pending ads",
+      "createFirstAd": "Create your first ad to start selling",
+      "pendingInfo": "Your ads under review will appear here"
+    },
+
+    "labels": {
+      "myActiveAds": "My active ads",
+      "pendingAds": "Pending ads",
+      "pending": "Pending",
+      "personalInfo": "Personal Information",
+      "fullName": "Full Name"
+    },
+    "paymentHistory": {
+      "title": "Payment History",
+      "payments": "payment(s)",
+      "loading": "Loading...",
+      "loadingError": "Loading error",
+      "retry": "Retry",
+      "noPayments": "No payments",
+      "noPaymentsDescription": "Your payment history will appear here",
+      "statusSuccess": "Paid",
+      "statusPending": "Pending",
+      "statusFailed": "Failed",
+      "statusCancelled": "Cancelled",
+      "statusExpired": "Expired",
+      "forfaitActive": "Active package",
+      "daysRemaining": "d remaining",
+      "previousPage": "Previous",
+      "nextPage": "Next",
+      "pageOf": "of"
+    },
+    "paymentStatus": {
+      "pending": "Payment in progress...",
+      "success": "Payment successful!",
+      "failed": "Payment failed",
+      "cancelled": "Payment cancelled",
+      "verifying": "Verifying...",
+      "pendingMessage": "Please validate the payment on your phone.\nThe package will be activated automatically.",
+      "successMessage": "Thank you for your payment!\nYour package has been activated successfully.",
+      "failedMessage": "The payment could not be completed.\nPlease try again.",
+      "cancelledMessage": "The payment has been cancelled.\nYou can try again.",
+      "redirecting": "Redirecting in",
+      "second": "second",
+      "seconds": "seconds",
+      "backToHome": "Back to home",
+      "close": "Close",
+      "cancel": "Cancel"
+    },
+
+    "forfaitSelector": {
+      "title": "Choose a boost package",
+      "for": "For:",
+      "loading": "Loading packages...",
+      "noForfaits": "No packages available",
+      "noForfaitsMessage": "Boost packages are not available at the moment.\nYou can boost your ad later from your profile.",
+      "daysVisibility": "days of visibility",
+      "continueWithout": "Continue without package",
+      "currency": "FCFA"
+    },
+    "payment": {
+      "title": "Package Payment",
+      "forfait": "Package",
+      "amount": "Amount",
+      "methodTitle": "Mobile Money Payment",
+      "methodDescription": "Enter your phone number to receive a payment notification",
+      "phoneNumber": "Phone number",
+      "required": "*",
+      "phonePlaceholder": "6xxxxxxxx",
+      "infoMessage": "You will receive a notification on your phone. Validate the payment to activate the package.",
+      "cancel": "Cancel",
+      "pay": "Pay",
+      "errorPhone": "Please enter your phone number",
+      "errorInvalidPhone": "Invalid number (ex: 6xxxxxxxx )",
+      "errorMissingInfo": "Missing payment information",
+      "errorPaymentInfo": "Unable to retrieve payment information",
+      "errorPaymentFailed": "Error initiating payment",
+      "error": "Error"
     }
   },
   "howItWorks": {
@@ -117,5 +289,499 @@
       "title": "Sell safely",
       "description": "Enjoy our protection tools and support"
     }
+  },
+  "settings": {
+    "title": "Settings",
+    "sections": {
+      "appearance": "Appearance",
+      "language": "Language",
+      "notifications": "Notifications",
+      "infoLegal": "Information & Legal"
+    },
+    "darkMode": {
+      "title": "Dark mode",
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "languageOption": {
+      "title": "Language",
+      "french": "Français",
+      "english": "English"
+    },
+    "notificationsOption": {
+      "title": "Notifications",
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "about": {
+      "title": "About",
+      "description": "Discover our mission and values"
+    },
+    "contact": {
+      "title": "Contact",
+      "description": "Send us a message"
+    },
+    "terms": {
+      "title": "Terms of Use",
+      "description": "Platform rules and conditions"
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "description": "Protection of your personal data"
+    },
+    "version": "Version",
+    "copyright": "BuyAndSale ©"
+  },
+  "about": {
+    "hero": {
+      "title": "About Us",
+      "subtitle": "The classified ads platform connecting Cameroonians to buy, sell and exchange with confidence."
+    },
+    "mission": {
+      "title": "Our Mission",
+      "description1": "We believe every Cameroonian should have access to a simple, secure and efficient platform to sell their goods or find what they're looking for.",
+      "description2": "Our goal is to democratize e-commerce in Cameroon by offering a solution adapted to local needs, with French-speaking customer service and features designed for our market.",
+      "whyChooseUs": "Why choose us?",
+      "reasons": {
+        "secure": "100% secure platform",
+        "community": "Active and engaged community",
+        "support": "Responsive customer service",
+        "coverage": "Nationwide coverage"
+      }
+    },
+    "stats": {
+      "title": "Our numbers speak for themselves",
+      "subtitle": "Constant growth thanks to our users' trust",
+      "activeUsers": "Active users",
+      "publishedAds": "Published ads",
+      "secureTransactions": "Secure transactions",
+      "coveredCities": "Cities covered"
+    },
+    "features": {
+      "title": "What sets us apart",
+      "subtitle": "Features designed for the Cameroonian user experience",
+      "list": {
+        "easeOfUse": {
+          "title": "Ease of use",
+          "description": "Intuitive interface to publish and search for ads in just a few clicks."
+        },
+        "security": {
+          "title": "Guaranteed security",
+          "description": "User verification and reporting system for your safety."
+        },
+        "localSupport": {
+          "title": "Local support",
+          "description": "Specially designed for the Cameroonian market with French support."
+        },
+        "freeAccess": {
+          "title": "Free and accessible",
+          "description": "Free ad posting and open access for all users."
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to join us?",
+      "subtitle": "Join thousands of Cameroonians who trust our platform for their online buying and selling.",
+      "startNow": "Start now",
+      "contactUs": "Contact us"
+    }
+  },
+  "terms": {
+    "title": "Terms of Use",
+    "subtitle": "Rules and conditions for using the BuyAndSale platform. Please read these terms carefully before using our services.",
+    "lastUpdated": "Last updated",
+    "lastUpdatedDate": "September 2, 2025",
+    "important": {
+      "title": "Important to remember",
+      "description": "By using BuyAndSale, you accept these terms in their entirety. These rules are essential to maintain a safe and fair environment for all our users."
+    },
+    "acceptance": {
+      "title": "Acceptance of terms",
+      "content": {
+        "usage": "By using BuyAndSale, you accept these terms of use in their entirety. If you do not accept these terms, please do not use our platform.",
+        "application": "These terms apply to all users of the platform, whether buyers or sellers."
+      }
+    },
+    "services": {
+      "title": "Description of services",
+      "description": "BuyAndSale is an online classified ads platform for Cameroonian users. We connect buyers and sellers but are not party to transactions.",
+      "offeredTitle": "✓ What we offer",
+      "notGuaranteedTitle": "⚠️ What we do not guarantee",
+      "offered": {
+        "freeAds": "• Free ad posting",
+        "searchFilters": "• Search system and filters",
+        "directContact": "• Direct contact with sellers",
+        "favorites": "• Favorites system"
+      },
+      "notGuaranteed": {
+        "productQuality": "• The quality of products sold",
+        "descriptionAccuracy": "• The accuracy of descriptions",
+        "delivery": "• Order delivery",
+        "payment": "• Transaction payment"
+      }
+    },
+    "obligations": {
+      "title": "User obligations",
+      "userCommitments": "✅ You commit to:",
+      "prohibitions": "❌ It is forbidden to:",
+      "user": {
+        "accurateInfo": "• Provide accurate information",
+        "respectLaws": "• Respect Cameroonian laws",
+        "legalContent": "• Publish legal and appropriate content",
+        "respectUsers": "• Respect other users",
+        "secureAccount": "• Secure your account"
+      },
+      "prohibited": {
+        "illegalProducts": "• Sell illegal products",
+        "fakeIdentity": "• Use fake identities",
+        "spam": "• Spam",
+        "hacking": "• Hack or attack the site",
+        "multipleFraudAccounts": "• Create multiple fraudulent accounts"
+      }
+    },
+    "liability": {
+      "title": "Responsibilities and limitations",
+      "yourResponsibility": "Your responsibility",
+      "ourResponsibility": "Our responsibility",
+      "limitationTitle": "⚠️ Limitation of liability",
+      "limitationContent": "BuyAndSale cannot be held responsible for transactions between users, product quality, delivery delays or commercial disputes. We act solely as a technical intermediary.",
+      "user": {
+        "legalityVerification": "• Verification of the legality of your ads",
+        "descriptionAccuracy": "• Accuracy of product descriptions",
+        "buyerAgreements": "• Respect agreements with buyers",
+        "dataProtection": "• Protection of your personal data"
+      },
+      "our": {
+        "platformProvision": "• Provision of the technical platform",
+        "dataProtection": "• Data protection according to our policy",
+        "contentModeration": "• Moderation of reported content",
+        "basicSupport": "• Basic technical support"
+      }
+    },
+    "sanctions": {
+      "title": "Sanctions and disciplinary measures",
+      "introduction": "In case of non-compliance with these terms:",
+      "progression": "📢 Warning → ⏸️ Suspension → 🚫 Ban",
+      "description": "Progressive sanctions according to the severity of the offense"
+    },
+    "modifications": {
+      "title": "Modifications of terms",
+      "description": "We reserve the right to modify these terms at any time. Users will be informed of important changes via email or platform notification.",
+      "continuityTitle": "Continued use = Acceptance",
+      "continuityContent": "By continuing to use BuyAndSale after modification of the terms, you automatically accept the new terms."
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "subtitle": "Your privacy is our priority. Discover how we collect, use and protect your personal data on BuyAndSale.",
+    "lastUpdated": "Last updated",
+    "lastUpdatedDate": "September 2, 2025",
+    "summary": {
+      "title": "Summary in brief",
+      "description": "BuyAndSale only collects data necessary for the operation of our Cameroonian marketplace. Your personal information is never sold to third parties and remains secured by cutting-edge technologies."
+    },
+    "collection": {
+      "title": "Information collection",
+      "personal": {
+        "title": "Personal information"
+      },
+      "products": {
+        "title": "Information about your products"
+      },
+      "technical": {
+        "title": "Technical information"
+      }
+    },
+    "usage": {
+      "title": "Use of your data",
+      "platform": {
+        "title": "Platform operation"
+      },
+      "communication": {
+        "title": "Communication and support"
+      }
+    },
+    "sharing": {
+      "title": "Data sharing",
+      "public": {
+        "title": "Public information"
+      },
+      "notShared": {
+        "title": "Private information"
+      }
+    },
+    "protection": {
+      "title": "Data protection",
+      "technical": {
+        "title": "Technical security"
+      },
+      "access": {
+        "title": "Access control"
+      }
+    },
+    "rights": {
+      "title": "Your rights",
+      "access": {
+        "title": "Right of access"
+      },
+      "modification": {
+        "title": "Right of rectification"
+      },
+      "deletion": {
+        "title": "Right to erasure"
+      }
+    },
+    "contact": {
+      "title": "Contact us",
+      "description": "Questions about our privacy policy? Our team is here to help."
+    },
+    "content": {
+      "personal": {
+        "identity": "Identity: First name, last name upon registration",
+        "contact": "Contact: Email address and Cameroonian phone number (+237)",
+        "avatar": "Profile picture: Optional avatar you upload"
+      },
+      "products": {
+        "images": "Images of your products (maximum 5 per ad)",
+        "descriptions": "Descriptions, prices, quantities and condition of products",
+        "location": "Location (city and neighborhood in Cameroon)",
+        "phone": "Phone number for direct contact"
+      },
+      "technical": {
+        "connection": "Connection and browsing information",
+        "session": "Session data for security",
+        "preferences": "Usage preferences (language, theme, favorites)"
+      },
+      "sharing": {
+        "public": {
+          "description": "Only your first name, last name and phone number are publicly visible on your ads to allow buyers to contact you."
+        }
+      },
+      "protection": {
+        "technical": {
+          "encryption": "• Advanced password encryption",
+          "connections": "• Secure connections",
+          "auth": "• Robust authentication system",
+          "infrastructure": "• Secure infrastructure",
+          "validation": "• Verification code validation"
+        },
+        "access": {
+          "control": "• Strict data access control",
+          "admin": "• Secure administration",
+          "monitoring": "• Activity monitoring",
+          "reporting": "• Integrated reporting system",
+          "moderation": "• Active content moderation"
+        }
+      }
+    }
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "We're here to help. Send us a message and we'll respond quickly.",
+    "form": {
+      "name": "Full name",
+      "email": "Email",
+      "subject": "Subject",
+      "message": "Message",
+      "send": "Send message",
+      "sending": "Sending...",
+      "success": "Message sent successfully!",
+      "error": "Error sending message"
+    },
+    "info": {
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address",
+      "responseTime": "Response within 24-48h",
+      "availability": "Mon-Fri, 8am-6pm",
+      "location": "Douala, Cameroon"
+    }
+  },
+  "productDetails": {
+    "loading": "Loading product...",
+    "sessionExpired": "Session expired",
+    "sessionExpiredMessage": "Your session has expired. Please log in again.",
+    "reconnect": "Log in again",
+    "notFound": "Product not found",
+    "back": "Back",
+    "noImage": "No image",
+    "description": "Description",
+    "state": "Condition",
+    "views": "Views",
+    "notSpecified": "Not specified",
+    "stateNew": "New",
+    "stateUsed": "Used",
+    "stateFair": "Fair",
+    "security": "Security",
+    "securityTip1": "Meet in public",
+    "securityTip2": "Check the product",
+    "securityTip3": "No advance payment",
+    "securityTip4": "Report any suspicious activity",
+    "seller": "Seller",
+    "showNumber": "Show number",
+    "whatsapp": "WhatsApp",
+    "favoriteError": "Unable to modify favorites",
+    "whatsappError": "Unable to open WhatsApp",
+    "interestedMessage": "Hello, I am interested in your product",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "daysAgo": "{days} days ago"
+  },
+  "postAds": {
+    "title": "Create Ad",
+    "step1Title": "Main Information",
+    "step1Subtitle": "Enter the main information for your ad",
+    "step2Title": "Add photos and location",
+    "step2Subtitle": "Add photos and specify the location",
+    "step3Title": "Contact details and validation",
+    "step3Subtitle": "Finalize with your contact details and verify the information",
+    "productName": "Product Name",
+    "productNamePlaceholder": "E.g: iPhone 13 Pro Max",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe your product in detail...",
+    "price": "Price (FCFA)",
+    "pricePlaceholder": "500000",
+    "category": "Category",
+    "selectCategory": "Select a category",
+    "selectCategoryPlaceholder": "Select a category",
+    "productState": "Product Condition",
+    "stateNew": "New",
+    "stateUsed": "Used",
+    "stateFair": "Fair",
+    "required": "*",
+    "characterCounter": "{count}/10 characters minimum",
+    "charactersMissing": "⚠️ {count} characters missing",
+    "validated": "✅",
+    "addPhotos": "Add Photos",
+    "photosSubtitle": "Add up to {max} photos of your product",
+    "noPhotos": "No photos added",
+    "addPhotoButton": "Add photos",
+    "city": "City",
+    "selectCity": "Select a city",
+    "selectCityPlaceholder": "Select a city",
+    "neighborhood": "Neighborhood",
+    "neighborhoodPlaceholder": "E.g: Bonamoussadi",
+    "phone": "Phone Number",
+    "phonePlaceholder": "6XX XX XX XX",
+    "quantity": "Available Quantity",
+    "quantityPlaceholder": "1",
+    "negotiable": "Price is negotiable",
+    "summary": "Summary of your ad",
+    "summaryProduct": "Product",
+    "summaryPrice": "Price",
+    "summaryState": "Condition",
+    "summaryCategory": "Category",
+    "summaryCity": "City",
+    "summaryNeighborhood": "Neighborhood",
+    "summaryImages": "Images",
+    "previous": "Previous",
+    "next": "Next",
+    "publish": "Publish",
+    "maxImagesReached": "Limit reached",
+    "maxImagesMessage": "You already have {max} images. Delete one to add more.",
+    "permissionRequired": "Permission required",
+    "permissionMessage": "We need your permission to access photos.",
+    "imagesAdded": "Success",
+    "imagesAddedMessage": "{count} image(s) added!",
+    "validationError": "Validation",
+    "fillRequired": "Please fill in all required fields.",
+    "validationErrors": "Validation errors",
+    "errorProductId": "Error",
+    "errorProductIdMessage": "Unable to retrieve the created product ID.",
+    "successCreated": "Success",
+    "successCreatedMessage": "Ad created successfully!",
+    "errorCreating": "Error creating product",
+    "errorGeneric": "Error",
+    "validations": {
+      "nameRequired": "Name is required",
+      "nameMinLength": "Name must be at least 3 characters",
+      "descriptionRequired": "Description is required",
+      "descriptionMinLength": "Description must be at least 10 characters",
+      "priceRequired": "Price is required",
+      "pricePositive": "Price must be greater than 0",
+      "categoryRequired": "Category is required",
+      "stateRequired": "Condition is required",
+      "cityRequired": "City is required",
+      "neighborhoodRequired": "Neighborhood is required",
+      "phoneRequired": "Phone number is required",
+      "phoneInvalid": "The Cameroonian phone number is not valid",
+      "quantityRequired": "Quantity is required",
+      "quantityPositive": "Quantity must be greater than 0",
+      "imagesRequired": "At least one image is required"
+    },
+    "deleteImage": "Delete image",
+    "deleteImageConfirm": "Do you really want to delete this image?",
+    "delete": "Delete",
+    "publishedWithoutForfait": "Ad published without package. You can add one later.",
+    "ok": "OK"
+  },
+  "sellerProfile": {
+    "noPhone": "No phone number",
+    "checkOut": "Check out",
+    "reportSuccess": "Report sent",
+    "locationNotSpecified": "Location not specified",
+    "memberSinceRecently": "Member recently",
+    "contactInfo": "Contact information",
+    "noProducts": "No products",
+    "whatsappError": "Unable to open WhatsApp",
+    "whatsapp": "WhatsApp",
+    "actions": {
+      "rate": "Rate",
+      "report": "Report"
+    },
+    "reportModal": {
+      "reasonFraud": "Fraud or scam",
+      "reasonSpam": "Spam or advertising",
+      "reasonAbuse": "Abusive behavior",
+      "reasonOther": "Other reason"
+    }
+  },
+  "products": {
+    "searchPlaceholder": "Search for a product...",
+    "resultsCount": "{count} result",
+    "resultsCountPlural": "{count} results",
+    "clearFilters": "Clear ({count})",
+    "filters": "Filters",
+    "noProductsFound": "No products found",
+    "noResultsFor": "No results for \"{query}\"",
+    "noProductsAvailable": "No products available at the moment",
+    "clearSearch": "Clear search",
+    "loading": "Loading...",
+    "loadingProducts": "Loading products...",
+    "errorLoading": "Loading error",
+    "errorMessage": "Unable to load products",
+    "retry": "Retry",
+    "loadingError": "Product loading error"
+  },
+  "sellers": {
+    "searchPlaceholder": "Search for a seller by name...",
+    "sellersFound": "{count} seller found",
+    "sellersFoundPlural": "{count} sellers found",
+    "noSellersFound": "No sellers found",
+    "noSellersAvailable": "No sellers are available at the moment",
+    "loadingSellers": "Loading sellers...",
+    "errorLoading": "Loading error",
+    "errorMessage": "An error occurred while loading sellers."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllAsRead": "Mark all as read",
+    "markAllAsReadTitle": "Mark all as read",
+    "markAllAsReadMessage": "Do you want to mark all notifications as read?",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "allRead": "All notifications are already read",
+    "info": "Info",
+    "all": "All",
+    "unread": "Unread",
+    "noNotifications": "No notifications",
+    "noUnreadNotifications": "You have no unread notifications",
+    "noNotificationsYet": "You don't have any notifications yet",
+    "loading": "Loading..."
+  },
+  "favorites": {
+    "title": "Favorites",
+    "noFavorites": "No favorites",
+    "noFavoritesMessage": "You haven't added any favorites yet"
   }
 }

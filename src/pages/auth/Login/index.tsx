@@ -18,11 +18,13 @@ import { GoogleAuthService } from '../../../services/googleAuthService'
 import API_CONFIG from '../../../config/api.config'
 import { Loading } from '../../../components/LoadingVariants'
 import { normalizePhoneNumber, validateCameroonPhone } from '../../../utils/phoneUtils'
+import { useTranslation } from '../../../hooks/useTranslation'
 
 type LoginNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>
 
 const Login = () => {
   const navigation = useNavigation<LoginNavigationProp>()
+  const { t } = useTranslation()
   const dispatch = useAppDispatch()
   
   const authState = useAppSelector(selectUserAuthenticated)
@@ -52,7 +54,7 @@ const Login = () => {
       handleGoogleSuccess(response.authentication?.accessToken);
     } else if (response?.type === 'error') {
       setIsGoogleLoading(false);
-      Alert.alert('Erreur', 'Échec de l\'authentification Google');
+      Alert.alert(t('auth.errors.title'), t('auth.errors.google.authFailed'));
     } else if (response?.type === 'cancel') {
       setIsGoogleLoading(false);
     }
@@ -61,7 +63,7 @@ const Login = () => {
   // 🔐 Traiter le succès de l'authentification Google
   const handleGoogleSuccess = async (googleAccessToken?: string) => {
     if (!googleAccessToken) {
-      Alert.alert('Erreur', 'Token Google non reçu');
+      Alert.alert(t('auth.errors.title'), t('auth.errors.google.tokenNotReceived'));
       setIsGoogleLoading(false);
       return;
     }
@@ -81,19 +83,19 @@ const Login = () => {
         );
 
         if (handleSocialAuthCallback.fulfilled.match(resultAction)) {
-          Alert.alert('Succès', 'Connexion Google réussie !');
+          Alert.alert(t('auth.success.title'), t('auth.success.googleLogin'));
           // La navigation se fera automatiquement via RootNavigator
         } else {
-          throw new Error('Échec de récupération du profil utilisateur');
+          throw new Error(t('auth.errors.google.profileFailed'));
         }
       } else {
-        throw new Error(result.error || 'Authentification Google échouée');
+        throw new Error(result.error || t('auth.errors.google.authFailed'));
       }
     } catch (error) {
       // TODO: Implémenter système de logging
       Alert.alert(
-        'Erreur',
-        error instanceof Error ? error.message : 'Erreur d\'authentification Google'
+        t('auth.errors.title'),
+        error instanceof Error ? error.message : t('auth.errors.google.authFailed')
       );
     } finally {
       setIsGoogleLoading(false);
@@ -162,12 +164,12 @@ const Login = () => {
     }
 
     if (!password.trim()) {
-      setPasswordError('Mot de passe requis')
+      setPasswordError(t('auth.errors.validation.passwordRequired'))
       return
     }
 
     if (password.length < 6) {
-      setPasswordError('Minimum 6 caractères')
+      setPasswordError(t('auth.errors.validation.passwordMinLength'))
       return
     }
 
@@ -188,22 +190,22 @@ const Login = () => {
         routes: [{ name: 'Main' as any, params: { screen: 'HomeTab' } }],
       })
     } catch (error: any) {
-      const errorMessage = error?.message || error?.error?.message || 'Erreur de connexion'
+      const errorMessage = error?.message || error?.error?.message || t('auth.errors.generic.loginFailed')
 
       if (errorMessage.includes('Email ou mot de passe incorrect')) {
-        setIdentifierError('Identifiants incorrects')
+        setIdentifierError(t('auth.errors.generic.incorrectCredentials'))
       } else if (errorMessage.includes('non vérifié')) {
-        Alert.alert('Compte non vérifié', 'Veuillez vérifier votre email ou SMS.', [{ text: 'OK' }])
+        Alert.alert(t('auth.errors.account.notVerified'), t('auth.errors.account.verifyPrompt'), [{ text: 'OK' }])
       } else if (errorMessage.includes('suspendu') || errorMessage === 'ACCOUNT_SUSPENDED') {
-        Alert.alert('Compte suspendu', 'Votre compte a été temporairement suspendu. Contactez le support.', [{ text: 'OK' }])
+        Alert.alert(t('auth.errors.account.suspended'), t('auth.errors.account.suspendedMessage'), [{ text: 'OK' }])
       } else {
-        Alert.alert('Erreur', errorMessage, [{ text: 'OK' }])
+        Alert.alert(t('auth.errors.title'), errorMessage, [{ text: 'OK' }])
       }
     }
   }
 
   if (isLoading) {
-    return <Loading fullScreen message="Connexion en cours..." />;
+    return <Loading fullScreen message={t('auth.loading.login')} />;
   }
 
   return (

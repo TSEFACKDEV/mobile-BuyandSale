@@ -14,6 +14,7 @@ import { verifyOtpAction, resendOtpAction } from '../../../store/register/action
 import { selectOtpVerification, selectResendOtp } from '../../../store/register/slice'
 import { LoadingType } from '../../../models/store'
 import { Loading } from '../../../components/LoadingVariants'
+import { useTranslation } from '../../../hooks/useTranslation'
 
 type VerifyOTPNavigationProp = NativeStackNavigationProp<
   AuthStackParamList,
@@ -26,6 +27,7 @@ const VerifyOTP = () => {
   const navigation = useNavigation<VerifyOTPNavigationProp>()
   const route = useRoute<VerifyOTPRouteProp>()
   const dispatch = useAppDispatch()
+  const { t } = useTranslation()
 
   // ✅ Pattern Redux standardisé avec hooks typés
   const otpState = useAppSelector(selectOtpVerification)
@@ -43,22 +45,22 @@ const VerifyOTP = () => {
     setOtpError('')
 
     if (!otp.trim()) {
-      setOtpError('Code OTP requis')
+      setOtpError(t('auth.errors.validation.otpRequired'))
       return
     }
 
     if (otp.length !== 6) {
-      setOtpError('Le code doit contenir 6 chiffres')
+      setOtpError(t('auth.errors.validation.otpLength'))
       return
     }
 
     if (!/^\d{6}$/.test(otp)) {
-      setOtpError('Le code ne doit contenir que des chiffres')
+      setOtpError(t('auth.errors.validation.otpDigitsOnly'))
       return
     }
 
     if (!userId) {
-      Alert.alert('Erreur', 'ID utilisateur manquant', [{ text: 'OK' }])
+      Alert.alert(t('auth.errors.title'), t('auth.errors.account.userIdMissing'), [{ text: 'OK' }])
       return
     }
 
@@ -78,7 +80,7 @@ const VerifyOTP = () => {
       })
     } catch (error: unknown) {
       // 🚨 Gestion d'erreurs
-      let errorMessage = 'Code OTP invalide'
+      let errorMessage = t('auth.errors.validation.otpInvalid')
 
       if (error instanceof Error) {
         errorMessage = error.message
@@ -96,18 +98,18 @@ const VerifyOTP = () => {
 
       // Messages d'erreur spécifiques
       if (errorMessage.includes('expiré')) {
-        setOtpError('Code expiré. Demandez un nouveau code')
+        setOtpError(t('auth.errors.validation.otpExpired'))
       } else if (errorMessage.includes('invalide') || errorMessage.includes('incorrect')) {
-        setOtpError('Code OTP incorrect')
+        setOtpError(t('auth.errors.validation.otpInvalid'))
       } else {
-        Alert.alert('Erreur', errorMessage, [{ text: 'OK' }])
+        Alert.alert(t('auth.errors.title'), errorMessage, [{ text: 'OK' }])
       }
     }
   }
 
   const handleResendOTP = async () => {
     if (!userId) {
-      Alert.alert('Erreur', 'ID utilisateur manquant', [{ text: 'OK' }])
+      Alert.alert(t('auth.errors.title'), t('auth.errors.account.userIdMissing'), [{ text: 'OK' }])
       return
     }
 
@@ -115,10 +117,10 @@ const VerifyOTP = () => {
       // ✅ Dispatch de l'action Redux resendOtpAction
       await dispatch(resendOtpAction({ userId })).unwrap()
 
-      Alert.alert('Succès', 'Un nouveau code a été envoyé', [{ text: 'OK' }])
+      Alert.alert(t('auth.success.title'), t('auth.success.codeResent'), [{ text: 'OK' }])
       setOtp('') // Réinitialiser le champ OTP
     } catch (error: unknown) {
-      let errorMessage = 'Erreur lors du renvoi du code'
+      let errorMessage = t('auth.errors.generic.resendCodeFailed')
 
       if (error instanceof Error) {
         errorMessage = error.message
@@ -132,12 +134,12 @@ const VerifyOTP = () => {
         }
       }
 
-      Alert.alert('Erreur', errorMessage, [{ text: 'OK' }])
+      Alert.alert(t('auth.errors.title'), errorMessage, [{ text: 'OK' }])
     }
   }
 
   if (isLoading) {
-    return <Loading fullScreen message="Vérification en cours..." />;
+    return <Loading fullScreen message={t('auth.loading.verification')} />;
   }
 
   return (

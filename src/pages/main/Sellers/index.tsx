@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { View, Text, TextInput, FlatList, RefreshControl, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useThemeColors } from '../../../contexts/ThemeContext';
+import { useTranslation } from '../../../hooks/useTranslation';
 import { useAppDispatch, useAppSelector } from '../../../hooks/store';
 import { fetchPublicSellersAction } from '../../../store/user/actions';
 import { selectUsers, selectUsersStatus, selectUsersError } from '../../../store/user/slice';
@@ -12,6 +13,7 @@ import createStyles from './style';
 
 const Sellers = () => {
   const colors = useThemeColors();
+  const { t, language } = useTranslation();
   const dispatch = useAppDispatch();
   const styles = createStyles(colors);
 
@@ -119,7 +121,7 @@ const Sellers = () => {
         <Icon name="search" size={20} color={colors.textSecondary} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Rechercher un vendeur par nom..."
+          placeholder={t('sellers.searchPlaceholder')}
           placeholderTextColor={colors.textSecondary}
           value={localSearch}
           onChangeText={handleSearchChange}
@@ -137,9 +139,10 @@ const Sellers = () => {
 
       {/* Stats */}
       <Text style={styles.statsText}>
-        {sellers.length} vendeur{sellers.length !== 1 ? 's' : ''} trouvé
-        {sellers.length !== 1 ? 's' : ''}
-        {filters.search ? ` pour "${filters.search}"` : ''}
+        {sellers.length} {language === 'fr' 
+          ? (sellers.length !== 1 ? 'vendeurs trouvés' : 'vendeur trouvé')
+          : (sellers.length !== 1 ? 'sellers found' : 'seller found')}
+        {filters.search ? ` ${language === 'fr' ? 'pour' : 'for'} "${filters.search}"` : ''}
       </Text>
     </View>
   );
@@ -148,11 +151,13 @@ const Sellers = () => {
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
       <Icon name="people-outline" size={64} color={colors.textSecondary} />
-      <Text style={styles.emptyTitle}>Aucun vendeur trouvé</Text>
+      <Text style={styles.emptyTitle}>{t('sellers.noSellersFound')}</Text>
       <Text style={styles.emptyText}>
         {filters.search
-          ? `Aucun vendeur ne correspond à "${filters.search}"`
-          : "Aucun vendeur n'est disponible pour le moment"}
+          ? (language === 'fr' 
+              ? `Aucun vendeur ne correspond à "${filters.search}"`
+              : `No seller matches "${filters.search}"`)
+          : t('sellers.noSellersAvailable')}
       </Text>
     </View>
   );
@@ -164,7 +169,7 @@ const Sellers = () => {
         <TopNavigation />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.loadingText}>Chargement des vendeurs...</Text>
+          <Text style={styles.loadingText}>{t('sellers.loadingSellers')}</Text>
         </View>
       </View>
     );
@@ -177,9 +182,9 @@ const Sellers = () => {
         <TopNavigation />
         <View style={styles.errorContainer}>
           <Icon name="alert-circle-outline" size={64} color={colors.error} />
-          <Text style={styles.errorTitle}>Erreur de chargement</Text>
+          <Text style={styles.errorTitle}>{t('sellers.errorLoading')}</Text>
           <Text style={styles.errorText}>
-            {error?.meta?.message || "Une erreur est survenue lors du chargement des vendeurs."}
+            {error?.meta?.message || t('sellers.errorMessage')}
           </Text>
         </View>
       </View>

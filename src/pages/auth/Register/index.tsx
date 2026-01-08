@@ -20,6 +20,7 @@ import { Loading } from '../../../components/LoadingVariants'
 import { normalizePhoneNumber, validateCameroonPhone } from '../../../utils/phoneUtils'
 import PasswordStrengthIndicator from '../../../components/PasswordStrengthIndicator'
 import PhoneInput from '../../../components/PhoneInput'
+import { useTranslation } from '../../../hooks/useTranslation'
 
 type RegisterNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Register'>
 type AuthNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Auth'>
@@ -28,6 +29,7 @@ const Register = () => {
   const navigation = useNavigation<RegisterNavigationProp>()
   const navigation1 = useNavigation<AuthNavigationProp>()
   const dispatch = useAppDispatch()
+  const { t } = useTranslation()
 
   // ✅ Pattern Redux standardisé avec hooks typés
   const registerState = useAppSelector(selectUserRegisted)
@@ -59,7 +61,7 @@ const Register = () => {
       handleGoogleSuccess(response.authentication?.accessToken);
     } else if (response?.type === 'error') {
       setIsGoogleLoading(false);
-      Alert.alert('Erreur', 'Échec de l\'authentification Google');
+      Alert.alert(t('auth.errors.title'), t('auth.errors.google.authFailed'));
     } else if (response?.type === 'cancel') {
       setIsGoogleLoading(false);
     }
@@ -111,8 +113,8 @@ const Register = () => {
   const handleGoogleRegister = async () => {
     if (!GoogleAuthService.isConfigured()) {
       Alert.alert(
-        'Configuration manquante',
-        'L\'authentification Google n\'est pas configurée.',
+        t('auth.titles.configMissing'),
+        t('auth.errors.google.configMissing'),
         [{ text: 'OK' }]
       );
       return;
@@ -120,8 +122,8 @@ const Register = () => {
 
     if (!request) {
       Alert.alert(
-        'Erreur',
-        'Authentification Google non disponible pour le moment.',
+        t('auth.errors.title'),
+        t('auth.errors.google.notAvailable'),
         [{ text: 'OK' }]
       );
       return;
@@ -133,7 +135,7 @@ const Register = () => {
     } catch (error) {
       // TODO: Implémenter système de logging
       setIsGoogleLoading(false);
-      Alert.alert('Erreur', 'Impossible d\'initier l\'authentification Google');
+      Alert.alert(t('auth.errors.title'), t('auth.errors.google.initFailed'));
     }
   };
 
@@ -237,8 +239,8 @@ const Register = () => {
 
         // 🎉 Inscription réussie - Navigation vers vérification OTP avec userId
         Alert.alert(
-          'Inscription réussie',
-          'Un code de vérification vous a été envoyé',
+          t('auth.success.registration'),
+          t('auth.success.verificationSent'),
           [
             {
               text: 'OK',
@@ -252,7 +254,7 @@ const Register = () => {
         )
       } catch (error: unknown) {
         // 🚨 Gestion d'erreurs améliorée
-        let errorMessage = 'Erreur lors de l\'inscription'
+        let errorMessage = t('auth.errors.generic.registrationFailed')
 
         if (error instanceof Error) {
           errorMessage = error.message
@@ -271,21 +273,21 @@ const Register = () => {
         // Messages d'erreur spécifiques
         if (errorMessage.includes('existe déjà') || errorMessage.includes('already exists')) {
           if (errorMessage.includes('email')) {
-            setEmailError('Cet email est déjà utilisé')
+            setEmailError(t('auth.errors.validation.emailExists'))
           } else if (errorMessage.includes('téléphone') || errorMessage.includes('phone')) {
-            setPhoneError('Ce numéro est déjà utilisé')
+            setPhoneError(t('auth.errors.validation.phoneExists'))
           } else {
-            Alert.alert('Erreur', errorMessage, [{ text: 'OK' }])
+            Alert.alert(t('auth.errors.title'), errorMessage, [{ text: 'OK' }])
           }
         } else {
-          Alert.alert('Erreur', errorMessage, [{ text: 'OK' }])
+          Alert.alert(t('auth.errors.title'), errorMessage, [{ text: 'OK' }])
         }
       }
     }
   }
 
   if (isLoading) {
-    return <Loading fullScreen message="Inscription en cours..." />;
+    return <Loading fullScreen message={t('auth.loading.login')} />;
   }
 
   return (

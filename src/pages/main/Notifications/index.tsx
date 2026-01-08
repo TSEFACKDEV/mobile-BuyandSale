@@ -13,6 +13,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../../../hooks/store';
 import { useThemeColors } from '../../../contexts/ThemeContext';
+import { useTranslation } from '../../../hooks/useTranslation';
 import {
   fetchNotificationsAction,
   markAsReadAction,
@@ -34,6 +35,7 @@ const Notifications = () => {
   const navigation = useNavigation();
   const dispatch = useAppDispatch();
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const styles = createStyles(colors);
 
   const { items, unreadCount, status } = useAppSelector(
@@ -57,17 +59,17 @@ const Notifications = () => {
   // Marquer toutes comme lues
   const handleMarkAllAsRead = useCallback(() => {
     if (unreadCount === 0) {
-      Alert.alert('Info', 'Toutes les notifications sont déjà lues');
+      Alert.alert(t('notifications.info'), t('notifications.allRead'));
       return;
     }
 
     Alert.alert(
-      'Marquer tout comme lu',
-      'Voulez-vous marquer toutes les notifications comme lues ?',
+      t('notifications.markAllAsReadTitle'),
+      t('notifications.markAllAsReadMessage'),
       [
-        { text: 'Annuler', style: 'cancel' },
+        { text: t('notifications.cancel'), style: 'cancel' },
         {
-          text: 'Confirmer',
+          text: t('notifications.confirm'),
           onPress: async () => {
             await dispatch(markAllAsReadAction());
             await dispatch(fetchNotificationsAction());
@@ -75,7 +77,7 @@ const Notifications = () => {
         },
       ]
     );
-  }, [dispatch, unreadCount]);
+  }, [dispatch, unreadCount, t]);
 
   // Gérer le clic sur une notification
   const handleNotificationPress = useCallback(
@@ -165,11 +167,11 @@ const Notifications = () => {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Icon name="notifications-off-outline" size={80} color={colors.textSecondary} />
-      <Text style={styles.emptyStateTitle}>Aucune notification</Text>
+      <Text style={styles.emptyStateTitle}>{t('notifications.noNotifications')}</Text>
       <Text style={styles.emptyStateText}>
         {filter === 'unread'
-          ? 'Vous n\'avez aucune notification non lue'
-          : 'Vous n\'avez pas encore de notifications'}
+          ? t('notifications.noUnreadNotifications')
+          : t('notifications.noNotificationsYet')}
       </Text>
     </View>
   );
@@ -180,7 +182,7 @@ const Notifications = () => {
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.loadingText}>Chargement...</Text>
+          <Text style={styles.loadingText}>{t('notifications.loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -191,7 +193,7 @@ const Notifications = () => {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.headerTitle}>Notifications</Text>
+          <Text style={styles.headerTitle}>{t('notifications.title')}</Text>
           {unreadCount > 0 && (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>{unreadCount}</Text>
@@ -205,7 +207,7 @@ const Notifications = () => {
             onPress={handleMarkAllAsRead}
           >
             <Icon name="checkmark-done" size={20} color={colors.primary} />
-            <Text style={styles.markAllText}>Tout lire</Text>
+            <Text style={styles.markAllText}>{t('notifications.markAllAsRead')}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -225,7 +227,7 @@ const Notifications = () => {
               filter === 'all' && styles.filterTextActive,
             ]}
           >
-            Toutes ({items.length})
+            {t('notifications.all')} ({items.length})
           </Text>
         </TouchableOpacity>
 
@@ -242,7 +244,7 @@ const Notifications = () => {
               filter === 'unread' && styles.filterTextActive,
             ]}
           >
-            Non lues ({unreadCount})
+            {t('notifications.unread')} ({unreadCount})
           </Text>
         </TouchableOpacity>
       </View>

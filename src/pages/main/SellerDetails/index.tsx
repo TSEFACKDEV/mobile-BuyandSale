@@ -15,6 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useThemeColors } from '../../../contexts/ThemeContext';
+import { useTranslation } from '../../../hooks/useTranslation';
 import { useProducts } from '../../../hooks/useProducts';
 import { useSellerReviews } from '../../../hooks/useSellerReviews';
 import { useAppSelector } from '../../../hooks/store';
@@ -29,28 +30,6 @@ import { normalizePhoneForWhatsApp, formatPhoneForDisplay } from '../../../utils
 import createStyles from './style';
 import type { HomeStackParamList } from '../../../types/navigation';
 import type { Product } from '../../../store/product/actions';
-
-// Dummy translation function for now
-const t = (key: string, params?: any): string => {
-  const translations: Record<string, string> = {
-    'common.loading': 'Chargement...',
-    'sellerProfile.noPhone': 'Aucun numéro de téléphone',
-    'sellerProfile.checkOut': 'Découvrez',
-    'sellerProfile.reportSuccess': 'Signalement envoyé',
-    'sellerProfile.locationNotSpecified': 'Localisation non précisée',
-    'sellerProfile.memberSinceRecently': 'Membre récemment',
-    'sellerProfile.contactInfo': 'Informations de contact',
-    'sellerProfile.noProducts': 'Aucun produit',
-    'sellerProfile.actions.rate': 'Noter',
-    'sellerProfile.actions.report': 'Signaler',
-    'sellerProfile.actions.contact': 'Contacter',
-    'sellerProfile.actions.share': 'Partager',
-  };
-  if (key === 'sellerProfile.productsSection') {
-    return `Produits de ${params?.name || ''} (${params?.count || 0})`;
-  }
-  return translations[key] || key;
-};
 
 type SellerDetailsRouteProp = RouteProp<HomeStackParamList, 'SellerDetails'>;
 
@@ -67,6 +46,7 @@ const SellerDetails: React.FC = () => {
   const route = useRoute<SellerDetailsRouteProp>();
   const navigation = useNavigation();
   const theme = useThemeColors();
+  const { t, language } = useTranslation();
   const styles = createStyles(theme);
 
   const { sellerId } = route.params;
@@ -108,7 +88,7 @@ const SellerDetails: React.FC = () => {
     const whatsappUrl = `https://wa.me/${normalizedPhone}?text=${message}`;
 
     Linking.openURL(whatsappUrl)
-      .catch(() => Alert.alert('Erreur', 'Impossible d\'ouvrir WhatsApp'));
+      .catch(() => Alert.alert(t('common.error'), t('sellerProfile.whatsappError')));
   };
 
   const handleShareProfile = async () => {
@@ -259,7 +239,7 @@ const SellerDetails: React.FC = () => {
           >
             <Icon name="logo-whatsapp" size={16} color="#FFFFFF" />
             <Text style={styles.contactButtonText}>
-              WhatsApp
+              {t('sellerProfile.whatsapp')}
             </Text>
           </TouchableOpacity>
 
@@ -286,7 +266,9 @@ const SellerDetails: React.FC = () => {
         {/* Products Section - Separate Card */}
         <View style={styles.productsCard}>
           <Text style={styles.productsTitle}>
-            {t('sellerProfile.productsSection', { name: seller.firstName, count })}
+            {language === 'fr' 
+              ? `Produits de ${seller.firstName} (${count})`
+              : `${seller.firstName}'s Products (${count})`}
           </Text>
 
           {isSellerProductsLoading ? (

@@ -7,7 +7,7 @@ import {
   Linking,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { LinearGradient } from 'expo-linear-gradient';
+// import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme, useThemeColors } from '../../../contexts/ThemeContext';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { styles } from './styles';
@@ -117,14 +117,9 @@ const UseCondition: React.FC = () => {
         contentContainerStyle={styles.scrollContent}
       >
         {/* Hero Section */}
-        <LinearGradient
-          colors={['#3B82F6', '#8B5CF6']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.heroSection}
-        >
+        <View style={styles.heroSection}>
           <View style={styles.heroIconContainer}>
-            <Icon name="shield-checkmark" size={48} color="#FFF" />
+            <Icon name="document-text-outline" size={48} color={colors.primary} />
           </View>
           <Text style={styles.heroTitle}>
             {t('terms.title') || 'Conditions d\'utilisation'}
@@ -134,13 +129,13 @@ const UseCondition: React.FC = () => {
               'Règles et conditions d\'utilisation de la plateforme BuyAndSale.'}
           </Text>
           <View style={styles.lastUpdatedBadge}>
-            <Icon name="time-outline" size={16} color="#FFF" />
+            <Icon name="calendar-outline" size={16} color={colors.primary} />
             <Text style={styles.lastUpdatedText}>
               {t('terms.lastUpdated') || 'Dernière mise à jour'} :{' '}
               {t('terms.lastUpdatedDate') || '2 septembre 2025'}
             </Text>
           </View>
-        </LinearGradient>
+        </View>
 
         {/* Important Notice */}
         <View
@@ -148,12 +143,12 @@ const UseCondition: React.FC = () => {
             styles.noticeCard,
             {
               backgroundColor: colors.backgroundSecondary,
-              borderColor: '#F59E0B',
+              borderColor: colors.border,
             },
           ]}
         >
           <View style={styles.noticeHeader}>
-            <Icon name="warning" size={24} color="#F59E0B" />
+            <Icon name="warning" size={24} color="#6B7280" />
             <Text style={[styles.noticeTitle, { color: colors.text }]}>
               {t('terms.important.title') || 'Important à retenir'}
             </Text>
@@ -175,7 +170,7 @@ const UseCondition: React.FC = () => {
           ]}
         >
           <View style={styles.sectionHeader}>
-            <Icon name="checkmark-circle" size={24} color="#10B981" />
+            <Icon name="checkbox-outline" size={24} color="#6B7280" />
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
               {t('terms.acceptance.title') || 'Acceptation des conditions'}
             </Text>
@@ -201,7 +196,7 @@ const UseCondition: React.FC = () => {
           ]}
         >
           <View style={styles.sectionHeader}>
-            <Icon name="layers" size={24} color="#3B82F6" />
+            <Icon name="apps" size={24} color="#6B7280" />
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
               {t('terms.services.title') || 'Description des services'}
             </Text>
@@ -216,8 +211,8 @@ const UseCondition: React.FC = () => {
                 t('terms.services.offeredTitle') || '✓ Ce que nous offrons'
               }
               items={offeredServices}
-              bgColor="rgba(16, 185, 129, 0.1)"
-              textColor="#10B981"
+              bgColor="#F9FAFB"
+              textColor="#374151"
               icon="checkmark-circle"
             />
             <InfoCard
@@ -226,8 +221,8 @@ const UseCondition: React.FC = () => {
                 '⚠️ Ce que nous ne garantissons pas'
               }
               items={notGuaranteedServices}
-              bgColor="rgba(59, 130, 246, 0.1)"
-              textColor="#3B82F6"
+              bgColor="#F9FAFB"
+              textColor="#374151"
               icon="alert-circle"
             />
           </View>
@@ -244,7 +239,7 @@ const UseCondition: React.FC = () => {
           ]}
         >
           <View style={styles.sectionHeader}>
-            <Icon name="person-circle" size={24} color="#8B5CF6" />
+            <Icon name="people" size={24} color="#6B7280" />
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
               {t('terms.obligations.title') || 'Obligations des utilisateurs'}
             </Text>
@@ -256,8 +251,8 @@ const UseCondition: React.FC = () => {
                 '✅ Vous vous engagez à :'
               }
               items={userObligations}
-              bgColor="rgba(16, 185, 129, 0.1)"
-              textColor="#10B981"
+              bgColor="#F9FAFB"
+              textColor="#374151"
               icon="checkbox"
             />
             <InfoCard
@@ -265,8 +260,8 @@ const UseCondition: React.FC = () => {
                 t('terms.obligations.prohibitions') || '❌ Il est interdit de :'
               }
               items={prohibitions}
-              bgColor="rgba(239, 68, 68, 0.1)"
-              textColor="#EF4444"
+              bgColor="#F9FAFB"
+              textColor="#374151"
               icon="close-circle"
             />
           </View>
@@ -283,7 +278,7 @@ const UseCondition: React.FC = () => {
           ]}
         >
           <View style={styles.sectionHeader}>
-            <Icon name="shield" size={24} color="#F59E0B" />
+            <Icon name="lock-closed" size={24} color="#6B7280" />
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
               {t('terms.liability.title') || 'Responsabilités et limitations'}
             </Text>
@@ -294,8 +289,8 @@ const UseCondition: React.FC = () => {
                 t('terms.liability.yourResponsibility') || 'Votre responsabilité'
               }
               items={userResponsibilities}
-              bgColor="rgba(139, 92, 246, 0.1)"
-              textColor="#8B5CF6"
+              bgColor="#F9FAFB"
+              textColor="#374151"
               icon="person"
             />
             <InfoCard
@@ -303,13 +298,13 @@ const UseCondition: React.FC = () => {
                 t('terms.liability.ourResponsibility') || 'Notre responsabilité'
               }
               items={ourResponsibilities}
-              bgColor="rgba(59, 130, 246, 0.1)"
-              textColor="#3B82F6"
+              bgColor="#F9FAFB"
+              textColor="#374151"
               icon="business"
             />
           </View>
           <View style={styles.warningCard}>
-            <Icon name="alert-circle" size={20} color="#F59E0B" />
+            <Icon name="alert-circle" size={20} color="#6B7280" />
             <Text style={styles.warningTitle}>
               {t('terms.liability.limitationTitle') ||
                 '⚠️ Limitation de responsabilité'}
@@ -332,7 +327,7 @@ const UseCondition: React.FC = () => {
           ]}
         >
           <View style={styles.sectionHeader}>
-            <Icon name="ban" size={24} color="#EF4444" />
+            <Icon name="close-circle" size={24} color="#6B7280" />
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
               {t('terms.sanctions.title') ||
                 'Sanctions et mesures disciplinaires'}
@@ -355,13 +350,8 @@ const UseCondition: React.FC = () => {
         </View>
 
         {/* Section 6: Modifications */}
-        <LinearGradient
-          colors={['#3B82F6', '#8B5CF6']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.modificationsSection}
-        >
-          <Icon name="document-text" size={40} color="#FFF" />
+        <View style={styles.modificationsSection}>
+          <Icon name="newspaper" size={40} color={colors.primary} />
           <Text style={styles.modificationsTitle}>
             {t('terms.modifications.title') || 'Modifications des conditions'}
           </Text>
@@ -379,7 +369,7 @@ const UseCondition: React.FC = () => {
                 'En continuant à utiliser BuyAndSale après modification des conditions, vous acceptez automatiquement les nouvelles conditions.'}
             </Text>
           </View>
-        </LinearGradient>
+        </View>
       </ScrollView>
     </View>
   );

@@ -27,9 +27,15 @@ export const getAllCategoriesAction = createAsyncThunk<
   try {
     // Construction des paramètres de requête
     const queryParams = new URLSearchParams()
-    if (params?.page) queryParams.append('page', params.page.toString())
-    if (params?.limit) queryParams.append('limit', params.limit.toString())
-    if (params?.search) queryParams.append('search', params.search)
+    if (params && 'page' in params && params.page) {
+      queryParams.append('page', params.page.toString())
+    }
+    if (params && 'limit' in params && params.limit) {
+      queryParams.append('limit', params.limit.toString())
+    }
+    if (params && 'search' in params && params.search) {
+      queryParams.append('search', params.search)
+    }
 
     const queryString = queryParams.toString()
     const url = queryString

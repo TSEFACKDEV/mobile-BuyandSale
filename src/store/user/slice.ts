@@ -24,11 +24,6 @@ interface UserState {
     page: number
     limit: number
     totalPages: number
-    perpage: number
-    prevPage: number | null
-    currentPage: number
-    nextPage: number | null
-    totalPage: number
   } | null
   stats: UserStats | null
 }

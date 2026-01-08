@@ -107,6 +107,20 @@ const About: React.FC = () => {
     try {
       setIsLoadingStats(true);
       const response = await fetch(`${API_CONFIG.BASE_URL}/stats/platform`);
+      
+      // Vérifier si la réponse est OK avant de parser
+      if (!response.ok) {
+        console.warn(`Stats API returned status ${response.status}`);
+        return;
+      }
+
+      // Vérifier le content-type pour s'assurer que c'est du JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.warn('Stats API did not return JSON');
+        return;
+      }
+
       const result = await response.json();
 
       if (result.success && result.data) {

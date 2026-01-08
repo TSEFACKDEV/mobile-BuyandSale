@@ -4,6 +4,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Constants from 'expo-constants';
 import { useTheme, useThemeMode } from '../../../contexts/ThemeContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTranslation } from '../../../hooks/useTranslation';
 import pushNotificationService from '../../../services/pushNotificationService';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -13,6 +14,7 @@ const Settings = () => {
   const { theme } = useTheme();
   const { mode, setMode } = useThemeMode();
   const { language, setLanguage } = useLanguage();
+  const { t } = useTranslation();
   const colors = theme.colors;
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -139,7 +141,7 @@ const Settings = () => {
       >
         {/* THEME SWITCH */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Apparence</Text>
+          <Text style={styles.sectionTitle}>{t('settings.sections.appearance')}</Text>
           
           <View style={styles.settingItem}>
             <View style={styles.settingLeft}>
@@ -151,9 +153,9 @@ const Settings = () => {
                 />
               </View>
               <View style={styles.settingTextContainer}>
-                <Text style={styles.settingLabel}>Mode sombre</Text>
+                <Text style={styles.settingLabel}>{t('settings.darkMode.title')}</Text>
                 <Text style={styles.settingDescription}>
-                  {isDarkMode ? 'Activé' : 'Désactivé'}
+                  {isDarkMode ? t('settings.darkMode.enabled') : t('settings.darkMode.disabled')}
                 </Text>
               </View>
             </View>
@@ -168,7 +170,7 @@ const Settings = () => {
 
         {/* LANGUAGE SWITCH */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Langue</Text>
+          <Text style={styles.sectionTitle}>{t('settings.sections.language')}</Text>
           
           <View style={styles.settingItem}>
             <View style={styles.settingLeft}>
@@ -180,9 +182,9 @@ const Settings = () => {
                 />
               </View>
               <View style={styles.settingTextContainer}>
-                <Text style={styles.settingLabel}>Langue</Text>
+                <Text style={styles.settingLabel}>{t('settings.languageOption.title')}</Text>
                 <Text style={styles.settingDescription}>
-                  {language === 'fr' ? 'Français' : 'English'}
+                  {language === 'fr' ? t('settings.languageOption.french') : t('settings.languageOption.english')}
                 </Text>
               </View>
             </View>
@@ -197,7 +199,7 @@ const Settings = () => {
 
         {/* NOTIFICATIONS SWITCH */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Notifications</Text>
+          <Text style={styles.sectionTitle}>{t('settings.sections.notifications')}</Text>
           
           <View style={styles.settingItem}>
             <View style={styles.settingLeft}>
@@ -209,9 +211,9 @@ const Settings = () => {
                 />
               </View>
               <View style={styles.settingTextContainer}>
-                <Text style={styles.settingLabel}>Notifications</Text>
+                <Text style={styles.settingLabel}>{t('settings.notificationsOption.title')}</Text>
                 <Text style={styles.settingDescription}>
-                  {notificationsEnabled ? 'Activées' : 'Désactivées'}
+                  {notificationsEnabled ? t('settings.notificationsOption.enabled') : t('settings.notificationsOption.disabled')}
                 </Text>
               </View>
             </View>
@@ -226,7 +228,7 @@ const Settings = () => {
 
         {/* INFORMATION & LEGAL SECTION */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Informations & Légal</Text>
+          <Text style={styles.sectionTitle}>{t('settings.sections.infoLegal')}</Text>
           
           <TouchableOpacity
             style={styles.navigationItem}
@@ -242,9 +244,9 @@ const Settings = () => {
                 />
               </View>
               <View style={styles.settingTextContainer}>
-                <Text style={styles.settingLabel}>À propos</Text>
+                <Text style={styles.settingLabel}>{t('settings.about.title')}</Text>
                 <Text style={styles.settingDescription}>
-                  Découvrez notre mission et nos valeurs
+                  {t('settings.about.description')}
                 </Text>
               </View>
             </View>
@@ -270,9 +272,9 @@ const Settings = () => {
                 />
               </View>
               <View style={styles.settingTextContainer}>
-                <Text style={styles.settingLabel}>Contact</Text>
+                <Text style={styles.settingLabel}>{t('settings.contact.title')}</Text>
                 <Text style={styles.settingDescription}>
-                  Envoyez-nous un message
+                  {t('settings.contact.description')}
                 </Text>
               </View>
             </View>
@@ -298,9 +300,9 @@ const Settings = () => {
                 />
               </View>
               <View style={styles.settingTextContainer}>
-                <Text style={styles.settingLabel}>Conditions d'utilisation</Text>
+                <Text style={styles.settingLabel}>{t('settings.terms.title')}</Text>
                 <Text style={styles.settingDescription}>
-                  Règles et conditions de la plateforme
+                  {t('settings.terms.description')}
                 </Text>
               </View>
             </View>
@@ -326,9 +328,9 @@ const Settings = () => {
                 />
               </View>
               <View style={styles.settingTextContainer}>
-                <Text style={styles.settingLabel}>Politique de confidentialité</Text>
+                <Text style={styles.settingLabel}>{t('settings.privacy.title')}</Text>
                 <Text style={styles.settingDescription}>
-                  Protection de vos données personnelles
+                  {t('settings.privacy.description')}
                 </Text>
               </View>
             </View>
@@ -344,10 +346,10 @@ const Settings = () => {
         {/* VERSION INFO */}
         <View style={styles.versionContainer}>
           <Text style={styles.versionText}>
-            Version {Constants.expoConfig?.version || '1.0.0'}
+            {t('settings.version')} {Constants.expoConfig?.version || '1.0.0'}
           </Text>
           <Text style={styles.versionSubtext}>
-            BuyAndSale © {new Date().getFullYear()}
+            {t('settings.copyright')} {new Date().getFullYear()}
           </Text>
         </View>
       </ScrollView>

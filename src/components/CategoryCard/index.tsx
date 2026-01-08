@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useThemeColors } from '../../contexts/ThemeContext';
+import { useTranslation } from '../../hooks/useTranslation';
 import type { Category } from '../../store/category/slice';
 import createStyles from './style';
 
@@ -13,6 +14,7 @@ interface CategoryCardProps {
 const CategoryCard: React.FC<CategoryCardProps> = ({ category, onPress }) => {
   const colors = useThemeColors();
   const navigation = useNavigation();
+  const { t } = useTranslation();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const handlePress = () => {
@@ -39,7 +41,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, onPress }) => {
           <Text style={styles.iconText}>{category.icon || '🛒'}</Text>
         </View>
         <Text style={styles.name} numberOfLines={2}>
-          {category.name}
+          {t(`categories.${category.name}`) || category.name}
         </Text>
       </View>
     </TouchableOpacity>

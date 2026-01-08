@@ -15,6 +15,7 @@ import {
   Keyboard,
 } from 'react-native';
 import { useThemeColors } from '../../contexts/ThemeContext';
+import { useTranslation } from '../../hooks/useTranslation';
 import { useAppDispatch } from '../../hooks/store';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { assignForfaitWithPaymentAction } from '../../store/forfait/actions';
@@ -39,6 +40,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   onClose,
 }) => {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
 
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -79,18 +81,18 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
   const handlePayment = async () => {
     if (!phoneNumber.trim()) {
-      Alert.alert('Erreur', 'Veuillez saisir votre numéro de téléphone');
+      Alert.alert(t('userProfile.payment.error'), t('userProfile.payment.errorPhone'));
       return;
     }
 
     const { valid, normalized } = normalizeAndValidate(phoneNumber);
     if (!valid) {
-      Alert.alert('Erreur', 'Numéro invalide (ex: 6xxxxxxxx )');
+      Alert.alert(t('userProfile.payment.error'), t('userProfile.payment.errorInvalidPhone'));
       return;
     }
 
     if (!productId || !forfaitType) {
-      Alert.alert('Erreur', 'Informations manquantes pour le paiement');
+      Alert.alert(t('userProfile.payment.error'), t('userProfile.payment.errorMissingInfo'));
       return;
     }
 
@@ -111,14 +113,14 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         if (payment?.id) {
           onPaymentInitiated(payment.id);
         } else {
-          Alert.alert('Erreur', 'Impossible de récupérer les informations de paiement');
+          Alert.alert(t('userProfile.payment.error'), t('userProfile.payment.errorPaymentInfo'));
         }
       } else {
-        const errorMsg = (result.payload as any) || 'Erreur lors de l\'initiation du paiement';
-        Alert.alert('Erreur', errorMsg);
+        const errorMsg = (result.payload as any) || t('userProfile.payment.errorPaymentFailed');
+        Alert.alert(t('userProfile.payment.error'), errorMsg);
       }
     } catch (error: any) {
-      Alert.alert('Erreur', error.message || 'Erreur lors de l\'initiation du paiement');
+      Alert.alert(t('userProfile.payment.error'), error.message || t('userProfile.payment.errorPaymentFailed'));
     } finally {
       setIsProcessing(false);
     }
@@ -146,7 +148,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 {/* Header */}
                 <View style={styles.header}>
                   <Text style={[styles.title, { color: colors.text }]}>
-                    Paiement du forfait
+                    {t('userProfile.payment.title')}
                   </Text>
                   <TouchableOpacity onPress={onClose} style={styles.closeButton}>
                     <Icon name="close" size={24} color={colors.text} />
@@ -164,7 +166,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             <View style={[styles.infoCard, { backgroundColor: colors.background }]}>
               <View style={styles.infoRow}>
                 <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>
-                  Forfait
+                  {t('userProfile.payment.forfait')}
                 </Text>
                 <Text style={[styles.infoValue, { color: colors.text }]}>
                   {forfaitType}
@@ -172,10 +174,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               </View>
               <View style={styles.infoRow}>
                 <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>
-                  Montant
+                  {t('userProfile.payment.amount')}
                 </Text>
                 <Text style={[styles.infoValue, styles.priceText, { color: '#FF6B35' }]}>
-                  {formatPrice(forfaitPrice)} FCFA
+                  {formatPrice(forfaitPrice)} {t('userProfile.forfaitSelector.currency')}
                 </Text>
               </View>
             </View>
@@ -185,18 +187,18 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               <View style={styles.methodHeader}>
                 <Icon name="card" size={24} color="#FF6B35" />
                 <Text style={[styles.methodTitle, { color: colors.text }]}>
-                  Paiement Mobile Money
+                  {t('userProfile.payment.methodTitle')}
                 </Text>
               </View>
               <Text style={[styles.methodDescription, { color: colors.textSecondary }]}>
-                Entrez votre numéro de téléphone pour recevoir une notification de paiement
+                {t('userProfile.payment.methodDescription')}
               </Text>
             </View>
 
             {/* Phone Input */}
             <View style={styles.inputGroup}>
               <Text style={[styles.label, { color: colors.text }]}>
-                Numéro de téléphone <Text style={styles.required}>*</Text>
+                {t('userProfile.payment.phoneNumber')} <Text style={styles.required}>{t('userProfile.payment.required')}</Text>
               </Text>
               <View style={[styles.phoneInputContainer, { borderColor: colors.border }]}>
                 <View style={[styles.countryCode, { backgroundColor: colors.background }]}>
@@ -204,7 +206,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 </View>
                 <TextInput
                   style={[styles.phoneInput, { color: colors.text }]}
-                  placeholder="6xxxxxxxx"
+                  placeholder={t('userProfile.payment.phonePlaceholder')}
                   placeholderTextColor={colors.textSecondary}
                   value={phoneNumber}
                   onChangeText={handlePhoneChange}
@@ -221,7 +223,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             <View style={styles.infoMessage}>
               <Icon name="information-circle" size={20} color="#007AFF" />
               <Text style={[styles.infoMessageText, { color: colors.textSecondary }]}>
-                Vous recevrez une notification sur votre téléphone. Validez le paiement pour activer le forfait.
+                {t('userProfile.payment.infoMessage')}
               </Text>
             </View>
                 </ScrollView>
@@ -234,7 +236,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                     disabled={isProcessing}
                   >
                     <Text style={[styles.cancelButtonText, { color: colors.text }]}>
-                      Annuler
+                      {t('userProfile.payment.cancel')}
                     </Text>
                   </TouchableOpacity>
 
@@ -253,7 +255,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                       <>
                         <Icon name="card" size={20} color="#FFF" />
                         <Text style={styles.payButtonText}>
-                          Payer {formatPrice(forfaitPrice)} FCFA
+                          {t('userProfile.payment.pay')} {formatPrice(forfaitPrice)} {t('userProfile.forfaitSelector.currency')}
                         </Text>
                       </>
                     )}

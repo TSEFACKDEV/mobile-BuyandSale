@@ -16,14 +16,14 @@ export const fetchCitiesAction = createAsyncThunk<
 >('city/fetchWithSearch', async (args, apiThunk) => {
   try {
     // Validation côté client
-    if (args?.search && args.search.trim().length === 0) {
+    if (args && 'search' in args && args.search && args.search.trim().length === 0) {
       throw new Error('Terme de recherche vide')
     }
 
     // Construire les paramètres de requête
     const params = new URLSearchParams()
 
-    if (args?.search && args.search.trim()) {
+    if (args && 'search' in args && args.search && args.search.trim()) {
       params.append('search', args.search.trim())
     }
 
