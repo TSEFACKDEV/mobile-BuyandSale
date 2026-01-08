@@ -136,7 +136,7 @@ const About: React.FC = () => {
         ]);
       }
     } catch (error) {
-      console.error('Error fetching platform stats:', error);
+      // TODO: Implémenter système de logging
       // Keep default loading values if fetch fails
     } finally {
       setIsLoadingStats(false);

@@ -97,7 +97,7 @@ const Register = () => {
         throw new Error(result.error || 'Authentification Google échouée');
       }
     } catch (error) {
-      console.error('❌ [Register] Erreur Google Auth:', error);
+      // TODO: Implémenter système de logging
       Alert.alert(
         'Erreur',
         error instanceof Error ? error.message : 'Erreur d\'authentification Google'
@@ -131,7 +131,7 @@ const Register = () => {
     try {
       await promptAsync();
     } catch (error) {
-      console.error('❌ [Register] Erreur promptAsync:', error);
+      // TODO: Implémenter système de logging
       setIsGoogleLoading(false);
       Alert.alert('Erreur', 'Impossible d\'initier l\'authentification Google');
     }

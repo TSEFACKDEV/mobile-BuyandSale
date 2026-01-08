@@ -24,7 +24,7 @@ const createStyles = (colors: any) =>
       borderColor: colors.border,
     },
     iconText: {
-      fontSize: 28,
+      fontSize: 32,
     },
     name: {
       fontSize: 12,

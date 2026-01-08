@@ -19,8 +19,12 @@ function AppContent() {
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.authentification.auth.entities);
 
+  // Note: Les notifications push ne fonctionnent plus dans Expo Go avec SDK 53+
+  // Utilisez un development build pour les tester
+  // Voir: https://docs.expo.dev/develop/development-builds/introduction/
   useEffect(() => {
-    pushNotificationService.initialize();
+    // pushNotificationService.initialize();
+    // Décommentez cette ligne quand vous utilisez un development build
   }, []);
 
   useEffect(() => {

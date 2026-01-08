@@ -140,7 +140,7 @@ const ProductDetails = () => {
         message: `${product.name} - ${formatPrice(product.price)}\n\n${product.description}`,
       });
     } catch (error) {
-      console.error('Erreur partage:', error);
+      // TODO: Implémenter système de logging
     }
   };
 

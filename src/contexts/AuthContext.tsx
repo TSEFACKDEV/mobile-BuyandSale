@@ -33,7 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const onboardingDone = await AsyncStorage.getItem(ONBOARDING_KEY);
         setIsOnboardingComplete(onboardingDone === 'true');
       } catch (error) {
-        console.error('Erreur lors de l\'initialisation de l\'authentification:', error);
+        // TODO: Implémenter système de logging
       } finally {
         setIsLoading(false);
       }
@@ -47,7 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
       setIsOnboardingComplete(true);
     } catch (error) {
-      console.error('Erreur lors de la finalisation du onboarding:', error);
+      // TODO: Implémenter système de logging
       throw error;
     }
   }, []);
@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await dispatch(logoutAction()).unwrap();
     } catch (error) {
-      console.error('Erreur lors de la déconnexion:', error);
+      // TODO: Implémenter système de logging
       throw error;
     }
   }, [dispatch]);

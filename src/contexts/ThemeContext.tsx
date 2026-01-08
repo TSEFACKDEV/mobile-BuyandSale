@@ -143,7 +143,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           setThemeMode(savedMode as ThemeMode);
         }
       } catch (error) {
-        console.warn('Erreur lors du chargement de la préférence de thème:', error);
+        // TODO: Implémenter système de logging
       } finally {
         setIsInitialized(true);
       }

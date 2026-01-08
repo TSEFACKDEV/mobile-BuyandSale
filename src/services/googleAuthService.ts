@@ -54,8 +54,6 @@ export class GoogleAuthService {
     googleAccessToken: string
   ): Promise<GoogleAuthResult> {
     try {
-      console.log('🔐 [GoogleAuth] Début authentification backend');
-
       // Étape 1: Récupérer les informations utilisateur depuis Google
       const userInfoResponse = await fetch(
         'https://www.googleapis.com/oauth2/v3/userinfo',
@@ -69,10 +67,6 @@ export class GoogleAuthService {
       }
 
       const googleUserInfo = await userInfoResponse.json();
-      console.log('✅ [GoogleAuth] Informations Google récupérées:', {
-        email: googleUserInfo.email,
-        name: googleUserInfo.name,
-      });
 
       // Étape 2: Envoyer à notre backend pour créer/récupérer l'utilisateur
       const backendResponse = await fetch(
@@ -103,15 +97,13 @@ export class GoogleAuthService {
         throw new Error(errorMessage);
       }
 
-      console.log('✅ [GoogleAuth] Authentification backend réussie');
-
       return {
         success: true,
         accessToken: backendData.data.token.AccessToken,
         user: backendData.data.user,
       };
     } catch (error) {
-      console.error('❌ [GoogleAuth] Erreur authentification:', error);
+      // TODO: Implémenter système de logging
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Erreur inconnue',
@@ -128,13 +120,6 @@ export class GoogleAuthService {
       !!GOOGLE_CONFIG.iosClientId ||
       !!GOOGLE_CONFIG.androidClientId ||
       !!GOOGLE_CONFIG.webClientId;
-
-    if (!hasAtLeastOneId) {
-      console.warn(
-        '⚠️ [GoogleAuth] Aucun Google Client ID configuré. ' +
-        'Ajoutez EXPO_PUBLIC_GOOGLE_CLIENT_ID_* dans votre fichier .env'
-      );
-    }
 
     return hasAtLeastOneId;
   }

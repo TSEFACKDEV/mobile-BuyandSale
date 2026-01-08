@@ -6,7 +6,7 @@ const getApiUrl = (): string => {
   if (__DEV__) {
     // TEMPORAIRE: Utiliser l'IP locale pour tous les appareils
     // Si ça ne fonctionne pas, essayez 10.0.2.2 pour Android Emulator
-    return 'http://192.168.1.28:3001/api/buyandsale';
+    return 'http://192.168.1.173:3001/api/buyandsale';
     
     /* VERSION AVEC DÉTECTION AUTO (à réactiver si besoin)
     if (Platform.OS === 'android') {
@@ -15,7 +15,7 @@ const getApiUrl = (): string => {
       return url;
     }
     
-    const url = 'http://192.168.1.28:3001/api/buyandsale';
+    const url = 'http://192.168.1.173:3001/api/buyandsale';
     console.log('🌐 API URL (iOS/Physical):', url);
     return url;
     */

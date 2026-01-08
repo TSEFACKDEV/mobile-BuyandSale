@@ -227,7 +227,7 @@ const UserProfile: React.FC = () => {
                 routes: [{ name: 'Auth' as any, params: { screen: 'Login' } }],
               });
             } catch (error) {
-              console.error('Erreur lors de la déconnexion:', error);
+              // TODO: Implémenter système de logging
               // En cas d'erreur, on redirige quand même
               navigation.reset({
                 index: 0,

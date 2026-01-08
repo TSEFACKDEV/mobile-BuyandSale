@@ -106,7 +106,6 @@ const Notifications = () => {
           }
         } else {
           // Pour d'autres types de liens, on pourrait ajouter d'autres cas ici
-          console.log('Type de lien non géré:', notification.link);
         }
       }
     },

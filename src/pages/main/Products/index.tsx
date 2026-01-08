@@ -109,7 +109,7 @@ const Products = () => {
         })
       ).unwrap();
     } catch (error) {
-      console.error('Erreur chargement produits:', error);
+      // TODO: Implémenter système de logging
     }
   };
 

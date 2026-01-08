@@ -7,7 +7,7 @@ class Utils {
       const state = store.getState();
       return state.authentification?.auth?.entities?.token?.AccessToken || null;
     } catch (error) {
-      console.error('❌ Erreur lors de la récupération du token:', error);
+      // TODO: Implémenter système de logging
       return null;
     }
   }

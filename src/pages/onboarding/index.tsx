@@ -132,7 +132,7 @@ const Onboarding = () => {
       await completeOnboarding();
       // La navigation se fera automatiquement grâce à la condition dans RootNavigator
     } catch (error) {
-      console.error('Erreur lors de la finalisation du onboarding:', error);
+      // TODO: Implémenter système de logging
     }
   };
 
