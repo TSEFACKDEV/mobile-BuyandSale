@@ -12,79 +12,79 @@ export const getCategoryIcon = (categoryName: string): string => {
 
   // Mapping catégorie → emoji
   const iconMap: Record<string, string> = {
-    // Catégories principales
-    électronique: '📱',
-    maison: '🏠',
-    automobile: '🚗',
-    immobilier: '🏢',
-    mode: '👕',
-    enfants: '👶',
-    sport: '⚽',
-    animaux: '🐾',
-    loisirs: '🎮',
-    services: '🔧',
-    rencontres: '❤️',
-    événements: '🎫',
-    divers: '📦',
+    // Catégories principales (correspondance exacte)
+    électronique: "📱",
+    maison: "🏠",
+    automobile: "🚗",
+    immobilier: "🏢",
+    mode: "👕",
+    enfants: "🧸",
+    sport: "⚽",
+    animaux: "🐕",
+    loisirs: "🎮",
+    services: "🔧",
+    rencontres: "💕",
+    événements: "🎫",
+    divers: "📦",
 
     // Mots-clés alternatifs pour compatibilité
-    phone: '📱',
-    smartphone: '📱',
-    ordinateur: '💻',
-    tv: '📺',
+    phone: "📱",
+    smartphone: "📱",
+    ordinateur: "📱",
+    tv: "📱",
 
-    vêtement: '👕',
-    fashion: '👗',
-    chaussures: '👟',
-    bijoux: '💎',
+    vêtement: "👕",
+    fashion: "👕",
+    chaussures: "👕",
+    bijoux: "👕",
 
-    voiture: '🚗',
-    car: '🚗',
-    véhicule: '🚙',
+    voiture: "🚗",
+    car: "🚗",
+    véhicule: "🚗",
 
-    appartement: '🏢',
-    terrain: '🏞️',
-    locaux: '🏪',
+    appartement: "🏢",
+    terrain: "🏢",
+    locaux: "🏢",
 
-    mobilier: '🛋️',
-    électroménager: '🔌',
-    décoration: '🪴',
-    jardin: '🌳',
+    mobilier: "🏠",
+    électroménager: "🏠",
+    décoration: "🏠",
+    jardin: "🏠",
 
-    jouet: '🧸',
-    puériculture: '🍼',
-    enfant: '👶',
-    bébé: '👶',
+    jouet: "🧸",
+    puériculture: "🧸",
+    enfant: "🧸",
+    bébé: "🧸",
 
-    fitness: '💪',
-    équipement: '🏋️',
+    fitness: "⚽",
+    équipement: "⚽",
 
-    chat: '🐱',
-    chien: '🐕',
-    nourriture: '🍖',
+    chat: "🐕",
+    chien: "🐕",
+    nourriture: "🐕",
 
-    livre: '📚',
-    musique: '🎵',
-    jeux: '🎮',
-    divertissement: '🎭',
+    livre: "🎮",
+    musique: "🎮",
+    jeux: "🎮",
+    divertissement: "🎮",
 
-    emploi: '💼',
-    cours: '🎓',
-    réparation: '🔧',
-    domicile: '🔨',
+    emploi: "🔧",
+    cours: "🔧",
+    réparation: "🔧",
+    domicile: "🔧",
 
-    ami: '👥',
-    partenaire: '❤️',
-    social: '👥',
+    ami: "💕",
+    partenaire: "💕",
+    social: "💕",
 
-    billet: '🎫',
-    concert: '🎤',
-    spectacle: '🎭',
-    formation: '🎓',
+    billet: "🎫",
+    concert: "🎫",
+    spectacle: "🎫",
+    formation: "🎫",
 
-    collection: '🖼️',
-    antiquité: '🏺',
-    autre: '📦',
+    collection: "📦",
+    antiquité: "📦",
+    autre: "📦",
   };
 
   // Trouver l'emoji correspondant
@@ -92,8 +92,7 @@ export const getCategoryIcon = (categoryName: string): string => {
     if (name.includes(keyword)) return icon;
   }
 
-  // Emoji par défaut
-  return '🛒';
+  return "🛍️"; // Emoji par défaut
 };
 
 /**

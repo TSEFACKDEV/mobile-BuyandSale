@@ -111,11 +111,7 @@ const Products = () => {
         })
       ).unwrap();
     } catch (error) {
-<<<<<<< HEAD
-      // TODO: Implémenter système de logging
-=======
       console.error(t('products.loadingError'), error);
->>>>>>> 15edb6538ef6a0b94343d0ae094206f4e92d3efa
     }
   };
 

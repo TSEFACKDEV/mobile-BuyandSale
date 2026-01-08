@@ -25,6 +25,7 @@
     "expo-image-picker": "^17.0.10",
     "expo-linear-gradient": "^15.0.8",
     "expo-notifications": "~0.32.15",
+    "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "~3.0.9",
     "expo-web-browser": "~15.0.10",
     "react": "19.1.0",

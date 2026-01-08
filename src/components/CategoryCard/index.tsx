@@ -38,7 +38,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, onPress }) => {
     <TouchableOpacity onPress={handlePress} activeOpacity={0.7}>
       <View style={styles.container}>
         <View style={styles.iconContainer}>
-          <Text style={styles.iconText}>{category.icon || '🛒'}</Text>
+          <Text style={styles.iconText}>{category.icon || '�️'}</Text>
         </View>
         <Text style={styles.name} numberOfLines={2}>
           {t(`categories.${category.name}`) || category.name}

@@ -2,6 +2,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { fetchCitiesAction } from './actions'
 import { LoadingType } from '../../models/store'
 import type { RootState } from '../index'
+import { getErrorMessage } from '../../utils/errorHelpers'
 
 // Interface pour une ville - correspond aux données backend EXACTES
 export interface City {
@@ -26,11 +27,6 @@ const initialState: CityState = {
   data: [],
   status: LoadingType.IDLE,
   error: null,
-}
-
-// Helper pour extraire le message d'erreur
-const getErrorMessage = (action: any): string => {
-  return action.payload?.message || action.error?.message || 'Une erreur est survenue'
 }
 
 // Slice (simplifié - sans fonctionnalités admin)
