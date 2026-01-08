@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Alert, TouchableOpacity, BackHandler, ActivityIndicator } from 'react-native'
+import { View, Text, Pressable, ScrollView, Alert, TouchableOpacity, BackHandler, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -218,10 +218,16 @@ const Login = () => {
         <Ionicons name="arrow-back" size={24} color={COLORS.primary} />
       </TouchableOpacity>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
         {/* Header Section */}
         <View style={styles.header}>
           <View style={styles.headerIcon}>
@@ -337,6 +343,7 @@ const Login = () => {
           </Text>
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </LinearGradient>
   )
 }

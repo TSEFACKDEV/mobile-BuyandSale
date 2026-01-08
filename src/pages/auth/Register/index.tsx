@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Alert, ActivityIndicator, TouchableOpacity } from 'react-native'
+import { View, Text, Pressable, ScrollView, Alert, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -264,14 +264,27 @@ const Register = () => {
           }
         }
 
-        // Messages d'erreur spécifiques
+        // Messages d'erreur spécifiques avec Alert pour meilleure visibilité
         const lowerErrorMessage = errorMessage.toLowerCase();
         
         if (lowerErrorMessage.includes('email') && (lowerErrorMessage.includes('existe') || lowerErrorMessage.includes('already exists'))) {
-          setEmailError(t('auth.errors.validation.emailExists'))
-        } else if ((lowerErrorMessage.includes('téléphone') || lowerErrorMessage.includes('phone')) && (lowerErrorMessage.includes('existe') || lowerErrorMessage.includes('already exists'))) {
-          setPhoneError(t('auth.errors.validation.phoneExists'))
+          const emailExistsMessage = t('auth.errors.validation.emailExists')
+          setEmailError(emailExistsMessage)
+          Alert.alert(
+            t('auth.errors.title'), 
+            emailExistsMessage + '\n\nVeuillez utiliser un autre email ou vous connecter si vous avez déjà un compte.',
+            [{ text: 'OK' }]
+          )
+        } else if ((lowerErrorMessage.includes('téléphone') || lowerErrorMessage.includes('phone') || lowerErrorMessage.includes('numéro')) && (lowerErrorMessage.includes('existe') || lowerErrorMessage.includes('already exists'))) {
+          const phoneExistsMessage = t('auth.errors.validation.phoneExists')
+          setPhoneError(phoneExistsMessage)
+          Alert.alert(
+            t('auth.errors.title'), 
+            phoneExistsMessage + '\n\nVeuillez utiliser un autre numéro de téléphone.',
+            [{ text: 'OK' }]
+          )
         } else {
+          // Pour toute autre erreur, afficher le message complet
           Alert.alert(t('auth.errors.title'), errorMessage, [{ text: 'OK' }])
         }
       }
@@ -284,10 +297,16 @@ const Register = () => {
 
   return (
     <LinearGradient colors={[COLORS.white, '#FFF9F0']} style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
         {/* Header Section */}
         <View style={styles.header}>
           <View style={styles.headerIcon}>
@@ -523,6 +542,7 @@ const Register = () => {
           </Text>
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </LinearGradient>
   )
 }
