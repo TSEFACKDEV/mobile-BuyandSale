@@ -40,7 +40,7 @@ interface FormData {
   quantity: string;
   categoryId: string;
   cityId: string;
-  etat: 'NEUF' | 'OCCASION' | 'RECONDITIONNE';
+  etat: 'NEUF' | 'OCCASION' | 'CORRECT';
   existingImages: string[]; // Images déjà sur le serveur
   newImages: string[]; // Nouvelles images sélectionnées
   quartier: string;
@@ -207,6 +207,9 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
         quantity: Number(formData.quantity),
         categoryId: formData.categoryId,
         cityId: formData.cityId,
+        etat: formData.etat,
+        quartier: formData.quartier,
+        telephone: formData.telephone,
       };
 
       // Ajouter les images seulement si de nouvelles images ont été sélectionnées
@@ -433,7 +436,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
                 {[
                   { value: 'NEUF', label: 'Neuf' },
                   { value: 'OCCASION', label: 'Occasion' },
-                  { value: 'RECONDITIONNE', label: 'Recond.' },
+                  { value: 'CORRECT', label: 'Correct' },
                 ].map((condition) => (
                   <TouchableOpacity
                     key={condition.value}

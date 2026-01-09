@@ -533,6 +533,9 @@ export const updateProductAction = createAsyncThunk<
         if (updateData.description) formData.append('description', updateData.description);
         if (updateData.categoryId) formData.append('categoryId', updateData.categoryId);
         if (updateData.cityId) formData.append('cityId', updateData.cityId);
+        if (updateData.etat) formData.append('etat', updateData.etat);
+        if (updateData.quartier) formData.append('quartier', updateData.quartier);
+        if (updateData.telephone) formData.append('telephone', updateData.telephone);
 
         updateData.images.forEach((image, index) => {
           formData.append('images', {
