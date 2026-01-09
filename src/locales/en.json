@@ -36,7 +36,9 @@
     "Services": "Services",
     "Rencontres": "Dating",
     "Événements": "Events",
-    "Divers": "Miscellaneous"
+    "Divers": "Miscellaneous",
+    "Art et Artisanat": "Art and Crafts",
+    "Cosmétiques et Soins corporels": "Cosmetics and Body Care"
   },
   "common": {
     "views": "views",

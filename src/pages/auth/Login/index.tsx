@@ -197,7 +197,8 @@ const Login = () => {
       } else if (errorMessage.includes('non vérifié')) {
         Alert.alert(t('auth.errors.account.notVerified'), t('auth.errors.account.verifyPrompt'), [{ text: 'OK' }])
       } else if (errorMessage.includes('suspendu') || errorMessage === 'ACCOUNT_SUSPENDED') {
-        Alert.alert(t('auth.errors.account.suspended'), t('auth.errors.account.suspendedMessage'), [{ text: 'OK' }])
+        // Rediriger vers la page AccountSuspended au lieu d'afficher une simple alerte
+        navigation.navigate('AccountSuspended' as any)
       } else {
         Alert.alert(t('auth.errors.title'), errorMessage, [{ text: 'OK' }])
       }
