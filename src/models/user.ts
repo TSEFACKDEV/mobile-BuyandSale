@@ -50,6 +50,7 @@ export interface AuthUser {
   lastName: string;
   email: string;
   phone: string;
+  location?: string;
   isVerified: boolean;
   status: 'PENDING' | 'ACTIVE' | 'SUSPENDED';
   avatar?: string;

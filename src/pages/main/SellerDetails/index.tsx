@@ -40,6 +40,7 @@ interface SellerInfo {
   email: string;
   phone?: string;
   avatar?: string;
+  location?: string;
 }
 
 const SellerDetails: React.FC = () => {
@@ -185,7 +186,7 @@ const SellerDetails: React.FC = () => {
             <View style={styles.infoItem}>
               <Icon name="location-outline" size={16} color={theme.textSecondary} />
               <Text style={styles.infoText}>
-                {t('sellerProfile.locationNotSpecified')}
+                {seller.location || t('sellerProfile.locationNotSpecified')}
               </Text>
             </View>
             <View style={styles.infoItem}>

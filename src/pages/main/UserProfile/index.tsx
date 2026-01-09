@@ -172,6 +172,7 @@ const UserProfile: React.FC = () => {
     lastName: user?.lastName || '',
     email: user?.email || '',
     phone: user?.phone || '',
+    location: user?.location || '',
   });
 
   const { products: userProducts, refetch: refetchUserProducts, deleteProduct: deleteUserProduct, isLoading: isLoadingUserProducts } = useProducts(
@@ -245,6 +246,7 @@ const UserProfile: React.FC = () => {
       lastName: user?.lastName || '',
       email: user?.email || '',
       phone: user?.phone || '',
+      location: user?.location || '',
     });
     setIsEditingProfile(true);
   }, [user]);
@@ -260,7 +262,12 @@ const UserProfile: React.FC = () => {
       const result = await dispatch(
         updateUserAction({
           id: user.id,
-          updates: profileData,
+          updates: {
+            firstName: profileData.firstName,
+            lastName: profileData.lastName,
+            phone: profileData.phone,
+            location: profileData.location,
+          },
         })
       ).unwrap();
 
@@ -566,6 +573,11 @@ const UserProfile: React.FC = () => {
               <Text style={[styles.userEmail, isDark && styles.userEmailDark]}>
                 {user.email}
               </Text>
+              {user.location && (
+                <Text style={[styles.userLocation, isDark && styles.userLocationDark]}>
+                  📍 {user.location}
+                </Text>
+              )}
               <View style={styles.ratingContainer}>
                 {renderStars(userRating)}
                 <Text style={[styles.ratingValue, isDark && styles.ratingValueDark]}>
@@ -916,6 +928,19 @@ const UserProfile: React.FC = () => {
                     />
                   </View>
 
+                  <View style={styles.profileField}>
+                    <Text style={[styles.profileLabel, isDark && styles.profileLabelDark]}>
+                      {t('userProfile.profile.location')}
+                    </Text>
+                    <TextInput
+                      style={[styles.profileInput, isDark && styles.profileInputDark]}
+                      value={profileData.location}
+                      onChangeText={(text) => setProfileData({ ...profileData, location: text })}
+                      placeholder={t('userProfile.profile.locationPlaceholder')}
+                      placeholderTextColor={isDark ? '#9CA3AF' : '#6B7280'}
+                    />
+                  </View>
+
                   <View style={styles.profileActions}>
                     <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
                       <Text style={styles.profileButtonText}>{t('userProfile.actions.saveProfile')}</Text>
@@ -956,6 +981,17 @@ const UserProfile: React.FC = () => {
                     <View style={[styles.profileValue, isDark && styles.profileValueDark]}>
                       <Text style={[styles.profileValueText, isDark && styles.profileValueTextDark]}>
                         {user.phone || t('userProfile.messages.notSpecified')}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.profileField}>
+                    <Text style={[styles.profileLabel, isDark && styles.profileLabelDark]}>
+                      {t('userProfile.profile.location')}
+                    </Text>
+                    <View style={[styles.profileValue, isDark && styles.profileValueDark]}>
+                      <Text style={[styles.profileValueText, isDark && styles.profileValueTextDark]}>
+                        {user.location || t('userProfile.messages.notSpecified')}
                       </Text>
                     </View>
                   </View>

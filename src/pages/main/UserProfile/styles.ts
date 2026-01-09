@@ -79,10 +79,18 @@ export const styles = StyleSheet.create({
   userEmail: {
     fontSize: 14,
     color: '#6B7280',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   userEmailDark: {
     color: '#9CA3AF',
+  },
+  userLocation: {
+    fontSize: 13,
+    color: '#4B5563',
+    marginBottom: 8,
+  },
+  userLocationDark: {
+    color: '#D1D5DB',
   },
   ratingContainer: {
     flexDirection: 'row',
