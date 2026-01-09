@@ -45,7 +45,6 @@ interface FormData {
   newImages: string[]; // Nouvelles images sélectionnées
   quartier: string;
   telephone: string;
-  isNegotiable: boolean;
 }
 
 const EditProductModal: React.FC<EditProductModalProps> = ({
@@ -76,7 +75,6 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
     newImages: [],
     quartier: '',
     telephone: '',
-    isNegotiable: false,
   });
 
   // Charger les données du produit
@@ -107,7 +105,6 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
             newImages: [],
             quartier: product.quartier || '',
             telephone: product.telephone || '',
-            isNegotiable: false,
           });
         }
       }
@@ -484,29 +481,6 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
                 required
               />
             </View>
-
-            {/* Négociable */}
-            <TouchableOpacity
-              style={styles.checkboxRow}
-              onPress={() => handleInputChange('isNegotiable', !formData.isNegotiable)}
-            >
-              <View
-                style={[
-                  styles.checkbox,
-                  {
-                    backgroundColor: formData.isNegotiable ? '#f97316' : 'transparent',
-                    borderColor: formData.isNegotiable ? '#f97316' : colors.border,
-                  },
-                ]}
-              >
-                {formData.isNegotiable && (
-                  <Icon name="checkmark" size={14} color="#fff" />
-                )}
-              </View>
-              <Text style={[styles.checkboxLabel, { color: colors.text }]}>
-                Prix négociable
-              </Text>
-            </TouchableOpacity>
 
             {/* Espace en bas */}
             <View style={styles.bottomSpace} />

@@ -62,7 +62,6 @@ interface PostAdFormData {
   images: { uri: string; type: string; name: string }[];
   quartier: string;
   telephone: string;
-  isNegotiable: boolean;
 }
 
 // Configuration des conditions
@@ -98,7 +97,6 @@ const PostAds: React.FC = () => {
     images: [],
     quartier: '',
     telephone: '',
-    isNegotiable: false,
   });
   
   const [currentStep, setCurrentStep] = useState(1);
@@ -172,7 +170,6 @@ const PostAds: React.FC = () => {
       images: [],
       quartier: '',
       telephone: '',
-      isNegotiable: false,
     });
     setCurrentStep(1);
     setCreatedProductId(null);
@@ -754,25 +751,6 @@ if (!validateCameroonPhone(formData.telephone)) {
           keyboardType="numeric"
         />
       </View>
-
-      {/* Checkbox prix négociable */}
-      <TouchableOpacity 
-        style={styles.checkboxContainer}
-        onPress={() => handleInputChange('isNegotiable', !formData.isNegotiable)}
-      >
-        <View style={[
-          styles.checkbox,
-          { borderColor: colors.border },
-          formData.isNegotiable && styles.checkboxChecked
-        ]}>
-          {formData.isNegotiable && (
-            <Icon name="checkmark" size={14} color="#FFF" />
-          )}
-        </View>
-        <Text style={[styles.checkboxLabel, { color: colors.text }]}>
-          {t('postAds.negotiable')}
-        </Text>
-      </TouchableOpacity>
 
       {/* Résumé */}
       <View style={[styles.summaryCard, { backgroundColor: colors.backgroundSecondary }]}>
