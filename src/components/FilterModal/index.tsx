@@ -15,7 +15,6 @@ interface FilterModalProps {
   visible: boolean;
   onClose: () => void;
   filters: {
-    search: string;
     categoryId?: string;
     cityId?: string;
     priceMin?: number;
@@ -47,7 +46,6 @@ const FilterModal: React.FC<FilterModalProps> = ({
 
   const handleClearAll = () => {
     const clearedFilters = {
-      search: filters.search, // Garder la recherche
       categoryId: undefined,
       cityId: undefined,
       priceMin: undefined,
