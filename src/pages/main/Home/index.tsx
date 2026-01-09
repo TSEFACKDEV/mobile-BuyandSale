@@ -15,7 +15,7 @@ import { enrichCategoriesWithIcons } from '../../../utils/categoryHelpers';
 
 // Actions
 import { getAllCategoriesAction } from '../../../store/category/actions';
-import { getHomeProductsAction } from '../../../store/product/actions';
+import { getValidatedProductsAction } from '../../../store/product/actions';
 import { fetchCitiesAction } from '../../../store/city/actions';
 import { fetchPublicSellersAction } from '../../../store/user/actions';
 
@@ -36,8 +36,8 @@ const Home = () => {
   // State from Redux
   const { data: categories, status: categoryStatus } = useAppSelector(state => state.category);
   const categoriesLoading = categoryStatus === 'PENDING';
-  const homeProducts = useAppSelector(state => state.product.homeProducts);
-  const homeProductsStatus = useAppSelector(state => state.product.homeProductsStatus);
+  const homeProducts = useAppSelector(state => state.product.validatedProducts);
+  const homeProductsStatus = useAppSelector(state => state.product.validatedProductsStatus);
   const productsLoading = homeProductsStatus === 'loading';
   const { data: cities, status: cityStatus } = useAppSelector(state => state.city);
   const citiesLoading = cityStatus === 'PENDING';
@@ -55,7 +55,7 @@ const Home = () => {
     try {
       await Promise.all([
         dispatch(getAllCategoriesAction({ limit: 20 })).unwrap(),
-        dispatch(getHomeProductsAction()).unwrap(),
+        dispatch(getValidatedProductsAction({ page: 1, limit: 12 })).unwrap(),
         dispatch(fetchCitiesAction()).unwrap(),
         dispatch(fetchPublicSellersAction({ page: 1, limit: 10 })).unwrap(),
       ]);

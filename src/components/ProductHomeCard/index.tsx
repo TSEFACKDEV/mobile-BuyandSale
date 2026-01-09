@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useThemeColors } from '../../contexts/ThemeContext';
 import type { Product } from '../../store/product/actions';
+import { getPrimaryForfait } from '../../config/forfaits.config';
 import createStyles from './style';
 
 interface ProductCardProps {
@@ -15,61 +16,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
   const colors = useThemeColors();
   const navigation = useNavigation();
 
-  // Obtenir le forfait avec la priorité la plus haute
-  const topForfait = useMemo(() => {
-    const productForfaits = product?.productForfaits;
-    if (!productForfaits || !Array.isArray(productForfaits)) return null;
-
-    const now = new Date();
-    const activeForfaits = productForfaits.filter((pf: any) => {
-      const expiryDate = new Date(pf.expiresAt);
-      return pf.isActive && expiryDate > now && pf.forfait?.type;
-    });
-
-    if (activeForfaits.length === 0) return null;
-
-    // Priorités: PREMIUM(1) > TOP_ANNONCE(2) > URGENT(3)
-    const priorityMap: Record<string, number> = {
-      PREMIUM: 1,
-      TOP_ANNONCE: 2,
-      URGENT: 3,
-    };
-
-    const sorted = activeForfaits.sort((a: any, b: any) => {
-      const priorityA = priorityMap[a.forfait.type] || 999;
-      const priorityB = priorityMap[b.forfait.type] || 999;
-      return priorityA - priorityB;
-    });
-
-    return sorted[0]?.forfait.type;
-  }, [product?.productForfaits]);
-
-  // Configuration des forfaits (exactement comme le web)
-  const forfaitConfig = {
-    PREMIUM: { 
-      bgColor: '#A78BFA',      // purple-400
-      borderColor: '#C4B5FD',  // purple-300
-      textColor: '#FFFFFF',
-      label: 'premium',
-      icon: 'star'
-    },
-    TOP_ANNONCE: { 
-      bgColor: '#60A5FA',      // blue-400
-      borderColor: '#93C5FD',  // blue-300
-      textColor: '#FFFFFF',
-      label: 'top',
-      icon: 'trending-up'
-    },
-    URGENT: { 
-      bgColor: '#F87171',      // red-400
-      borderColor: '#FCA5A5',  // red-300
-      textColor: '#FFFFFF',
-      label: 'urgent',
-      icon: 'flame'
-    },
-  };
-
-  const forfait = topForfait ? forfaitConfig[topForfait as keyof typeof forfaitConfig] : null;
+  // Obtenir le forfait avec la plus haute priorité
+  const primaryForfait = useMemo(
+    () => getPrimaryForfait(product?.productForfaits),
+    [product?.productForfaits]
+  );
 
   // Première image du produit
   const imageUrl = Array.isArray(product.images) && product.images.length > 0
@@ -98,7 +49,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
 
   return (
     <TouchableOpacity onPress={handlePress} activeOpacity={0.7}>
-      <View style={[styles.container, forfait && styles.containerWithBorder, forfait && { borderColor: forfait.bgColor }]}>
+      <View style={[styles.container, primaryForfait && styles.containerWithBorder, primaryForfait && { borderColor: primaryForfait.card.borderColor }]}>
         {/* Image */}
         <View style={styles.imageContainer}>
           {imageUrl ? (
@@ -113,14 +64,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
             </View>
           )}
           
-          {/* Badge Forfait - Style identique au web */}
-          {forfait && (
+          {/* Badge Forfait */}
+          {primaryForfait && (
             <View style={[styles.forfaitBadge, { 
-              backgroundColor: forfait.bgColor,
+              backgroundColor: primaryForfait.badge.bgColor,
             }]}>
-              <Icon name={forfait.icon} size={10} color={forfait.textColor} />
-              <Text style={[styles.forfaitText, { color: forfait.textColor }]}>
-                {forfait.label}
+              <Icon name={primaryForfait.icon} size={10} color={primaryForfait.badge.textColor} />
+              <Text style={[styles.forfaitText, { color: primaryForfait.badge.textColor }]}>
+                {primaryForfait.label}
               </Text>
             </View>
           )}

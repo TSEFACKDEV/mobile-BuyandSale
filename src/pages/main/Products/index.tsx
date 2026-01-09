@@ -20,6 +20,7 @@ import FilterModal from '../../../components/FilterModal';
 import TopNavigation from '../../../components/TopNavigation';
 import { useThemeColors } from '../../../contexts/ThemeContext';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { sortProductsByForfaitPriority } from '../../../config/forfaits.config';
 import { getAllCategoriesAction } from '../../../store/category/actions';
 import { fetchCitiesAction } from '../../../store/city/actions';
 import styles from './style';
@@ -124,32 +125,7 @@ const Products = () => {
   // Trier les produits par priorité de forfait
   const sortedProducts = useMemo(() => {
     if (!validatedProducts) return [];
-
-    const priorityMap: Record<string, number> = {
-      PREMIUM: 1,
-      TOP_ANNONCE: 2,
-      URGENT: 3,
-    };
-
-    return [...validatedProducts].sort((a, b) => {
-      const getForfaitPriority = (product: any) => {
-        if (!product.productForfaits || product.productForfaits.length === 0) {
-          return 999;
-        }
-
-        const now = new Date();
-        const active = product.productForfaits.filter(
-          (pf: any) => pf.isActive && new Date(pf.expiresAt) > now
-        );
-
-        if (active.length === 0) return 999;
-
-        const priorities = active.map((pf: any) => priorityMap[pf.forfait.type] || 999);
-        return Math.min(...priorities);
-      };
-
-      return getForfaitPriority(a) - getForfaitPriority(b);
-    });
+    return sortProductsByForfaitPriority(validatedProducts);
   }, [validatedProducts]);
 
   // Filtrer par recherche

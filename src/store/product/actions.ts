@@ -143,44 +143,8 @@ interface ThunkApi {
 // ===============================
 
 /**
- * Récupère les produits pour la page Home (12 derniers)
- * Backend: GET /product?page=1&limit=12
- */
-export const getHomeProductsAction = createAsyncThunk<
-  ProductListResponse,
-  void,
-  ThunkApi
->(
-  'product/getHome',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await fetch(
-        `${API_CONFIG.BASE_URL}/product?page=1&limit=12`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.meta?.message || 'Erreur lors de la récupération des produits');
-      }
-
-      return data.data;
-    } catch (error: unknown) {
-      return rejectWithValue({
-        message: (error as Error).message || 'Erreur lors de la récupération des produits',
-      });
-    }
-  }
-);
-
-/**
  * Récupère tous les produits validés (marketplace publique)
+ * Utilisé aussi pour la page Home avec limit=12
  * Backend: GET /product?search=...&categoryId=...&cityId=...&priceMin=...&priceMax=...&etat=...&page=...&limit=...
  */
 export const getValidatedProductsAction = createAsyncThunk<

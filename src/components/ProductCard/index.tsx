@@ -9,6 +9,7 @@ import { selectValidFavorites } from '../../store/favorite/slice';
 import { selectUserAuthenticated } from '../../store/authentification/slice';
 import { useThemeColors } from '../../contexts/ThemeContext';
 import type { Product } from '../../store/product/actions';
+import { getPrimaryForfait } from '../../config/forfaits.config';
 import styles from './style';
 
 interface ProductCardProps {
@@ -45,48 +46,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     return (img as any).imagePath || 'https://via.placeholder.com/400x300?text=No+Image';
   }, [product.images]);
 
-  // Déterminer le forfait actif avec la plus haute priorité
-  const activeForfait = useMemo(() => {
-    if (!product.productForfaits || product.productForfaits.length === 0) {
-      return null;
-    }
+  // Obtenir le forfait avec la plus haute priorité
+  const primaryForfait = useMemo(
+    () => getPrimaryForfait(product.productForfaits),
+    [product.productForfaits]
+  );
 
-    const now = new Date();
-    const active = product.productForfaits.filter(
-      (pf) => pf.isActive && new Date(pf.expiresAt) > now
-    );
-
-    if (active.length === 0) return null;
-
-    // Priorités: PREMIUM(1) > TOP_ANNONCE(2) > URGENT(3)
-    const priorityMap: Record<string, number> = {
-      PREMIUM: 1,
-      TOP_ANNONCE: 2,
-      URGENT: 3,
-    };
-
-    const highest = active.reduce((prev, curr) => {
-      const prevPriority = priorityMap[prev.forfait.type] || 999;
-      const currPriority = priorityMap[curr.forfait.type] || 999;
-      return currPriority < prevPriority ? curr : prev;
-    });
-
-    return highest.forfait.type;
-  }, [product.productForfaits]);
-
-  // Styles de bordure selon le forfait
-  const borderColor = useMemo(() => {
-    switch (activeForfait) {
-      case 'PREMIUM':
-        return '#A855F7'; // purple-500
-      case 'TOP_ANNONCE':
-        return '#3B82F6'; // blue-500
-      case 'URGENT':
-        return '#EF4444'; // red-500
-      default:
-        return theme.border;
-    }
-  }, [activeForfait, theme.border]);
+  const borderColor = primaryForfait?.card.borderColor || theme.border;
+  const borderWidth = primaryForfait?.card.borderWidth || 1;
 
   // Formater le prix
   const formatPrice = (price: number) => {
@@ -156,7 +123,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {
           backgroundColor: theme.surface,
           borderColor: borderColor,
-          borderWidth: activeForfait ? 2 : 1,
+          borderWidth: borderWidth,
         },
       ]}
       onPress={handlePress}
@@ -167,26 +134,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <Image source={{ uri: firstImage }} style={styles.image} resizeMode="cover" />
 
         {/* Badge forfait */}
-        {activeForfait && (
+        {primaryForfait && (
           <View
             style={[
               styles.forfaitBadge,
               {
-                backgroundColor:
-                  activeForfait === 'PREMIUM'
-                    ? '#A855F7'
-                    : activeForfait === 'TOP_ANNONCE'
-                    ? '#3B82F6'
-                    : '#EF4444',
+                backgroundColor: primaryForfait.badge.bgColor,
               },
             ]}
           >
-            <Text style={styles.forfaitText}>
-              {activeForfait === 'PREMIUM'
-                ? '⭐ PREMIUM'
-                : activeForfait === 'TOP_ANNONCE'
-                ? '🔝 TOP'
-                : '⚡ URGENT'}
+            <Ionicons name={primaryForfait.icon} size={12} color={primaryForfait.badge.textColor} />
+            <Text style={[styles.forfaitText, { marginLeft: 4 }]}>
+              {primaryForfait.label.toUpperCase()}
             </Text>
           </View>
         )}

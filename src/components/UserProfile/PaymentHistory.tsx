@@ -14,6 +14,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useThemeColors } from '../../contexts/ThemeContext';
 import { useTranslation } from '../../hooks/useTranslation';
+import { FORFAIT_CONFIG } from '../../config/forfaits.config';
 import API_ENDPOINTS from '../../helpers/api';
 import API_CONFIG from '../../config/api.config';
 import { getImageUrl, PLACEHOLDER_IMAGE } from '../../utils/imageUtils';
@@ -136,19 +137,6 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
     },
   }), [t]);
 
-  const forfaitConfig = useMemo(() => ({
-    labels: {
-      PREMIUM: 'Premium',
-      TOP_ANNONCE: 'Top Annonce',
-      URGENT: 'Urgent',
-    },
-    colors: {
-      PREMIUM: '#9333ea',
-      TOP_ANNONCE: '#3b82f6',
-      URGENT: '#ef4444',
-    },
-  }), []);
-
   const getStatusIcon = useCallback((status: Payment['status']) => {
     return statusConfig.icons[status];
   }, [statusConfig]);
@@ -162,12 +150,14 @@ const PaymentHistory: React.FC<PaymentHistoryProps> = ({ userId }) => {
   }, [statusConfig]);
 
   const getForfaitTypeLabel = useCallback((type: Payment['forfait']['type']) => {
-    return forfaitConfig.labels[type];
-  }, [forfaitConfig]);
+    const config = FORFAIT_CONFIG[type];
+    return config?.label || type;
+  }, []);
 
   const getForfaitTypeColor = useCallback((type: Payment['forfait']['type']) => {
-    return forfaitConfig.colors[type];
-  }, [forfaitConfig]);
+    const config = FORFAIT_CONFIG[type];
+    return config?.badge.bgColor || '#6B7280';
+  }, []);
 
   const formatDate = useCallback((dateString: string) => {
     const date = new Date(dateString);
