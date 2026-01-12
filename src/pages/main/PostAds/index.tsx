@@ -981,8 +981,8 @@ if (!validateCameroonPhone(formData.telephone)) {
             style={[styles.footerButton, styles.backFooterButton, { borderColor: colors.border }]}
             onPress={handlePreviousStep}
           >
-            <Icon name="arrow-back" size={20} color={colors.text} />
-            <Text style={[styles.footerButtonText, { color: colors.text }]}>
+            <Icon name="arrow-back" size={20} color="#FF6B35" />
+            <Text style={[styles.footerButtonText, { color: '#FF6B35' }]}>
               {t('postAds.previous')}
             </Text>
           </TouchableOpacity>
