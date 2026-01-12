@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,6 +19,7 @@ import { useTranslation } from '../../../hooks/useTranslation';
 import { useAppSelector, useAppDispatch } from '../../../hooks/store';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { RootNavigationProp } from '../../../types/navigation';
+import ConfirmDialog from '../../../components/ConfirmDialog';
 
 // Redux Actions
 import { getAllCategoriesAction } from '../../../store/category/actions';
@@ -115,6 +115,22 @@ const PostAds: React.FC = () => {
   const [createdProductId, setCreatedProductId] = useState<string | null>(null);
   const [currentPaymentId, setCurrentPaymentId] = useState<string | null>(null);
 
+  // État pour le dialog de confirmation
+  const [confirmDialog, setConfirmDialog] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+    type?: 'success' | 'error' | 'warning' | 'info';
+    onConfirm?: () => void;
+    onCancel?: () => void;
+    confirmText?: string;
+    cancelText?: string;
+  }>({
+    visible: false,
+    title: '',
+    message: '',
+  });
+
   const isMountedRef = useRef(true);
 
   // Charger les données au montage
@@ -194,14 +210,26 @@ const PostAds: React.FC = () => {
     const availableSlots = MAX_IMAGES - formData.images.length;
 
     if (availableSlots === 0) {
-      Alert.alert(t('postAds.maxImagesReached'), t('postAds.maxImagesMessage').replace('{max}', MAX_IMAGES.toString()));
+      setConfirmDialog({
+        visible: true,
+        title: t('postAds.maxImagesReached'),
+        message: t('postAds.maxImagesMessage').replace('{max}', MAX_IMAGES.toString()),
+        type: 'warning',
+        confirmText: 'OK',
+      });
       return;
     }
 
     // Demander la permission
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert(t('postAds.permissionRequired'), t('postAds.permissionMessage'));
+      setConfirmDialog({
+        visible: true,
+        title: t('postAds.permissionRequired'),
+        message: t('postAds.permissionMessage'),
+        type: 'warning',
+        confirmText: 'OK',
+      });
       return;
     }
 
@@ -224,28 +252,27 @@ const PostAds: React.FC = () => {
         ...prev,
         images: [...prev.images, ...newImages],
       }));
-
-      Alert.alert(t('postAds.imagesAdded'), t('postAds.imagesAddedMessage').replace('{count}', newImages.length.toString()));
     }
   };
 
   // Supprimer une image
   const handleImageRemove = (index: number) => {
-    Alert.alert(
-      t('postAds.deleteImage'),
-      t('postAds.deleteImageConfirm'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('postAds.delete'),
-          style: 'destructive',
-          onPress: () => {
-            const newImages = formData.images.filter((_, i) => i !== index);
-            setFormData((prev) => ({ ...prev, images: newImages }));
-          },
-        },
-      ]
-    );
+    setConfirmDialog({
+      visible: true,
+      title: t('postAds.deleteImage'),
+      message: t('postAds.deleteImageConfirm'),
+      type: 'warning',
+      confirmText: t('postAds.delete'),
+      cancelText: t('common.cancel'),
+      onConfirm: () => {
+        const newImages = formData.images.filter((_, i) => i !== index);
+        setFormData((prev) => ({ ...prev, images: newImages }));
+        setConfirmDialog({ visible: false, title: '', message: '' });
+      },
+      onCancel: () => {
+        setConfirmDialog({ visible: false, title: '', message: '' });
+      },
+    });
   };
 
   // Validation des étapes
@@ -283,7 +310,13 @@ const PostAds: React.FC = () => {
     if (isStepValid(currentStep)) {
       setCurrentStep((prev) => Math.min(prev + 1, 3));
     } else {
-      Alert.alert(t('postAds.validationError'), t('postAds.fillRequired'));
+      setConfirmDialog({
+        visible: true,
+        title: t('postAds.validationError'),
+        message: t('postAds.fillRequired'),
+        type: 'error',
+        confirmText: 'OK',
+      });
     }
   };
 
@@ -338,7 +371,13 @@ if (!validateCameroonPhone(formData.telephone)) {
       }
 
       if (validationErrors.length > 0) {
-        Alert.alert(t('postAds.validationErrors'), validationErrors.join('\n'));
+        setConfirmDialog({
+          visible: true,
+          title: t('postAds.validationErrors'),
+          message: validationErrors.join('\n'),
+          type: 'error',
+          confirmText: 'OK',
+        });
         setIsSubmitting(false);
         return;
       }
@@ -364,7 +403,13 @@ if (!validateCameroonPhone(formData.telephone)) {
         const createdProduct = (result.payload as any)?.product;
 
         if (!createdProduct?.id) {
-          Alert.alert(t('postAds.errorProductId'), t('postAds.errorProductIdMessage'));
+          setConfirmDialog({
+            visible: true,
+            title: t('postAds.errorProductId'),
+            message: t('postAds.errorProductIdMessage'),
+            type: 'error',
+            confirmText: 'OK',
+          });
           setIsSubmitting(false);
           return;
         }
@@ -379,19 +424,37 @@ if (!validateCameroonPhone(formData.telephone)) {
             }
           }, 500);
         } else {
-          Alert.alert(t('postAds.successCreated'), t('postAds.successCreatedMessage'), [
-            {
-              text: 'OK',
-              onPress: () => navigation.navigate('HomeTab'),
+          setConfirmDialog({
+            visible: true,
+            title: t('postAds.successCreated'),
+            message: t('postAds.successCreatedMessage'),
+            type: 'success',
+            confirmText: 'OK',
+            cancelText: '',
+            onConfirm: () => {
+              setConfirmDialog({ visible: false, title: '', message: '' });
+              navigation.navigate('HomeTab');
             },
-          ]);
+          });
         }
       } else {
         const errorMsg = (result.payload as any)?.message || t('postAds.errorCreating');
-        Alert.alert(t('postAds.errorGeneric'), errorMsg);
+        setConfirmDialog({
+          visible: true,
+          title: t('postAds.errorGeneric'),
+          message: errorMsg,
+          type: 'error',
+          confirmText: 'OK',
+        });
       }
     } catch (error: any) {
-      Alert.alert(t('postAds.errorGeneric'), error.message || t('postAds.errorCreating'));
+      setConfirmDialog({
+        visible: true,
+        title: t('postAds.errorGeneric'),
+        message: error.message || t('postAds.errorCreating'),
+        type: 'error',
+        confirmText: 'OK',
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -412,12 +475,18 @@ if (!validateCameroonPhone(formData.telephone)) {
     if (!isMountedRef.current) return;
     setShowBoostOffer(false);
 
-    Alert.alert(t('postAds.successCreated'), t('postAds.successCreatedMessage'), [
-      {
-        text: t('postAds.ok'),
-        onPress: () => navigation.navigate('HomeTab'),
+    setConfirmDialog({
+      visible: true,
+      title: t('postAds.successCreated'),
+      message: t('postAds.successCreatedMessage'),
+      type: 'success',
+      confirmText: t('postAds.ok'),
+      cancelText: '',
+      onConfirm: () => {
+        setConfirmDialog({ visible: false, title: '', message: '' });
+        navigation.navigate('HomeTab');
       },
-    ]);
+    });
   };
 
   const handleForfaitSelected = (forfaitType: string, forfaitId: string) => {
@@ -442,7 +511,13 @@ if (!validateCameroonPhone(formData.telephone)) {
         }
       }, 100);
     } catch (error: any) {
-      Alert.alert(t('common.error'), error.message);
+      setConfirmDialog({
+        visible: true,
+        title: t('common.error'),
+        message: error.message,
+        type: 'error',
+        confirmText: 'OK',
+      });
       setShowForfaitSelector(false);
     }
   };
@@ -453,12 +528,18 @@ if (!validateCameroonPhone(formData.telephone)) {
     setShowForfaitSelector(false);
     setShowBoostOffer(false);
 
-    Alert.alert(t('notifications.info'), t('postAds.publishedWithoutForfait'), [
-      {
-        text: t('postAds.ok'),
-        onPress: () => navigation.navigate('HomeTab'),
+    setConfirmDialog({
+      visible: true,
+      title: t('notifications.info'),
+      message: t('postAds.publishedWithoutForfait'),
+      type: 'info',
+      confirmText: t('postAds.ok'),
+      cancelText: '',
+      onConfirm: () => {
+        setConfirmDialog({ visible: false, title: '', message: '' });
+        navigation.navigate('HomeTab');
       },
-    ]);
+    });
   };
 
   const handlePaymentInitiated = (paymentId: string) => {
@@ -1055,6 +1136,22 @@ if (!validateCameroonPhone(formData.telephone)) {
         onSuccess={handlePaymentSuccess}
         onError={handlePaymentError}
         onClose={handlePaymentCancel}
+      />
+
+      <ConfirmDialog
+        visible={confirmDialog.visible}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        type={confirmDialog.type === 'error' ? 'destructive' : confirmDialog.type === 'info' ? 'default' : confirmDialog.type}
+        onConfirm={confirmDialog.onConfirm || (() => {
+          setConfirmDialog({ visible: false, title: '', message: '' });
+        })}
+        onCancel={confirmDialog.onCancel || (() => {
+          setConfirmDialog({ visible: false, title: '', message: '' });
+          navigation.navigate('HomeTab');
+        })}
+        confirmText={confirmDialog.confirmText}
+        cancelText={confirmDialog.cancelText}
       />
       </KeyboardAvoidingView>
     </SafeAreaView>
