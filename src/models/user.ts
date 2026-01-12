@@ -97,6 +97,8 @@ export interface UserRegisterForm {
 export interface RegisterResponse {
   userId: string;
   message: string;
+  method?: 'SMS' | 'EMAIL';
+  contact?: string;
 }
 
 export interface ForgotPasswordForm {

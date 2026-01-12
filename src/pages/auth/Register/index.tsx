@@ -236,6 +236,8 @@ const Register = () => {
           () => {
             navigation.navigate('VerifyOTP', {
               userId: result.data?.userId,
+              method: result.data?.method as 'SMS' | 'EMAIL',
+              contact: result.data?.contact,
             })
           }
         )

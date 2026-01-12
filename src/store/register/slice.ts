@@ -3,11 +3,12 @@ import { LoadingType, type AsyncState } from '../../models/store'
 import type { RootState } from '..'
 import { registerAction, verifyOtpAction, resendOtpAction } from './actions'
 import { getErrorMessage } from '../../utils/errorHelpers'
+import type { RegisterResponse } from '../../models/user'
 
 type RegisterState = {
-  register: AsyncState<{ userId: string; message: string } | null>
+  register: AsyncState<RegisterResponse | null>
   otpVerification: AsyncState<{ message: string } | null>
-  resendOtp: AsyncState<{ message: string } | null>
+  resendOtp: AsyncState<{ message: string; method?: string; contact?: string } | null>
 }
 
 const initialState: RegisterState = {

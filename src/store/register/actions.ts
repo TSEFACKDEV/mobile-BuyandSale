@@ -88,7 +88,7 @@ export const verifyOtpAction = createAsyncThunk<
  * Envoie une demande de nouveau code OTP au backend
  */
 export const resendOtpAction = createAsyncThunk<
-  ApiResponse<{ message: string }>,
+  ApiResponse<{ message: string; method?: string; contact?: string }>,
   { userId: string },
   ThunkApi
 >('auth/resend-otp', async (args, apiThunk) => {

@@ -40,8 +40,10 @@ const VerifyOTP = () => {
   const [otp, setOtp] = React.useState('')
   const [otpError, setOtpError] = React.useState('')
   
-  // ✅ Récupérer l'userId depuis les params de navigation
+  // ✅ Récupérer l'userId et la méthode d'envoi depuis les params de navigation
   const userId = route.params?.userId || ''
+  const [method, setMethod] = React.useState<'SMS' | 'EMAIL' | undefined>(route.params?.method)
+  const [contact, setContact] = React.useState<string | undefined>(route.params?.contact)
 
   const handleVerifyOTP = async () => {
     setOtpError('')
@@ -117,7 +119,15 @@ const VerifyOTP = () => {
 
     try {
       // ✅ Dispatch de l'action Redux resendOtpAction
-      await dispatch(resendOtpAction({ userId })).unwrap()
+      const result = await dispatch(resendOtpAction({ userId })).unwrap()
+
+      // Mettre à jour la méthode et le contact si retournés par le backend
+      if (result.data?.method) {
+        setMethod(result.data.method as 'SMS' | 'EMAIL')
+      }
+      if (result.data?.contact) {
+        setContact(result.data.contact)
+      }
 
       showSuccess(t('auth.success.title'), t('auth.success.codeResent'))
       setOtp('') // Réinitialiser le champ OTP
@@ -181,7 +191,11 @@ const VerifyOTP = () => {
               color={COLORS.primary}
             />
             <Text style={styles.infoText}>
-              Un code a été envoyé à votre adresse email ou numéro de téléphone
+              {method === 'SMS' 
+                ? `Un code a été envoyé par SMS au ${contact || 'numéro de téléphone'}`
+                : method === 'EMAIL'
+                ? `Un code a été envoyé par email à ${contact || 'votre adresse'}`
+                : 'Un code a été envoyé à votre adresse email ou numéro de téléphone'}
             </Text>
           </View>
 
