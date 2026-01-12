@@ -335,7 +335,8 @@ const createStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingTop: 20,
+    paddingBottom: 12,
   },
   modalCounter: {
     color: '#FFFFFF',
@@ -343,7 +344,12 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontWeight: '600',
   },
   modalCloseButton: {
-    padding: 8,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalImageContainer: {
     flex: 1,

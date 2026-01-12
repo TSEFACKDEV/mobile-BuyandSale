@@ -5,7 +5,6 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
-  Alert,
   TextInput,
   Image,
   ActivityIndicator,
@@ -18,6 +17,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useAppSelector, useAppDispatch } from '../../../hooks/store';
 import { useProducts } from '../../../hooks/useProducts';
 import { useSellerReviews } from '../../../hooks/useSellerReviews';
+import { useDialog } from '../../../contexts/DialogContext';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useTheme, useThemeColors } from '../../../contexts/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
@@ -76,6 +76,7 @@ const UserProfile: React.FC = () => {
   const { theme } = useTheme();
   const colors = useThemeColors();
   const { t, language } = useTranslation();
+  const { showDestructive, showSuccess, showWarning, showConfirm } = useDialog();
   const isDark = theme.isDark;
 
   const authState = useAppSelector((state) => state.authentification);
@@ -210,35 +211,22 @@ const UserProfile: React.FC = () => {
   }, [refetchUserProducts, refetchPendingProducts, dispatch]);
 
   const handleLogout = useCallback(async () => {
-    Alert.alert(
+    const confirmed = await showDestructive(
       t('userProfile.messages.logoutConfirm'),
       t('userProfile.actions.logout') + ' ?',
-      [
-        { text: t('userProfile.actions.cancel'), style: 'cancel' },
-        {
-          text: t('userProfile.actions.logout'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await dispatch(logoutAction()).unwrap();
-              // Redirection automatique vers Auth/Login
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'Auth' as any, params: { screen: 'Login' } }],
-              });
-            } catch (error) {
-              // TODO: Implémenter système de logging
-              // En cas d'erreur, on redirige quand même
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'Auth' as any, params: { screen: 'Login' } }],
-              });
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          await dispatch(logoutAction()).unwrap();
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Auth' as any, params: { screen: 'Login' } }],
+          });
+        } catch (error) {
+          // TODO: Implémenter système de logging
+        }
+      }
     );
-  }, [dispatch, navigation]);
+  }, [dispatch, navigation, showDestructive, t]);
 
   const handleStartEdit = useCallback(() => {
     setProfileData({
@@ -272,15 +260,15 @@ const UserProfile: React.FC = () => {
       ).unwrap();
 
       if (result) {
-        Alert.alert(t('userProfile.messages.profileUpdateSuccess'), t('userProfile.messages.profileUpdateSuccess'));
+        showSuccess(t('userProfile.messages.profileUpdateSuccess'), t('userProfile.messages.profileUpdateSuccess'));
         setIsEditingProfile(false);
         // Rafraîchir le profil
         await dispatch(getUserProfileAction());
       }
     } catch (error: any) {
-      Alert.alert(t('userProfile.messages.profileUpdateError'), error.message || t('userProfile.messages.profileUpdateError'));
+      showWarning(t('userProfile.messages.profileUpdateError'), error.message || t('userProfile.messages.profileUpdateError'));
     }
-  }, [profileData, user?.id, dispatch]);
+  }, [profileData, user?.id, dispatch, showSuccess, showWarning]);
 
   const handleAvatarUpload = useCallback(async () => {
     try {
@@ -288,7 +276,7 @@ const UserProfile: React.FC = () => {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       
       if (status !== 'granted') {
-        Alert.alert(t('userProfile.messages.permissionDenied'), t('userProfile.messages.permissionGallery'));
+        showWarning(t('userProfile.messages.permissionDenied'), t('userProfile.messages.permissionGallery'));
         return;
       }
 
@@ -348,21 +336,21 @@ const UserProfile: React.FC = () => {
         throw new Error(data.meta?.message || 'Échec de la mise à jour de l\'avatar');
       }
 
-      Alert.alert(t('userProfile.messages.avatarUpdateSuccess'), t('userProfile.messages.avatarUpdateSuccess'));
+      showSuccess(t('userProfile.messages.avatarUpdateSuccess'), t('userProfile.messages.avatarUpdateSuccess'));
       await dispatch(getUserProfileAction());
     } catch (error: any) {
-      Alert.alert(t('userProfile.messages.avatarUpdateError'), error.message || t('userProfile.messages.avatarUpdateError'));
+      showWarning(t('userProfile.messages.avatarUpdateError'), error.message || t('userProfile.messages.avatarUpdateError'));
     } finally {
       setIsUploadingAvatar(false);
     }
   }, [user, dispatch]);
 
   // Handlers pour le boost
-  const handleBoostProduct = useCallback((productId: string, productName: string) => {
+  const handleBoostProduct = useCallback(async (productId: string, productName: string) => {
     const product = userProducts.find((p: any) => p.id === productId);
     
     if (!product) {
-      Alert.alert(t('userProfile.messages.error'), t('userProfile.messages.productNotFound'));
+      showWarning(t('userProfile.messages.error'), t('userProfile.messages.productNotFound'));
       return;
     }
     
@@ -371,7 +359,7 @@ const UserProfile: React.FC = () => {
     
     // Vérifier si l'annonce a déjà le forfait PREMIUM (niveau max)
     if (currentForfaitType === 'PREMIUM') {
-      Alert.alert(
+      showWarning(
         t('userProfile.messages.maxForfaitReached'),
         t('userProfile.messages.maxForfaitMessage')
       );
@@ -385,22 +373,16 @@ const UserProfile: React.FC = () => {
         ? t('userProfile.messages.premiumOnly')
         : t('userProfile.messages.topOrPremium');
       
-      Alert.alert(
+      await showConfirm(
         t('userProfile.messages.upgradeForfait'),
         `${language === 'fr' 
           ? `Cette annonce possède actuellement le forfait ${FORFAIT_LABELS[currentForfaitType]}.\n\nVous pouvez la booster avec : ${availableForfaits}`
           : `This ad currently has the ${FORFAIT_LABELS[currentForfaitType]} package.\n\nYou can boost it with: ${availableForfaits}`}`,
-        [
-          { text: t('common.cancel'), style: 'cancel' },
-          {
-            text: t('userProfile.messages.continue'),
-            onPress: () => {
-              setBoostingProductId(productId);
-              setBoostingProductName(productName);
-              setShowForfaitSelector(true);
-            },
-          },
-        ]
+        () => {
+          setBoostingProductId(productId);
+          setBoostingProductName(productName);
+          setShowForfaitSelector(true);
+        }
       );
     } else {
       // Pas de forfait actif, permettre tous les forfaits
@@ -427,7 +409,7 @@ const UserProfile: React.FC = () => {
       setShowForfaitSelector(false);
       setShowPaymentModal(true);
     } catch (error: any) {
-      Alert.alert(t('userProfile.messages.error'), error.message);
+      showWarning(t('userProfile.messages.error'), error.message);
       setShowForfaitSelector(false);
     }
   }, [boostingProductId, forfaits]);
@@ -739,25 +721,18 @@ const UserProfile: React.FC = () => {
                             </TouchableOpacity>
                             <TouchableOpacity
                               style={styles.productActionButton}
-                              onPress={() => Alert.alert(
+                              onPress={() => showDestructive(
                                 t('userProfile.messages.confirmation'),
                                 `${t('userProfile.messages.deleteConfirmText')} "${product.name}" ?`,
-                                [
-                                  { text: t('userProfile.actions.cancel'), style: 'cancel' },
-                                  { 
-                                    text: t('userProfile.actions.delete'), 
-                                    style: 'destructive',
-                                    onPress: async () => {
-                                      try {
-                                        await deleteUserProduct(product.id);
-                                        Alert.alert(t('userProfile.messages.success'), t('userProfile.messages.productDeleted'));
-                                        await refetchUserProducts();
-                                      } catch (error: any) {
-                                        Alert.alert(t('userProfile.messages.error'), error.message || t('userProfile.messages.deleteFailed'));
-                                      }
-                                    }
+                                async () => {
+                                  try {
+                                    await deleteUserProduct(product.id);
+                                    showSuccess(t('userProfile.messages.success'), t('userProfile.messages.productDeleted'));
+                                    await refetchUserProducts();
+                                  } catch (error: any) {
+                                    showWarning(t('userProfile.messages.error'), error.message || t('userProfile.messages.deleteFailed'));
                                   }
-                                ]
+                                }
                               )}
                             >
                               <Icon name="trash-outline" size={18} color="#EF4444" />

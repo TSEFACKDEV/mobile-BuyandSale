@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, Pressable, ScrollView, KeyboardAvoidingView, Platform } from 'react-native'
 import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -15,6 +15,7 @@ import { selectOtpVerification, selectResendOtp } from '../../../store/register/
 import { LoadingType } from '../../../models/store'
 import { Loading } from '../../../components/LoadingVariants'
 import { useTranslation } from '../../../hooks/useTranslation'
+import { useDialog } from '../../../contexts/DialogContext'
 
 type VerifyOTPNavigationProp = NativeStackNavigationProp<
   AuthStackParamList,
@@ -28,6 +29,7 @@ const VerifyOTP = () => {
   const route = useRoute<VerifyOTPRouteProp>()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
+  const { showWarning, showSuccess } = useDialog()
 
   // ✅ Pattern Redux standardisé avec hooks typés
   const otpState = useAppSelector(selectOtpVerification)
@@ -60,7 +62,7 @@ const VerifyOTP = () => {
     }
 
     if (!userId) {
-      Alert.alert(t('auth.errors.title'), t('auth.errors.account.userIdMissing'), [{ text: 'OK' }])
+      showWarning(t('auth.errors.title'), t('auth.errors.account.userIdMissing'))
       return
     }
 
@@ -102,14 +104,14 @@ const VerifyOTP = () => {
       } else if (errorMessage.includes('invalide') || errorMessage.includes('incorrect')) {
         setOtpError(t('auth.errors.validation.otpInvalid'))
       } else {
-        Alert.alert(t('auth.errors.title'), errorMessage, [{ text: 'OK' }])
+        showWarning(t('auth.errors.title'), errorMessage)
       }
     }
   }
 
   const handleResendOTP = async () => {
     if (!userId) {
-      Alert.alert(t('auth.errors.title'), t('auth.errors.account.userIdMissing'), [{ text: 'OK' }])
+      showWarning(t('auth.errors.title'), t('auth.errors.account.userIdMissing'))
       return
     }
 
@@ -117,7 +119,7 @@ const VerifyOTP = () => {
       // ✅ Dispatch de l'action Redux resendOtpAction
       await dispatch(resendOtpAction({ userId })).unwrap()
 
-      Alert.alert(t('auth.success.title'), t('auth.success.codeResent'), [{ text: 'OK' }])
+      showSuccess(t('auth.success.title'), t('auth.success.codeResent'))
       setOtp('') // Réinitialiser le champ OTP
     } catch (error: unknown) {
       let errorMessage = t('auth.errors.generic.resendCodeFailed')
@@ -134,7 +136,7 @@ const VerifyOTP = () => {
         }
       }
 
-      Alert.alert(t('auth.errors.title'), errorMessage, [{ text: 'OK' }])
+      showWarning(t('auth.errors.title'), errorMessage)
     }
   }
 
@@ -221,7 +223,7 @@ const VerifyOTP = () => {
           {/* Back Link */}
           <View style={styles.backContainer}>
             <Pressable
-              onPress={() => navigation.navigate('ForgotPassword')}
+              onPress={() => navigation.navigate('Login')}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
               <Text style={styles.backLink}>← Retour</Text>

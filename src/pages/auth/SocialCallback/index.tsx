@@ -1,4 +1,4 @@
-import { View, Text, ActivityIndicator, Alert } from 'react-native'
+import { View, Text, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -10,6 +10,7 @@ import { handleSocialAuthCallback } from '../../../store/authentification/action
 import styles from './style'
 import COLORS from '../../colors'
 import Button from '../../../components/Button'
+import { useDialog } from '../../../contexts/DialogContext'
 
 type SocialCallbackNavigationProp = NativeStackNavigationProp<
   AuthStackParamList,
@@ -22,6 +23,7 @@ const SocialCallback = () => {
   const navigation = useNavigation<SocialCallbackNavigationProp>()
   const route = useRoute<SocialCallbackRouteProp>()
   const dispatch = useAppDispatch()
+  const { showSuccess } = useDialog()
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -45,18 +47,9 @@ const SocialCallback = () => {
           const userData = resultAction.payload?.data
 
           // Afficher un message de succès
-          Alert.alert(
+          showSuccess(
             'Succès',
-            'Authentification Google réussie !',
-            [
-              {
-                text: 'OK',
-                onPress: () => {
-                  // La navigation se fera automatiquement via le RootNavigator
-                  // qui surveille l'état Redux de l'authentification
-                },
-              },
-            ]
+            'Authentification Google réussie !'
           )
         } else {
           // Erreur d'authentification

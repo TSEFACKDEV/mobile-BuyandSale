@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, Pressable, ScrollView, KeyboardAvoidingView, Platform } from 'react-native'
 import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -15,6 +15,7 @@ import { selectForgotPassword } from '../../../store/password/slice'
 import { LoadingType } from '../../../models/store'
 import { Loading } from '../../../components/LoadingVariants'
 import { useTranslation } from '../../../hooks/useTranslation'
+import { useDialog } from '../../../contexts/DialogContext'
 
 type ForgotPasswordNavigationProp = NativeStackNavigationProp<
   AuthStackParamList,
@@ -25,6 +26,7 @@ const ForgotPassword = () => {
   const navigation = useNavigation<ForgotPasswordNavigationProp>()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
+  const { showWarning, showSuccess } = useDialog()
 
   // ✅ Pattern Redux standardisé avec hooks typés
   const forgotPasswordState = useAppSelector(selectForgotPassword)
@@ -60,18 +62,12 @@ const ForgotPassword = () => {
       ).unwrap()
 
       // 🎉 Email envoyé avec succès
-      Alert.alert(
+      showSuccess(
         t('auth.titles.emailSent'),
         t('auth.success.emailSent'),
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              // Optionnel : rediriger vers la page de connexion
-              navigation.navigate('Login')
-            },
-          },
-        ]
+        () => {
+          navigation.navigate('Login')
+        }
       )
     } catch (error: unknown) {
       // 🚨 Gestion d'erreurs
@@ -95,7 +91,7 @@ const ForgotPassword = () => {
       if (errorMessage.includes('introuvable') || errorMessage.includes('not found')) {
         setEmailError(t('auth.errors.account.emailNotFound'))
       } else {
-        Alert.alert(t('auth.errors.title'), errorMessage, [{ text: 'OK' }])
+        showWarning(t('auth.errors.title'), errorMessage)
       }
     }
   }

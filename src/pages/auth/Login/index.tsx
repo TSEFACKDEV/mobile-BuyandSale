@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Alert, TouchableOpacity, BackHandler, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, Pressable, ScrollView, TouchableOpacity, BackHandler, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -19,12 +19,14 @@ import API_CONFIG from '../../../config/api.config'
 import { Loading } from '../../../components/LoadingVariants'
 import { normalizePhoneNumber, validateCameroonPhone } from '../../../utils/phoneUtils'
 import { useTranslation } from '../../../hooks/useTranslation'
+import { useDialog } from '../../../contexts/DialogContext'
 
 type LoginNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>
 
 const Login = () => {
   const navigation = useNavigation<LoginNavigationProp>()
   const { t } = useTranslation()
+  const { showWarning, showSuccess } = useDialog()
   const dispatch = useAppDispatch()
   
   const authState = useAppSelector(selectUserAuthenticated)
@@ -54,7 +56,7 @@ const Login = () => {
       handleGoogleSuccess(response.authentication?.accessToken);
     } else if (response?.type === 'error') {
       setIsGoogleLoading(false);
-      Alert.alert(t('auth.errors.title'), t('auth.errors.google.authFailed'));
+      showWarning(t('auth.errors.title'), t('auth.errors.google.authFailed'));
     } else if (response?.type === 'cancel') {
       setIsGoogleLoading(false);
     }
@@ -63,7 +65,7 @@ const Login = () => {
   // 🔐 Traiter le succès de l'authentification Google
   const handleGoogleSuccess = async (googleAccessToken?: string) => {
     if (!googleAccessToken) {
-      Alert.alert(t('auth.errors.title'), t('auth.errors.google.tokenNotReceived'));
+      showWarning(t('auth.errors.title'), t('auth.errors.google.tokenNotReceived'));
       setIsGoogleLoading(false);
       return;
     }
@@ -83,7 +85,7 @@ const Login = () => {
         );
 
         if (handleSocialAuthCallback.fulfilled.match(resultAction)) {
-          Alert.alert(t('auth.success.title'), t('auth.success.googleLogin'));
+          showSuccess(t('auth.success.title'), t('auth.success.googleLogin'));
           // La navigation se fera automatiquement via RootNavigator
         } else {
           throw new Error(t('auth.errors.google.profileFailed'));
@@ -93,7 +95,7 @@ const Login = () => {
       }
     } catch (error) {
       // TODO: Implémenter système de logging
-      Alert.alert(
+      showWarning(
         t('auth.errors.title'),
         error instanceof Error ? error.message : t('auth.errors.google.authFailed')
       );
@@ -106,19 +108,17 @@ const Login = () => {
   const handleGoogleLogin = async () => {
     // Vérifier que la configuration Google est présente
     if (!GoogleAuthService.isConfigured()) {
-      Alert.alert(
+      showWarning(
         'Configuration manquante',
-        'L\'authentification Google n\'est pas configurée. Veuillez contacter l\'administrateur.',
-        [{ text: 'OK' }]
+        'L\'authentification Google n\'est pas configurée. Veuillez contacter l\'administrateur.'
       );
       return;
     }
 
     if (!request) {
-      Alert.alert(
+      showWarning(
         'Erreur',
-        'Authentification Google non disponible pour le moment.',
-        [{ text: 'OK' }]
+        'Authentification Google non disponible pour le moment.'
       );
       return;
     }
@@ -129,7 +129,7 @@ const Login = () => {
     } catch (error) {
       // TODO: Implémenter système de logging
       setIsGoogleLoading(false);
-      Alert.alert('Erreur', 'Impossible d\'initier l\'authentification Google');
+      showWarning('Erreur', 'Impossible d\'initier l\'authentification Google');
     }
   };
 
@@ -195,12 +195,12 @@ const Login = () => {
       if (errorMessage.includes('Email ou mot de passe incorrect')) {
         setIdentifierError(t('auth.errors.generic.incorrectCredentials'))
       } else if (errorMessage.includes('non vérifié')) {
-        Alert.alert(t('auth.errors.account.notVerified'), t('auth.errors.account.verifyPrompt'), [{ text: 'OK' }])
+        showWarning(t('auth.errors.account.notVerified'), t('auth.errors.account.verifyPrompt'))
       } else if (errorMessage.includes('suspendu') || errorMessage === 'ACCOUNT_SUSPENDED') {
         // Rediriger vers la page AccountSuspended au lieu d'afficher une simple alerte
         navigation.navigate('AccountSuspended' as any)
       } else {
-        Alert.alert(t('auth.errors.title'), errorMessage, [{ text: 'OK' }])
+        showWarning(t('auth.errors.title'), errorMessage)
       }
     }
   }

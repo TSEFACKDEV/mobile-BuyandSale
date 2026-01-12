@@ -7,7 +7,6 @@ import {
   Image,
   Linking,
   Share,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RouteProp, useRoute } from '@react-navigation/native';
@@ -25,6 +24,7 @@ import ProductCard from '../../../components/ProductHomeCard';
 import SellerRatings from '../../../components/SellerRatings';
 import RatingModal from '../../../components/RatingModal';
 import ReportModal from '../../../components/ReportModal';
+import { useDialog } from '../../../contexts/DialogContext';
 import { getImageUrl } from '../../../utils/imageUtils';
 import { normalizePhoneForWhatsApp, formatPhoneForDisplay } from '../../../utils/phoneUtils';
 import createStyles from './style';
@@ -48,6 +48,7 @@ const SellerDetails: React.FC = () => {
   const navigation = useNavigation();
   const theme = useThemeColors();
   const { t, language } = useTranslation();
+  const { showSuccess } = useDialog();
   const styles = createStyles(theme);
 
   const { sellerId } = route.params;
@@ -109,7 +110,7 @@ const SellerDetails: React.FC = () => {
 
   const handleReportSuccess = () => {
     setShowReportModal(false);
-    Alert.alert(t('sellerProfile.reportSuccess'));
+    showSuccess(t('sellerProfile.reportSuccess'), t('sellerProfile.reportModal.success'));
   };
 
   if (!seller) {

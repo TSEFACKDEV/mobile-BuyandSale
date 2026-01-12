@@ -7,7 +7,6 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  Alert,
   ActivityIndicator,
   StyleSheet,
   KeyboardAvoidingView,
@@ -25,6 +24,7 @@ import { selectCities } from '../store/city/slice';
 import { getImageUrl, PLACEHOLDER_IMAGE } from '../utils/imageUtils';
 import { Loading } from './LoadingVariants';
 import PhoneInput from './PhoneInput';
+import { useDialog } from '../contexts/DialogContext';
 
 interface EditProductModalProps {
   visible: boolean;
@@ -55,6 +55,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
 }) => {
   const dispatch = useAppDispatch();
   const colors = useThemeColors();
+  const { showWarning, showSuccess } = useDialog();
   const categories = useAppSelector(selectCategories);
   const cities = useAppSelector(selectCities);
 
@@ -109,7 +110,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
         }
       }
     } catch (error) {
-      Alert.alert('Erreur', 'Impossible de charger le produit');
+      showWarning('Erreur', 'Impossible de charger le produit');
     } finally {
       setLoading(false);
     }
@@ -133,7 +134,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
         setFormData(prev => {
           const totalImages = prev.existingImages.length + prev.newImages.length + selectedImages.length;
           if (totalImages > 5) {
-            Alert.alert('Limite atteinte', 'Vous ne pouvez avoir que 5 images maximum');
+            showWarning('Limite atteinte', 'Vous ne pouvez avoir que 5 images maximum');
             return prev;
           }
           return {
@@ -143,7 +144,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
         });
       }
     } catch (error) {
-      Alert.alert('Erreur', 'Impossible de sélectionner les images');
+      showWarning('Erreur', 'Impossible de sélectionner les images');
     }
   };
 
@@ -167,31 +168,31 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
   const handleSubmit = async () => {
     // Validation
     if (!formData.name.trim()) {
-      Alert.alert('Erreur', 'Le nom du produit est requis');
+      showWarning('Erreur', 'Le nom du produit est requis');
       return;
     }
     if (!formData.description.trim()) {
-      Alert.alert('Erreur', 'La description est requise');
+      showWarning('Erreur', 'La description est requise');
       return;
     }
     if (!formData.price || Number(formData.price) <= 0) {
-      Alert.alert('Erreur', 'Le prix doit être supérieur à 0');
+      showWarning('Erreur', 'Le prix doit être supérieur à 0');
       return;
     }
     if (!formData.categoryId) {
-      Alert.alert('Erreur', 'Veuillez sélectionner une catégorie');
+      showWarning('Erreur', 'Veuillez sélectionner une catégorie');
       return;
     }
     if (!formData.cityId) {
-      Alert.alert('Erreur', 'Veuillez sélectionner une ville');
+      showWarning('Erreur', 'Veuillez sélectionner une ville');
       return;
     }
     if (!formData.quartier.trim()) {
-      Alert.alert('Erreur', 'Le quartier est requis');
+      showWarning('Erreur', 'Le quartier est requis');
       return;
     }
     if (!validateCameroonPhone(formData.telephone)) {
-      Alert.alert('Erreur', 'Numéro de téléphone camerounais invalide (format: 6XX XX XX XX)');
+      showWarning('Erreur', 'Numéro de téléphone camerounais invalide (format: 6XX XX XX XX)');
       return;
     }
 
@@ -230,14 +231,14 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
       );
 
       if (result.meta.requestStatus === 'fulfilled') {
-        Alert.alert('Succès', 'Produit mis à jour avec succès !');
+        showSuccess('Succès', 'Produit mis à jour avec succès !');
         onSuccess();
         onClose();
       } else {
-        Alert.alert('Erreur', 'Échec de la mise à jour du produit');
+        showWarning('Erreur', 'Échec de la mise à jour du produit');
       }
     } catch (error) {
-      Alert.alert('Erreur', 'Une erreur est survenue lors de la mise à jour');
+      showWarning('Erreur', 'Une erreur est survenue lors de la mise à jour');
     } finally {
       setIsUpdating(false);
     }
