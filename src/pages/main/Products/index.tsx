@@ -127,6 +127,12 @@ const Products = () => {
 
     return [...validatedProducts].sort((a, b) => {
       const getForfaitPriority = (product: any) => {
+        // ✅ Utiliser activeForfaits du serveur si disponible
+        if (product.activeForfaits && Array.isArray(product.activeForfaits) && product.activeForfaits.length > 0) {
+          return priorityMap[product.activeForfaits[0].type] || 999;
+        }
+
+        // Fallback: calculer côté client
         if (!product.productForfaits || product.productForfaits.length === 0) {
           return 999;
         }

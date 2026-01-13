@@ -46,7 +46,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   }, [product.images]);
 
   // Déterminer le forfait actif avec la plus haute priorité
+  // ✅ SIMPLIFICATION: Utiliser directement activeForfaits du serveur
   const activeForfait = useMemo(() => {
+    // Si le produit a activeForfaits précalculés par le serveur, les utiliser
+    if (product.activeForfaits && Array.isArray(product.activeForfaits) && product.activeForfaits.length > 0) {
+      // Le serveur a déjà trié par priorité, prendre le premier
+      return product.activeForfaits[0].type;
+    }
+
+    // Fallback: calculer côté client si le serveur n'a pas envoyé activeForfaits
     if (!product.productForfaits || product.productForfaits.length === 0) {
       return null;
     }
@@ -72,7 +80,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     });
 
     return highest.forfait.type;
-  }, [product.productForfaits]);
+  }, [product.activeForfaits, product.productForfaits]);
 
   // Styles de bordure selon le forfait
   const borderColor = useMemo(() => {
