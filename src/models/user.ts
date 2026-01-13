@@ -50,6 +50,7 @@ export interface AuthUser {
   lastName: string;
   email: string;
   phone: string;
+  location?: string;
   isVerified: boolean;
   status: 'PENDING' | 'ACTIVE' | 'SUSPENDED';
   avatar?: string;
@@ -96,6 +97,8 @@ export interface UserRegisterForm {
 export interface RegisterResponse {
   userId: string;
   message: string;
+  method?: 'SMS' | 'EMAIL';
+  contact?: string;
 }
 
 export interface ForgotPasswordForm {

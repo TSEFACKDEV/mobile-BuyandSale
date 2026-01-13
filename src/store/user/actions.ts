@@ -142,18 +142,8 @@ export const reportUserAction = createAsyncThunk<
         .json()
         .catch(() => ({ message: 'Erreur de serveur' }))
 
-      switch (response.status) {
-        case 401:
-          throw new Error('Authentification requise')
-        case 404:
-          throw new Error('Utilisateur non trouvé')
-        case 400:
-          throw new Error(data.message || 'Données invalides')
-        case 500:
-          throw new Error('Erreur serveur lors du signalement')
-        default:
-          throw new Error('Erreur lors du signalement')
-      }
+      const errorMessage = data?.meta?.message || data?.message || 'Erreur lors du signalement'
+      throw new Error(errorMessage)
     }
 
     const data = await response.json()

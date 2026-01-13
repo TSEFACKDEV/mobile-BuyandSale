@@ -29,6 +29,9 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
   // Récupérer le compteur de favoris
   const favoritesCount = useAppSelector(selectValidFavoritesCount);
 
+  // Vérifier si l'utilisateur est authentifié
+  const isAuthenticated = useAppSelector((state) => state.authentification.auth.entities !== null);
+
   // Animation pour le badge favoris
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -126,20 +129,22 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
             )}
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={handleNotificationPress}
-            activeOpacity={0.7}
-          >
-            <Icon name="notifications-outline" size={24} color={colors.text} />
-            {unreadCount > 0 && (
-              <View style={styles.notificationBadge}>
-                <Text style={styles.notificationBadgeText}>
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </Text>
-              </View>
-            )}
-          </TouchableOpacity>
+          {isAuthenticated && (
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={handleNotificationPress}
+              activeOpacity={0.7}
+            >
+              <Icon name="notifications-outline" size={24} color={colors.text} />
+              {unreadCount > 0 && (
+                <View style={styles.notificationBadge}>
+                  <Text style={styles.notificationBadgeText}>
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          )}
         </View>
       )}
     </View>

@@ -36,7 +36,9 @@
     "Services": "Services",
     "Rencontres": "Dating",
     "Événements": "Events",
-    "Divers": "Miscellaneous"
+    "Divers": "Miscellaneous",
+    "Art et Artisanat": "Art and Crafts",
+    "Cosmétiques et Soins corporels": "Cosmetics and Body Care"
   },
   "common": {
     "views": "views",
@@ -159,7 +161,8 @@
       "lastName": "Last Name",
       "email": "Email",
       "phone": "Phone",
-      "location": "Location"
+      "location": "Location",
+      "locationPlaceholder": "City, Region..."
     },
     "messages": {
       "loading": "Loading...",
@@ -722,6 +725,7 @@
     "noPhone": "No phone number",
     "checkOut": "Check out",
     "reportSuccess": "Report sent",
+    "alreadyReported": "You have already reported this user",
     "locationNotSpecified": "Location not specified",
     "memberSinceRecently": "Member recently",
     "contactInfo": "Contact information",
@@ -733,6 +737,14 @@
       "report": "Report"
     },
     "reportModal": {
+      "title": "Report seller",
+      "reporting": "Reporting",
+      "reason": "Reason",
+      "details": "Details",
+      "detailsPlaceholder": "Provide more details...",
+      "selectReason": "Please select a reason",
+      "success": "Report sent successfully",
+      "submit": "Report",
       "reasonFraud": "Fraud or scam",
       "reasonSpam": "Spam or advertising",
       "reasonAbuse": "Abusive behavior",

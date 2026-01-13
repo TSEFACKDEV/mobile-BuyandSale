@@ -7,11 +7,14 @@ import {
   TextInput,
   ActivityIndicator,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useAppDispatch } from '../../hooks/store';
 import { reportUserAction } from '../../store/user/actions';
 import { useThemeColors } from '../../contexts/ThemeContext';
+import { useTranslation } from '../../hooks/useTranslation';
 import styles from './style';
 
 interface ReportModalProps {
@@ -23,10 +26,10 @@ interface ReportModalProps {
 }
 
 const REPORT_REASONS = [
-  { value: 'fraud', label: 'Fraude' },
-  { value: 'spam', label: 'Spam' },
-  { value: 'abuse', label: 'Comportement abusif' },
-  { value: 'other', label: 'Autre' },
+  { value: 'fraud', key: 'reasonFraud' },
+  { value: 'spam', key: 'reasonSpam' },
+  { value: 'abuse', key: 'reasonAbuse' },
+  { value: 'other', key: 'reasonOther' },
 ] as const;
 
 const ReportModal: React.FC<ReportModalProps> = ({
@@ -38,6 +41,7 @@ const ReportModal: React.FC<ReportModalProps> = ({
 }) => {
   const dispatch = useAppDispatch();
   const colors = useThemeColors();
+  const { t } = useTranslation();
 
   const [formData, setFormData] = useState({ reason: '', details: '' });
   const [loading, setLoading] = useState(false);
@@ -52,7 +56,7 @@ const ReportModal: React.FC<ReportModalProps> = ({
 
   const handleSubmit = async () => {
     if (!formData.reason) {
-      setError('Veuillez sélectionner une raison');
+      setError(t('sellerProfile.reportModal.selectReason'));
       return;
     }
 
@@ -76,7 +80,14 @@ const ReportModal: React.FC<ReportModalProps> = ({
         onClose();
       }, 1200);
     } catch (err: unknown) {
-      setError((err as Error)?.message || 'Erreur lors du signalement');
+      const errorMessage = (err as Error)?.message || 'Erreur lors du signalement';
+      
+      // Traduire les messages d'erreur du backend
+      if (errorMessage.includes('already reported')) {
+        setError(t('sellerProfile.alreadyReported') || 'Vous avez déjà signalé cet utilisateur');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -93,9 +104,16 @@ const ReportModal: React.FC<ReportModalProps> = ({
 
   return (
     <Modal visible={isOpen} transparent animationType="slide" onRequestClose={handleClose}>
-      <View style={styles.overlay}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.overlay}
+      >
         <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
-          <ScrollView showsVerticalScrollIndicator={false}>
+          <ScrollView 
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{ paddingBottom: 20 }}
+          >
             {/* Header */}
             <View style={styles.header}>
               <View style={styles.headerIcon}>
@@ -103,10 +121,10 @@ const ReportModal: React.FC<ReportModalProps> = ({
               </View>
               <View style={styles.headerText}>
                 <Text style={[styles.headerTitle, { color: colors.text }]}>
-                  Signaler le vendeur
+                  {t('sellerProfile.reportModal.title')}
                 </Text>
                 <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
-                  Signaler {sellerName}
+                  {t('sellerProfile.reportModal.reporting')} {sellerName}
                 </Text>
               </View>
             </View>
@@ -115,9 +133,9 @@ const ReportModal: React.FC<ReportModalProps> = ({
             <View style={styles.formContainer}>
               {/* Reason Select */}
               <View style={styles.formGroup}>
-                <Text style={[styles.label, { color: colors.text }]}>Raison</Text>
+                <Text style={[styles.label, { color: colors.text }]}>{t('sellerProfile.reportModal.reason')}</Text>
                 <View style={styles.reasonButtons}>
-                  {REPORT_REASONS.map(({ value, label }) => (
+                  {REPORT_REASONS.map(({ value, key }) => (
                     <TouchableOpacity
                       key={value}
                       onPress={() => setFormData((prev) => ({ ...prev, reason: value }))}
@@ -138,7 +156,7 @@ const ReportModal: React.FC<ReportModalProps> = ({
                           { color: formData.reason === value ? '#F97316' : colors.text },
                         ]}
                       >
-                        {label}
+                        {t(`sellerProfile.reportModal.${key}`)}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -147,13 +165,13 @@ const ReportModal: React.FC<ReportModalProps> = ({
 
               {/* Details TextArea */}
               <View style={styles.formGroup}>
-                <Text style={[styles.label, { color: colors.text }]}>Détails</Text>
+                <Text style={[styles.label, { color: colors.text }]}>{t('sellerProfile.reportModal.details')}</Text>
                 <TextInput
                   value={formData.details}
                   onChangeText={(value) =>
                     setFormData((prev) => ({ ...prev, details: value }))
                   }
-                  placeholder="Fournissez plus de détails..."
+                  placeholder={t('sellerProfile.reportModal.detailsPlaceholder')}
                   placeholderTextColor={colors.textSecondary}
                   multiline
                   numberOfLines={3}
@@ -181,7 +199,7 @@ const ReportModal: React.FC<ReportModalProps> = ({
             {success && (
               <View style={styles.successContainer}>
                 <Icon name="checkmark-circle" size={16} color="#10B981" />
-                <Text style={styles.successText}>Signalement envoyé avec succès</Text>
+                <Text style={styles.successText}>{t('sellerProfile.reportModal.success')}</Text>
               </View>
             )}
 
@@ -198,7 +216,7 @@ const ReportModal: React.FC<ReportModalProps> = ({
                 ]}
               >
                 <Text style={[styles.cancelButtonText, { color: colors.text }]}>
-                  Annuler
+                  {t('common.cancel')}
                 </Text>
               </TouchableOpacity>
 
@@ -214,13 +232,13 @@ const ReportModal: React.FC<ReportModalProps> = ({
                 {loading ? (
                   <ActivityIndicator size="small" color="#FFFFFF" />
                 ) : (
-                  <Text style={styles.submitButtonText}>Signaler</Text>
+                  <Text style={styles.submitButtonText}>{t('sellerProfile.reportModal.submit')}</Text>
                 )}
               </TouchableOpacity>
             </View>
           </ScrollView>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };

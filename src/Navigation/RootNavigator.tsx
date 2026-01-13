@@ -32,7 +32,6 @@ import PostAds from '../pages/main/PostAds/index';
 
 // Guards
 import Authenticated from '../Guards/Authenticated';
-import NotSuspended from '../Guards/NotSuspended';
 
 // Components
 import TopNavigation from '../components/TopNavigation';
@@ -68,10 +67,8 @@ const UserProfileWithNav = () => {
   return (
     <View style={{ flex: 1 }}>
       <Authenticated>
-        <NotSuspended>
-          <TopNavigation showBackButton title={t('userProfile.title')} />
-          <UserProfile />
-        </NotSuspended>
+        <TopNavigation showBackButton title={t('userProfile.title')} />
+        <UserProfile />
       </Authenticated>
     </View>
   );

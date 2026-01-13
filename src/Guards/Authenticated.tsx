@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, CommonActions } from '@react-navigation/native';
 import { useAppSelector } from '../hooks/store';
 import type { RootState } from '../store';
 
@@ -28,15 +28,31 @@ const Authenticated: React.FC<AuthenticatedProps> = ({ children }) => {
   const user = authState.auth.entities;
 
   useEffect(() => {
-    // Si pas connecté, rediriger vers login
+    // Si pas connecté, réinitialiser la navigation : Main (Home) + Auth (Login)
     if (!isAuthenticated || !user) {
-      (navigation as any).navigate('Auth', { screen: 'Login' });
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 1,
+          routes: [
+            { name: 'Main', params: { screen: 'MainTab', params: { screen: 'HomeTab' } } },
+            { name: 'Auth', params: { screen: 'Login' } },
+          ],
+        })
+      );
       return;
     }
 
-    // Si utilisateur suspendu, rediriger vers page de suspension
+    // Si utilisateur suspendu, réinitialiser vers page de suspension
     if (user.status === 'SUSPENDED') {
-      (navigation as any).navigate('Auth', { screen: 'AccountSuspended' });
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 1,
+          routes: [
+            { name: 'Main', params: { screen: 'MainTab', params: { screen: 'HomeTab' } } },
+            { name: 'Auth', params: { screen: 'AccountSuspended' } },
+          ],
+        })
+      );
       return;
     }
   }, [isAuthenticated, user, navigation]);

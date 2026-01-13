@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, Pressable, ScrollView, KeyboardAvoidingView, Platform } from 'react-native'
 import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -15,6 +15,7 @@ import { selectResetPassword } from '../../../store/password/slice'
 import { LoadingType } from '../../../models/store'
 import { Loading } from '../../../components/LoadingVariants'
 import { useTranslation } from '../../../hooks/useTranslation'
+import { useDialog } from '../../../contexts/DialogContext'
 
 type ResetPasswordNavigationProp = NativeStackNavigationProp<
   AuthStackParamList,
@@ -28,6 +29,7 @@ const ResetPassword = () => {
   const route = useRoute<ResetPasswordRouteProp>()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
+  const { showWarning, showSuccess } = useDialog()
 
   // ✅ Pattern Redux standardisé avec hooks typés
   const resetPasswordState = useAppSelector(selectResetPassword)
@@ -67,7 +69,7 @@ const ResetPassword = () => {
     }
 
     if (!token) {
-      Alert.alert(t('auth.errors.title'), t('auth.errors.account.tokenMissing'), [{ text: 'OK' }])
+      showWarning(t('auth.errors.title'), t('auth.errors.account.tokenMissing'))
       return
     }
 
@@ -82,17 +84,12 @@ const ResetPassword = () => {
         ).unwrap()
 
         // 🎉 Réinitialisation réussie
-        Alert.alert(
+        showSuccess(
           t('auth.success.title'),
           t('auth.success.passwordReset'),
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                navigation.navigate('Login')
-              },
-            },
-          ]
+          () => {
+            navigation.navigate('Login')
+          }
         )
       } catch (error: unknown) {
         // 🚨 Gestion d'erreurs
@@ -114,22 +111,17 @@ const ResetPassword = () => {
 
         // Messages d'erreur spécifiques
         if (errorMessage.includes('expiré') || errorMessage.includes('expired')) {
-          Alert.alert(
+          showWarning(
             t('auth.titles.tokenExpired'),
             t('auth.errors.token.expiredMessage'),
-            [
-              {
-                text: 'OK',
-                onPress: () => {
-                  navigation.navigate('ForgotPassword')
-                },
-              },
-            ]
+            () => {
+              navigation.navigate('ForgotPassword')
+            }
           )
         } else if (errorMessage.includes('invalide') || errorMessage.includes('invalid')) {
-          Alert.alert(t('auth.errors.title'), t('auth.errors.token.invalid'), [{ text: 'OK' }])
+          showWarning(t('auth.errors.title'), t('auth.errors.token.invalid'))
         } else {
-          Alert.alert(t('auth.errors.title'), errorMessage, [{ text: 'OK' }])
+          showWarning(t('auth.errors.title'), errorMessage)
         }
       }
     }

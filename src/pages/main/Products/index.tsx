@@ -20,6 +20,7 @@ import FilterModal from '../../../components/FilterModal';
 import TopNavigation from '../../../components/TopNavigation';
 import { useThemeColors } from '../../../contexts/ThemeContext';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { sortProductsByForfaitPriority } from '../../../config/forfaits.config';
 import { getAllCategoriesAction } from '../../../store/category/actions';
 import { fetchCitiesAction } from '../../../store/city/actions';
 import styles from './style';
@@ -44,19 +45,26 @@ const Products = () => {
 
   // Local state
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<{
-    search: string;
     categoryId?: string;
     cityId?: string;
     priceMin?: number;
     priceMax?: number;
     etat?: 'NEUF' | 'OCCASION' | 'CORRECT';
-  }>({
-    search: '',
-  });
+  }>({});
+
+  // Debounce pour la recherche (attend 500ms après la dernière saisie)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Charger catégories et villes une seule fois
   useEffect(() => {
@@ -83,7 +91,7 @@ const Products = () => {
       return () => {
         setSearchQuery('');
         setCurrentPage(1);
-        setFilters({ search: '' });
+        setFilters({});
       };
     }, [])
   );
@@ -102,7 +110,6 @@ const Products = () => {
         getValidatedProductsAction({
           page: currentPage,
           limit: 12,
-          search: filters.search || undefined,
           categoryId: filters.categoryId,
           cityId: filters.cityId,
           priceMin: filters.priceMin,
@@ -118,6 +125,7 @@ const Products = () => {
   // Trier les produits par priorité de forfait
   const sortedProducts = useMemo(() => {
     if (!validatedProducts) return [];
+<<<<<<< HEAD
 
     const priorityMap: Record<string, number> = {
       PREMIUM: 1,
@@ -150,20 +158,23 @@ const Products = () => {
 
       return getForfaitPriority(a) - getForfaitPriority(b);
     });
+=======
+    return sortProductsByForfaitPriority(validatedProducts);
+>>>>>>> afd23051710118fdc46e617bd1fe0ec1631943af
   }, [validatedProducts]);
 
   // Filtrer par recherche
   const filteredProducts = useMemo(() => {
-    if (!searchQuery.trim()) return sortedProducts;
+    if (!debouncedSearchQuery.trim()) return sortedProducts;
 
-    const query = searchQuery.toLowerCase();
+    const query = debouncedSearchQuery.toLowerCase();
     return sortedProducts.filter(
       (product) =>
         product.name?.toLowerCase().includes(query) ||
         product.description?.toLowerCase().includes(query) ||
         product.category.name.toLowerCase().includes(query)
     );
-  }, [sortedProducts, searchQuery]);
+  }, [sortedProducts, debouncedSearchQuery]);
 
   // Refresh
   const handleRefresh = async () => {
@@ -178,12 +189,6 @@ const Products = () => {
     setRefreshing(false);
   };
 
-  // Recherche
-  const handleSearch = () => {
-    setCurrentPage(1);
-    setFilters({ ...filters, search: searchQuery });
-  };
-
   // Appliquer les filtres du modal
   const handleApplyFilters = (newFilters: typeof filters) => {
     setCurrentPage(1);
@@ -193,14 +198,13 @@ const Products = () => {
   // Effacer tous les filtres
   const handleClearFilters = () => {
     setSearchQuery('');
-    setFilters({ search: '' });
+    setFilters({});
     setCurrentPage(1);
   };
 
   // Compter les filtres actifs
   const activeFiltersCount = useMemo(() => {
     let count = 0;
-    if (filters.search.trim()) count++;
     if (filters.categoryId) count++;
     if (filters.cityId) count++;
     if (filters.priceMin !== undefined) count++;
@@ -219,28 +223,9 @@ const Products = () => {
     }
   };
 
-  // Render header
-  const renderHeader = () => (
+  // Render stats and filters (without search bar)
+  const renderListHeader = useCallback(() => (
     <View style={[styles.header, { backgroundColor: theme.background }]}>
-      {/* Barre de recherche */}
-      <View style={[styles.searchContainer, { backgroundColor: theme.backgroundSecondary }]}>
-        <Ionicons name="search-outline" size={20} color={theme.textSecondary} />
-        <TextInput
-          style={[styles.searchInput, { color: theme.text }]}
-          placeholder={t('products.searchPlaceholder')}
-          placeholderTextColor={theme.textSecondary}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onSubmitEditing={handleSearch}
-          returnKeyType="search"
-        />
-        {searchQuery ? (
-          <TouchableOpacity onPress={() => setSearchQuery('')}>
-            <Ionicons name="close-circle" size={20} color={theme.textSecondary} />
-          </TouchableOpacity>
-        ) : null}
-      </View>
-
       {/* Statistiques et filtres */}
       <View style={styles.statsRow}>
         <View style={styles.leftStats}>
@@ -280,7 +265,7 @@ const Products = () => {
         </View>
       </View>
     </View>
-  );
+  ), [theme, filteredProducts.length, activeFiltersCount, language, t]);
 
   // Render empty state
   const renderEmpty = () => {
@@ -359,8 +344,27 @@ const Products = () => {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <TopNavigation />
+      
+      {/* Barre de recherche fixe en dehors du FlatList */}
+      <View style={[styles.searchContainer, { backgroundColor: theme.backgroundSecondary }]}>
+        <Ionicons name="search-outline" size={20} color={theme.textSecondary} />
+        <TextInput
+          style={[styles.searchInput, { color: theme.text }]}
+          placeholder={t('products.searchPlaceholder')}
+          placeholderTextColor={theme.textSecondary}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          returnKeyType="search"
+        />
+        {searchQuery ? (
+          <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <Ionicons name="close-circle" size={20} color={theme.textSecondary} />
+          </TouchableOpacity>
+        ) : null}
+      </View>
+
       <FlatList
-        ListHeaderComponent={renderHeader}
+        ListHeaderComponent={renderListHeader}
         data={filteredProducts}
         renderItem={({ item }) => <ProductCard product={item} />}
         keyExtractor={(item) => item.id}
@@ -386,7 +390,7 @@ const Products = () => {
       <FilterModal
         visible={showFilters}
         onClose={() => setShowFilters(false)}
-        filters={{ ...filters, search: searchQuery }}
+        filters={filters}
         onApplyFilters={handleApplyFilters}
         categories={categories || []}
         cities={cities || []}

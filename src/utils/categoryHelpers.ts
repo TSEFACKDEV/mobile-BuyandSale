@@ -26,6 +26,8 @@ export const getCategoryIcon = (categoryName: string): string => {
     rencontres: "💕",
     événements: "🎫",
     divers: "📦",
+    "art et artisanat": "🎨",
+    "cosmétiques et soins corporels": "💄",
 
     // Mots-clés alternatifs pour compatibilité
     phone: "📱",
@@ -85,6 +87,19 @@ export const getCategoryIcon = (categoryName: string): string => {
     collection: "📦",
     antiquité: "📦",
     autre: "📦",
+
+    art: "🎨",
+    artisanat: "🎨",
+    peinture: "🎨",
+    sculpture: "🎨",
+    fournitures: "🎨",
+
+    cosmétique: "💄",
+    beauté: "💄",
+    maquillage: "💄",
+    soin: "💄",
+    peau: "💄",
+    capillaire: "💄",
   };
 
   // Trouver l'emoji correspondant

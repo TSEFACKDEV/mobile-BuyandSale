@@ -1,8 +1,8 @@
-import { View, Text, Pressable, ScrollView, Alert, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, Pressable, ScrollView, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { AuthStackParamList, RootStackParamList } from '../../../types/navigation'
+import { AuthStackParamList } from '../../../types/navigation'
 import { useNavigation } from '@react-navigation/native'
 import TextInput from '../../../components/TextImput'
 import Button from '../../../components/Button'
@@ -21,15 +21,15 @@ import { normalizePhoneNumber, validateCameroonPhone } from '../../../utils/phon
 import PasswordStrengthIndicator from '../../../components/PasswordStrengthIndicator'
 import PhoneInput from '../../../components/PhoneInput'
 import { useTranslation } from '../../../hooks/useTranslation'
+import { useDialog } from '../../../contexts/DialogContext'
 
 type RegisterNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Register'>
-type AuthNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Auth'>
 
 const Register = () => {
   const navigation = useNavigation<RegisterNavigationProp>()
-  const navigation1 = useNavigation<AuthNavigationProp>()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
+  const { showWarning, showSuccess } = useDialog()
 
   // ✅ Pattern Redux standardisé avec hooks typés
   const registerState = useAppSelector(selectUserRegisted)
@@ -61,7 +61,7 @@ const Register = () => {
       handleGoogleSuccess(response.authentication?.accessToken);
     } else if (response?.type === 'error') {
       setIsGoogleLoading(false);
-      Alert.alert(t('auth.errors.title'), t('auth.errors.google.authFailed'));
+      showWarning(t('auth.errors.title'), t('auth.errors.google.authFailed'));
     } else if (response?.type === 'cancel') {
       setIsGoogleLoading(false);
     }
@@ -70,7 +70,7 @@ const Register = () => {
   // 🔐 Traiter le succès de l'authentification Google
   const handleGoogleSuccess = async (googleAccessToken?: string) => {
     if (!googleAccessToken) {
-      Alert.alert('Erreur', 'Token Google non reçu');
+      showWarning('Erreur', 'Token Google non reçu');
       setIsGoogleLoading(false);
       return;
     }
@@ -90,7 +90,7 @@ const Register = () => {
         );
 
         if (handleSocialAuthCallback.fulfilled.match(resultAction)) {
-          Alert.alert('Succès', 'Inscription Google réussie !');
+          showSuccess('Succès', 'Inscription Google réussie !');
           // La navigation se fera automatiquement via RootNavigator
         } else {
           throw new Error('Échec de récupération du profil utilisateur');
@@ -100,7 +100,7 @@ const Register = () => {
       }
     } catch (error) {
       // TODO: Implémenter système de logging
-      Alert.alert(
+      showWarning(
         'Erreur',
         error instanceof Error ? error.message : 'Erreur d\'authentification Google'
       );
@@ -112,19 +112,17 @@ const Register = () => {
   // 🔐 Initier l'authentification Google
   const handleGoogleRegister = async () => {
     if (!GoogleAuthService.isConfigured()) {
-      Alert.alert(
+      showWarning(
         t('auth.titles.configMissing'),
-        t('auth.errors.google.configMissing'),
-        [{ text: 'OK' }]
+        t('auth.errors.google.configMissing')
       );
       return;
     }
 
     if (!request) {
-      Alert.alert(
+      showWarning(
         t('auth.errors.title'),
-        t('auth.errors.google.notAvailable'),
-        [{ text: 'OK' }]
+        t('auth.errors.google.notAvailable')
       );
       return;
     }
@@ -135,7 +133,7 @@ const Register = () => {
     } catch (error) {
       // TODO: Implémenter système de logging
       setIsGoogleLoading(false);
-      Alert.alert(t('auth.errors.title'), t('auth.errors.google.initFailed'));
+      showWarning(t('auth.errors.title'), t('auth.errors.google.initFailed'));
     }
   };
 
@@ -232,19 +230,16 @@ const Register = () => {
         ).unwrap()
 
         // 🎉 Inscription réussie - Navigation vers vérification OTP avec userId
-        Alert.alert(
+        showSuccess(
           t('auth.success.registration'),
           t('auth.success.verificationSent'),
-          [
-            {
-              text: 'OK',
-              onPress: () => {
-                navigation.navigate('VerifyOTP', {
-                  userId: result.data?.userId,
-                })
-              },
-            },
-          ]
+          () => {
+            navigation.navigate('VerifyOTP', {
+              userId: result.data?.userId,
+              method: result.data?.method as 'SMS' | 'EMAIL',
+              contact: result.data?.contact,
+            })
+          }
         )
       } catch (error: unknown) {
         // 🚨 Gestion d'erreurs améliorée
@@ -270,22 +265,20 @@ const Register = () => {
         if (lowerErrorMessage.includes('email') && (lowerErrorMessage.includes('existe') || lowerErrorMessage.includes('already exists'))) {
           const emailExistsMessage = t('auth.errors.validation.emailExists')
           setEmailError(emailExistsMessage)
-          Alert.alert(
+          showWarning(
             t('auth.errors.title'), 
-            emailExistsMessage + '\n\nVeuillez utiliser un autre email ou vous connecter si vous avez déjà un compte.',
-            [{ text: 'OK' }]
+            emailExistsMessage + '\n\nVeuillez utiliser un autre email ou vous connecter si vous avez déjà un compte.'
           )
         } else if ((lowerErrorMessage.includes('téléphone') || lowerErrorMessage.includes('phone') || lowerErrorMessage.includes('numéro')) && (lowerErrorMessage.includes('existe') || lowerErrorMessage.includes('already exists'))) {
           const phoneExistsMessage = t('auth.errors.validation.phoneExists')
           setPhoneError(phoneExistsMessage)
-          Alert.alert(
+          showWarning(
             t('auth.errors.title'), 
-            phoneExistsMessage + '\n\nVeuillez utiliser un autre numéro de téléphone.',
-            [{ text: 'OK' }]
+            phoneExistsMessage + '\n\nVeuillez utiliser un autre numéro de téléphone.'
           )
         } else {
           // Pour toute autre erreur, afficher le message complet
-          Alert.alert(t('auth.errors.title'), errorMessage, [{ text: 'OK' }])
+          showWarning(t('auth.errors.title'), errorMessage)
         }
       }
     }
@@ -448,19 +441,19 @@ const Register = () => {
             <View style={styles.termsTextContainer}>
               <Text style={styles.termsText}>
                 J'ai lu et j'accepte les{' '}
-                <TouchableOpacity
+                <Text 
+                  style={styles.termsLink}
                   onPress={() => navigation.navigate('UseCondition')}
-                  activeOpacity={0.7}
                 >
-                  <Text style={styles.termsLink}>conditions d'utilisation</Text>
-                </TouchableOpacity>
+                  conditions d'utilisation
+                </Text>
                 {' '}et la{' '}
-                <TouchableOpacity
+                <Text 
+                  style={styles.termsLink}
                   onPress={() => navigation.navigate('Confidentiality')}
-                  activeOpacity={0.7}
                 >
-                  <Text style={styles.termsLink}>politique de confidentialité</Text>
-                </TouchableOpacity>
+                  politique de confidentialité
+                </Text>
               </Text>
             </View>
           </View>

@@ -23,88 +23,56 @@ const Sellers = () => {
   const error = useAppSelector(selectUsersError);
   const pagination = useAppSelector((state) => state.user.pagination);
 
-  // États locaux UI (EXACTEMENT comme React)
-  const [localSearch, setLocalSearch] = useState(''); // Pour l'input immédiat
-  const [searchFilter, setSearchFilter] = useState(''); // Équivalent de searchParams.get("search")
+  // États locaux
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [page, setPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Paramètres de filtrage (comme React - utilise searchFilter au lieu de localSearch)
-  const filters = useMemo(
-    () => ({
-      search: searchFilter, // Comme searchParams.get("search")
-      page: page,
-      limit: 12,
-    }),
-    [searchFilter, page]
-  );
+  // Debounce pour la recherche (attend 500ms après la dernière saisie)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
 
-  // Gestionnaire équivalent de handleFilterChange de React
-  const handleFilterChange = useCallback((key: string, value: string) => {
-    if (key === "search") {
-      setSearchFilter(value.trim());
-      setPage(1); // Reset page comme dans React
-    }
-  }, []);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
-  // Gestionnaire de recherche avec debounce (EXACTEMENT comme React)
-  const handleSearchChange = (value: string) => {
-    setLocalSearch(value); // Input immédiat
+  // Filtrer les vendeurs par recherche
+  const filteredSellers = useMemo(() => {
+    if (!debouncedSearchQuery.trim()) return sellers;
 
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
+    const query = debouncedSearchQuery.toLowerCase();
+    return sellers.filter(
+      (seller) =>
+        seller.firstName?.toLowerCase().includes(query) ||
+        seller.lastName?.toLowerCase().includes(query) ||
+        `${seller.firstName} ${seller.lastName}`.toLowerCase().includes(query)
+    );
+  }, [sellers, debouncedSearchQuery]);
 
-    debounceTimerRef.current = setTimeout(() => {
-      handleFilterChange("search", value); // Comme React
-    }, 600);
-  };
-
-  const clearAllFilters = () => {
-    setLocalSearch('');
-    setSearchFilter(''); // Clear le filtre comme React
-    setPage(1);
-  };
-
-  // Effect pour charger les vendeurs (EXACTEMENT comme React)
+  // Charger les vendeurs
   useEffect(() => {
     dispatch(
       fetchPublicSellersAction({
-        search: filters.search,
-        page: filters.page,
-        limit: filters.limit,
+        page: page,
+        limit: 12,
       })
     );
-  }, [dispatch, filters.search, filters.page, filters.limit]);
-
-  // Synchroniser localSearch avec filters (comme React)
-  useEffect(() => {
-    setLocalSearch(filters.search);
-  }, [filters.search]);
-
-  // Nettoyage du timer au démontage (comme React)
-  useEffect(() => {
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-    };
-  }, []);
+  }, [dispatch, page]);
 
   // Gestionnaire de refresh
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
+    setPage(1);
     await dispatch(
       fetchPublicSellersAction({
-        search: filters.search,
         page: 1,
-        limit: filters.limit,
+        limit: 12,
       })
     );
     setRefreshing(false);
-    setPage(1);
-  }, [dispatch, filters.search, filters.limit]);
+  }, [dispatch]);
 
   // Gestionnaire de pagination
   const handleLoadMore = useCallback(() => {
@@ -113,39 +81,16 @@ const Sellers = () => {
     }
   }, [pagination, page, status]);
 
-  // Rendu du header avec recherche
-  const renderHeader = () => (
+  // Rendu du header (stats uniquement)
+  const renderListHeader = useCallback(() => (
     <View style={styles.header}>
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <Icon name="search" size={20} color={colors.textSecondary} style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder={t('sellers.searchPlaceholder')}
-          placeholderTextColor={colors.textSecondary}
-          value={localSearch}
-          onChangeText={handleSearchChange}
-        />
-        {localSearch !== '' && (
-          <Icon
-            name="close-circle"
-            size={20}
-            color={colors.textSecondary}
-            onPress={clearAllFilters}
-            style={styles.clearIcon}
-          />
-        )}
-      </View>
-
-      {/* Stats */}
       <Text style={styles.statsText}>
-        {sellers.length} {language === 'fr' 
-          ? (sellers.length !== 1 ? 'vendeurs trouvés' : 'vendeur trouvé')
-          : (sellers.length !== 1 ? 'sellers found' : 'seller found')}
-        {filters.search ? ` ${language === 'fr' ? 'pour' : 'for'} "${filters.search}"` : ''}
+        {filteredSellers.length} {language === 'fr' 
+          ? (filteredSellers.length !== 1 ? 'vendeurs trouvés' : 'vendeur trouvé')
+          : (filteredSellers.length !== 1 ? 'sellers found' : 'seller found')}
       </Text>
     </View>
-  );
+  ), [filteredSellers.length, language, styles]);
 
   // Rendu de l'état vide
   const renderEmpty = () => (
@@ -153,10 +98,10 @@ const Sellers = () => {
       <Icon name="people-outline" size={64} color={colors.textSecondary} />
       <Text style={styles.emptyTitle}>{t('sellers.noSellersFound')}</Text>
       <Text style={styles.emptyText}>
-        {filters.search
+        {searchQuery
           ? (language === 'fr' 
-              ? `Aucun vendeur ne correspond à "${filters.search}"`
-              : `No seller matches "${filters.search}"`)
+              ? `Aucun vendeur ne correspond à "${searchQuery}"`
+              : `No seller matches "${searchQuery}"`)
           : t('sellers.noSellersAvailable')}
       </Text>
     </View>
@@ -194,12 +139,35 @@ const Sellers = () => {
   return (
     <View style={styles.container}>
       <TopNavigation />
+      
+      {/* Barre de recherche fixe en dehors du FlatList */}
+      <View style={styles.searchContainer}>
+        <Icon name="search" size={20} color={colors.textSecondary} style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder={t('sellers.searchPlaceholder')}
+          placeholderTextColor={colors.textSecondary}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          returnKeyType="search"
+        />
+        {searchQuery !== '' && (
+          <Icon
+            name="close-circle"
+            size={20}
+            color={colors.textSecondary}
+            onPress={() => setSearchQuery('')}
+            style={styles.clearIcon}
+          />
+        )}
+      </View>
+
       <FlatList
-        data={sellers}
+        data={filteredSellers}
         keyExtractor={(item) => item.id}
         numColumns={2}
         columnWrapperStyle={styles.row}
-        ListHeaderComponent={renderHeader}
+        ListHeaderComponent={renderListHeader}
         ListEmptyComponent={renderEmpty}
         renderItem={({ item, index }) => (
           <View style={styles.cardWrapper}>

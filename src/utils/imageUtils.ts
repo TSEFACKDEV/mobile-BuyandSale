@@ -41,16 +41,3 @@ export const getImageUrl = (
   const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
   return `${BASE_URL}/public${folder}${cleanPath}`;
 };
-
-/**
- * Formate le prix en format compact (K/M)
- */
-export const formatCompactPrice = (price: number): string => {
-  if (price >= 1000000) {
-    return `${(price / 1000000).toFixed(1)}M`;
-  }
-  if (price >= 1000) {
-    return `${Math.floor(price / 1000)}K`;
-  }
-  return price.toString();
-};

@@ -32,7 +32,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     borderRadius: 12,
-    marginBottom: 16,
+    marginHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 8,
     gap: 8,
   },
   searchInput: {

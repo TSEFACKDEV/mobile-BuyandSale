@@ -8,6 +8,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { store, persistor, RootState, AppDispatch } from './src/store';
 import { AuthProvider } from './src/contexts/AuthContext';
+import { DialogProvider } from './src/contexts/DialogContext';
 import RootNavigator from './src/Navigation/RootNavigator';
 import { ThemeProvider } from './src/contexts/ThemeContext';
 import { LanguageProvider } from './src/contexts/LanguageContext';
@@ -60,12 +61,14 @@ function AppContent() {
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaProvider>
         <AuthProvider>
-          <ThemeProvider>
-            <LanguageProvider>
-              <StatusBar style="dark" />
-              <RootNavigator />
-            </LanguageProvider>
-          </ThemeProvider>
+          <DialogProvider>
+            <ThemeProvider>
+              <LanguageProvider>
+                <StatusBar style="dark" />
+                <RootNavigator />
+              </LanguageProvider>
+            </ThemeProvider>
+          </DialogProvider>
         </AuthProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

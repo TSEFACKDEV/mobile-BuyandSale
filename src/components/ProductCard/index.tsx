@@ -9,6 +9,7 @@ import { selectValidFavorites } from '../../store/favorite/slice';
 import { selectUserAuthenticated } from '../../store/authentification/slice';
 import { useThemeColors } from '../../contexts/ThemeContext';
 import type { Product } from '../../store/product/actions';
+import { getPrimaryForfait } from '../../config/forfaits.config';
 import styles from './style';
 
 interface ProductCardProps {
@@ -45,6 +46,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     return (img as any).imagePath || 'https://via.placeholder.com/400x300?text=No+Image';
   }, [product.images]);
 
+<<<<<<< HEAD
   // Déterminer le forfait actif avec la plus haute priorité
   // ✅ SIMPLIFICATION: Utiliser directement activeForfaits du serveur
   const activeForfait = useMemo(() => {
@@ -95,6 +97,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         return theme.border;
     }
   }, [activeForfait, theme.border]);
+=======
+  // Obtenir le forfait avec la plus haute priorité
+  const primaryForfait = useMemo(
+    () => getPrimaryForfait(product.productForfaits),
+    [product.productForfaits]
+  );
+
+  const borderColor = primaryForfait?.card.borderColor || theme.border;
+  const borderWidth = primaryForfait?.card.borderWidth || 1;
+>>>>>>> afd23051710118fdc46e617bd1fe0ec1631943af
 
   // Formater le prix
   const formatPrice = (price: number) => {
@@ -164,7 +176,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {
           backgroundColor: theme.surface,
           borderColor: borderColor,
-          borderWidth: activeForfait ? 2 : 1,
+          borderWidth: borderWidth,
         },
       ]}
       onPress={handlePress}
@@ -175,26 +187,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <Image source={{ uri: firstImage }} style={styles.image} resizeMode="cover" />
 
         {/* Badge forfait */}
-        {activeForfait && (
+        {primaryForfait && (
           <View
             style={[
               styles.forfaitBadge,
               {
-                backgroundColor:
-                  activeForfait === 'PREMIUM'
-                    ? '#A855F7'
-                    : activeForfait === 'TOP_ANNONCE'
-                    ? '#3B82F6'
-                    : '#EF4444',
+                backgroundColor: primaryForfait.badge.bgColor,
               },
             ]}
           >
-            <Text style={styles.forfaitText}>
-              {activeForfait === 'PREMIUM'
-                ? '⭐ PREMIUM'
-                : activeForfait === 'TOP_ANNONCE'
-                ? '🔝 TOP'
-                : '⚡ URGENT'}
+            <Ionicons name={primaryForfait.icon} size={12} color={primaryForfait.badge.textColor} />
+            <Text style={[styles.forfaitText, { marginLeft: 4 }]}>
+              {primaryForfait.label.toUpperCase()}
             </Text>
           </View>
         )}

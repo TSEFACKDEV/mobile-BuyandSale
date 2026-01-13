@@ -36,7 +36,9 @@
     "Services": "Services",
     "Rencontres": "Rencontres",
     "Événements": "Événements",
-    "Divers": "Divers"
+    "Divers": "Divers",
+    "Art et Artisanat": "Art et Artisanat",
+    "Cosmétiques et Soins corporels": "Cosmétiques et Soins corporels"
   },
   "common": {
     "views": "vues",
@@ -159,7 +161,8 @@
       "lastName": "Nom",
       "email": "Email",
       "phone": "Téléphone",
-      "location": "Localisation"
+      "location": "Localisation",
+      "locationPlaceholder": "Ville, Région..."
     },
     "messages": {
       "loading": "Chargement...",
@@ -721,6 +724,7 @@
     "noPhone": "Aucun numéro de téléphone",
     "checkOut": "Découvrez",
     "reportSuccess": "Signalement envoyé",
+    "alreadyReported": "Vous avez déjà signalé cet utilisateur",
     "locationNotSpecified": "Localisation non précisée",
     "memberSinceRecently": "Membre récemment",
     "contactInfo": "Informations de contact",
@@ -732,6 +736,14 @@
       "report": "Signaler"
     },
     "reportModal": {
+      "title": "Signaler le vendeur",
+      "reporting": "Signaler",
+      "reason": "Raison",
+      "details": "Détails",
+      "detailsPlaceholder": "Fournissez plus de détails...",
+      "selectReason": "Veuillez sélectionner une raison",
+      "success": "Signalement envoyé avec succès",
+      "submit": "Signaler",
       "reasonFraud": "Fraude ou arnaque",
       "reasonSpam": "Spam ou publicité",
       "reasonAbuse": "Comportement abusif",
