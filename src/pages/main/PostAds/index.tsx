@@ -28,6 +28,11 @@ import { createProductAction } from '../../../store/product/actions';
 import { getAllForfaitsAction } from '../../../store/forfait/actions';
 import { validateCameroonPhone } from '../../../utils/phoneUtils';
 import PhoneInput from '../../../components/PhoneInput';
+import { 
+  validateImageComplete, 
+  validateImagesArray,
+  IMAGE_CONFIG 
+} from '../../../utils/imageUtils';
 
 // Redux Selectors
 import {
@@ -205,7 +210,7 @@ const PostAds: React.FC = () => {
     return city?.name || t('postAds.selectCityPlaceholder');
   };
 
-  // Sélection d'images
+  // Sélection d'images avec validation complète
   const handleImagePick = async () => {
     const availableSlots = MAX_IMAGES - formData.images.length;
 
@@ -242,16 +247,58 @@ const PostAds: React.FC = () => {
     });
 
     if (!result.canceled && result.assets) {
-      const newImages = result.assets.map((asset, index) => ({
-        uri: asset.uri,
-        type: 'image/jpeg',
-        name: `image_${Date.now()}_${index}.jpg`,
-      }));
+      // 🔥 VALIDATION COMPLÈTE DE CHAQUE IMAGE
+      const validatedImages: Array<{ uri: string; type: string; name: string }> = [];
+      const errors: string[] = [];
 
-      setFormData((prev) => ({
-        ...prev,
-        images: [...prev.images, ...newImages],
-      }));
+      for (let i = 0; i < result.assets.length; i++) {
+        const asset = result.assets[i];
+        
+        // Valider l'image
+        const validation = await validateImageComplete({
+          uri: asset.uri,
+          fileSize: asset.fileSize,
+          type: asset.mimeType || asset.type,
+        }, 'product');
+
+        if (validation.isValid) {
+          validatedImages.push({
+            uri: asset.uri,
+            type: asset.mimeType || 'image/jpeg',
+            name: asset.fileName || `image_${Date.now()}_${i}.jpg`,
+          });
+        } else {
+          errors.push(`Image ${i + 1}: ${validation.error}`);
+        }
+      }
+
+      // Ajouter les images valides
+      if (validatedImages.length > 0) {
+        setFormData((prev) => ({
+          ...prev,
+          images: [...prev.images, ...validatedImages],
+        }));
+      }
+
+      // Afficher les erreurs s'il y en a
+      if (errors.length > 0) {
+        setConfirmDialog({
+          visible: true,
+          title: '⚠️ Certaines images ont été rejetées',
+          message: errors.join('\n\n'),
+          type: 'warning',
+          confirmText: 'OK',
+        });
+      } else if (validatedImages.length > 0) {
+        // Toutes les images sont valides
+        setConfirmDialog({
+          visible: true,
+          title: '✅ Images validées',
+          message: `${validatedImages.length} image(s) ajoutée(s) avec succès`,
+          type: 'success',
+          confirmText: 'OK',
+        });
+      }
     }
   };
 
@@ -324,7 +371,7 @@ const PostAds: React.FC = () => {
     setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
-  // Soumission du formulaire
+  // Soumission du formulaire avec validation des images
   const handleSubmit = async () => {
     if (isSubmitting || !isMountedRef.current) return;
 
@@ -362,12 +409,20 @@ const PostAds: React.FC = () => {
         validationErrors.push(t('postAds.validations.neighborhoodRequired'));
       }
 
-if (!validateCameroonPhone(formData.telephone)) {
-      validationErrors.push(t('postAds.validations.phoneInvalid'));
+      if (!validateCameroonPhone(formData.telephone)) {
+        validationErrors.push(t('postAds.validations.phoneInvalid'));
       }
 
       if (!formData.images || formData.images.length === 0) {
         validationErrors.push(t('postAds.validations.imagesRequired'));
+      }
+
+      // 🔥 VALIDATION FINALE DES IMAGES AVANT SOUMISSION
+      if (formData.images.length > 0) {
+        const imagesValidation = await validateImagesArray(formData.images, 'product');
+        if (!imagesValidation.isValid) {
+          validationErrors.push(...imagesValidation.errors);
+        }
       }
 
       if (validationErrors.length > 0) {

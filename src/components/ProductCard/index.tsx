@@ -46,58 +46,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     return (img as any).imagePath || 'https://via.placeholder.com/400x300?text=No+Image';
   }, [product.images]);
 
-<<<<<<< HEAD
-  // Déterminer le forfait actif avec la plus haute priorité
-  // ✅ SIMPLIFICATION: Utiliser directement activeForfaits du serveur
-  const activeForfait = useMemo(() => {
-    // Si le produit a activeForfaits précalculés par le serveur, les utiliser
-    if (product.activeForfaits && Array.isArray(product.activeForfaits) && product.activeForfaits.length > 0) {
-      // Le serveur a déjà trié par priorité, prendre le premier
-      return product.activeForfaits[0].type;
-    }
-
-    // Fallback: calculer côté client si le serveur n'a pas envoyé activeForfaits
-    if (!product.productForfaits || product.productForfaits.length === 0) {
-      return null;
-    }
-
-    const now = new Date();
-    const active = product.productForfaits.filter(
-      (pf) => pf.isActive && new Date(pf.expiresAt) > now
-    );
-
-    if (active.length === 0) return null;
-
-    // Priorités: PREMIUM(1) > TOP_ANNONCE(2) > URGENT(3)
-    const priorityMap: Record<string, number> = {
-      PREMIUM: 1,
-      TOP_ANNONCE: 2,
-      URGENT: 3,
-    };
-
-    const highest = active.reduce((prev, curr) => {
-      const prevPriority = priorityMap[prev.forfait.type] || 999;
-      const currPriority = priorityMap[curr.forfait.type] || 999;
-      return currPriority < prevPriority ? curr : prev;
-    });
-
-    return highest.forfait.type;
-  }, [product.activeForfaits, product.productForfaits]);
-
-  // Styles de bordure selon le forfait
-  const borderColor = useMemo(() => {
-    switch (activeForfait) {
-      case 'PREMIUM':
-        return '#A855F7'; // purple-500
-      case 'TOP_ANNONCE':
-        return '#3B82F6'; // blue-500
-      case 'URGENT':
-        return '#EF4444'; // red-500
-      default:
-        return theme.border;
-    }
-  }, [activeForfait, theme.border]);
-=======
   // Obtenir le forfait avec la plus haute priorité
   const primaryForfait = useMemo(
     () => getPrimaryForfait(product.productForfaits),
@@ -106,7 +54,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const borderColor = primaryForfait?.card.borderColor || theme.border;
   const borderWidth = primaryForfait?.card.borderWidth || 1;
->>>>>>> afd23051710118fdc46e617bd1fe0ec1631943af
 
   // Formater le prix
   const formatPrice = (price: number) => {
@@ -196,7 +143,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               },
             ]}
           >
-            <Ionicons name={primaryForfait.icon} size={12} color={primaryForfait.badge.textColor} />
+            <Ionicons name={primaryForfait.icon as any} size={12} color={primaryForfait.badge.textColor} />
             <Text style={[styles.forfaitText, { marginLeft: 4 }]}>
               {primaryForfait.label.toUpperCase()}
             </Text>

@@ -125,42 +125,7 @@ const Products = () => {
   // Trier les produits par priorité de forfait
   const sortedProducts = useMemo(() => {
     if (!validatedProducts) return [];
-<<<<<<< HEAD
-
-    const priorityMap: Record<string, number> = {
-      PREMIUM: 1,
-      TOP_ANNONCE: 2,
-      URGENT: 3,
-    };
-
-    return [...validatedProducts].sort((a, b) => {
-      const getForfaitPriority = (product: any) => {
-        // ✅ Utiliser activeForfaits du serveur si disponible
-        if (product.activeForfaits && Array.isArray(product.activeForfaits) && product.activeForfaits.length > 0) {
-          return priorityMap[product.activeForfaits[0].type] || 999;
-        }
-
-        // Fallback: calculer côté client
-        if (!product.productForfaits || product.productForfaits.length === 0) {
-          return 999;
-        }
-
-        const now = new Date();
-        const active = product.productForfaits.filter(
-          (pf: any) => pf.isActive && new Date(pf.expiresAt) > now
-        );
-
-        if (active.length === 0) return 999;
-
-        const priorities = active.map((pf: any) => priorityMap[pf.forfait.type] || 999);
-        return Math.min(...priorities);
-      };
-
-      return getForfaitPriority(a) - getForfaitPriority(b);
-    });
-=======
     return sortProductsByForfaitPriority(validatedProducts);
->>>>>>> afd23051710118fdc46e617bd1fe0ec1631943af
   }, [validatedProducts]);
 
   // Filtrer par recherche
