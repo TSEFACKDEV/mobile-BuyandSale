@@ -64,7 +64,19 @@ const FORFAIT_COLORS: Record<string, string> = {
 };
 
 // Helper: Trouver le forfait actif d'un produit
+// ✅ SIMPLIFICATION: Utiliser activeForfaits du serveur si disponible
 const getActiveForfait = (product: any) => {
+  // Utiliser activeForfaits du serveur si disponible
+  if (product?.activeForfaits && Array.isArray(product.activeForfaits) && product.activeForfaits.length > 0) {
+    const firstActive = product.activeForfaits[0];
+    // Retourner dans le format attendu par le reste du code
+    return {
+      isActive: true,
+      expiresAt: firstActive.expiresAt,
+      forfait: { type: firstActive.type }
+    };
+  }
+  // Fallback: chercher dans productForfaits
   return product?.productForfaits?.find(
     (pf: any) => pf.isActive && new Date(pf.expiresAt) > new Date()
   );
@@ -100,7 +112,18 @@ const UserProfile: React.FC = () => {
   }, []);
 
   // ✨ Fonction pour obtenir les forfaits actifs d'un produit triés par priorité
-  const getActiveForfaits = useCallback((productForfaits: any[]) => {
+  // ✅ SIMPLIFICATION: Utiliser activeForfaits du serveur si disponible
+  const getActiveForfaits = useCallback((productForfaits: any[], activeForfaits?: any[]) => {
+    // Utiliser activeForfaits du serveur si disponible
+    if (activeForfaits && Array.isArray(activeForfaits) && activeForfaits.length > 0) {
+      return activeForfaits.map((af: any) => ({
+        isActive: true,
+        expiresAt: af.expiresAt,
+        forfait: { type: af.type }
+      }));
+    }
+
+    // Fallback: calculer côté client
     if (!productForfaits || productForfaits.length === 0) return [];
 
     const now = new Date();

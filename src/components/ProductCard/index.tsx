@@ -143,7 +143,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               },
             ]}
           >
-            <Ionicons name={primaryForfait.icon} size={12} color={primaryForfait.badge.textColor} />
+            <Ionicons name={primaryForfait.icon as any} size={12} color={primaryForfait.badge.textColor} />
             <Text style={[styles.forfaitText, { marginLeft: 4 }]}>
               {primaryForfait.label.toUpperCase()}
             </Text>
