@@ -1,1 +1,0 @@
-bash: jq: command not found

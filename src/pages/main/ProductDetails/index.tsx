@@ -548,7 +548,7 @@ const ProductDetails = () => {
                 onPress={() => setIsImageModalVisible(false)}
                 style={styles.modalCloseButton}
               >
-                <Icon name="close" size={28} color="#FFFFFF" />
+                <Icon name="close" size={36} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
 

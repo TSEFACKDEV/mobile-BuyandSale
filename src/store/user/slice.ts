@@ -75,7 +75,16 @@ const userSlice = createSlice({
       })
       .addCase(fetchPublicSellersAction.fulfilled, (state, action) => {
         state.users.status = LoadingType.SUCCESS
-        state.users.entities = action.payload.users
+        // Si c'est la page 1, remplacer la liste, sinon ajouter à la liste existante
+        const isFirstPage = action.payload.pagination?.page === 1;
+        if (isFirstPage) {
+          state.users.entities = action.payload.users
+        } else {
+          // Ajouter les nouveaux vendeurs à la liste existante (infinite scroll)
+          const existingIds = new Set(state.users.entities.map((u: any) => u.id));
+          const newUsers = action.payload.users.filter((u: any) => !existingIds.has(u.id));
+          state.users.entities = [...state.users.entities, ...newUsers];
+        }
         state.pagination = action.payload.pagination
         state.stats = action.payload.stats
       })

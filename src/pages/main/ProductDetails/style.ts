@@ -344,9 +344,9 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontWeight: '600',
   },
   modalCloseButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',

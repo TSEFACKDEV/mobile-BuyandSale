@@ -183,7 +183,16 @@ const productSlice = createSlice({
       getValidatedProductsAction.fulfilled,
       (state, action: PayloadAction<ProductListResponse>) => {
         state.validatedProductsStatus = 'succeeded';
-        state.validatedProducts = action.payload.products;
+        // Si c'est la page 1, remplacer la liste, sinon ajouter à la liste existante
+        const isFirstPage = action.payload.links?.currentPage === 1;
+        if (isFirstPage) {
+          state.validatedProducts = action.payload.products;
+        } else {
+          // Ajouter les nouveaux produits à la liste existante (infinite scroll)
+          const existingIds = new Set(state.validatedProducts.map(p => p.id));
+          const newProducts = action.payload.products.filter(p => !existingIds.has(p.id));
+          state.validatedProducts = [...state.validatedProducts, ...newProducts];
+        }
         state.validatedProductsPagination = action.payload.links;
       }
     );
@@ -243,7 +252,16 @@ const productSlice = createSlice({
       getSellerProductsAction.fulfilled,
       (state, action: PayloadAction<SellerProductsResponse>) => {
         state.sellerProductsStatus = 'succeeded';
-        state.sellerProducts = action.payload.products;
+        // Si c'est la page 1, remplacer la liste, sinon ajouter à la liste existante
+        const isFirstPage = action.payload.links?.currentPage === 1;
+        if (isFirstPage) {
+          state.sellerProducts = action.payload.products;
+        } else {
+          // Ajouter les nouveaux produits à la liste existante (infinite scroll)
+          const existingIds = new Set(state.sellerProducts.map(p => p.id));
+          const newProducts = action.payload.products.filter(p => !existingIds.has(p.id));
+          state.sellerProducts = [...state.sellerProducts, ...newProducts];
+        }
         state.sellerProductsPagination = action.payload.links;
         state.currentSeller = action.payload.seller;
       }
