@@ -42,7 +42,7 @@ const PaymentStatusModal: React.FC<PaymentStatusModalProps> = ({
   const [countdownDisplay, setCountdownDisplay] = useState(10);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
-  const maxAttempts = 4; // Seulement 4 vérifications (le webhook backend active automatiquement)
+  const maxAttempts = 8; // 8 vérifications (le webhook backend active automatiquement)
 
   useEffect(() => {
     if (visible && paymentId) {
@@ -69,10 +69,10 @@ const PaymentStatusModal: React.FC<PaymentStatusModalProps> = ({
     // Première vérification immédiate
     checkPaymentStatus();
 
-    // Ensuite toutes les 15 secondes
+    // Ensuite toutes les 20 secondes
     intervalRef.current = setInterval(() => {
       checkPaymentStatus();
-    }, 15000);
+    }, 20000);
   };
 
   const stopPolling = () => {
