@@ -30,9 +30,12 @@ import { validateCameroonPhone } from '../../../utils/phoneUtils';
 import PhoneInput from '../../../components/PhoneInput';
 import { 
   validateImageComplete, 
-  validateImagesArray,
-  IMAGE_CONFIG 
+  validateImagesArray 
 } from '../../../utils/imageUtils';
+import { 
+  validateProductForm,
+  filterQuartierChars 
+} from '../../../utils/securityUtils';
 
 // Redux Selectors
 import {
@@ -382,41 +385,25 @@ const PostAds: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // Validation finale
-      const validationErrors = [];
+      // 🔒 VALIDATION DE SÉCURITÉ COMPLÈTE
+      const securityValidation = validateProductForm({
+        name: formData.name,
+        description: formData.description,
+        price: formData.price,
+        quantity: formData.quantity,
+        quartier: formData.quartier,
+        categoryId: formData.categoryId,
+        cityId: formData.cityId,
+      });
 
-      if (!formData.name || formData.name.trim().length < 2) {
-        validationErrors.push(t('postAds.validations.nameMinLength'));
-      }
+      const validationErrors = [...securityValidation.errors];
 
-      if (!formData.description || formData.description.trim().length < 10) {
-        validationErrors.push(t('postAds.validations.descriptionMinLength'));
-      }
-
-      if (!formData.price || Number(formData.price) <= 0) {
-        validationErrors.push(t('postAds.validations.pricePositive'));
-      }
-
-      if (!formData.quantity || Number(formData.quantity) <= 0) {
-        validationErrors.push(t('postAds.validations.quantityPositive'));
-      }
-
-      if (!formData.categoryId) {
-        validationErrors.push(t('postAds.validations.categoryRequired'));
-      }
-
-      if (!formData.cityId) {
-        validationErrors.push(t('postAds.validations.cityRequired'));
-      }
-
-      if (!formData.quartier || formData.quartier.trim().length === 0) {
-        validationErrors.push(t('postAds.validations.neighborhoodRequired'));
-      }
-
+      // Validation téléphone
       if (!validateCameroonPhone(formData.telephone)) {
         validationErrors.push(t('postAds.validations.phoneInvalid'));
       }
 
+      // Validation images
       if (!formData.images || formData.images.length === 0) {
         validationErrors.push(t('postAds.validations.imagesRequired'));
       }
@@ -441,16 +428,16 @@ const PostAds: React.FC = () => {
         return;
       }
 
-      // Créer FormData pour l'upload
+      // ✅ Utiliser les données sanitizées (sécurisées)
       const productData: any = {
-        name: formData.name.trim(),
-        description: formData.description.trim(),
-        price: formData.price,
-        quantity: formData.quantity,
-        categoryId: formData.categoryId,
-        cityId: formData.cityId,
+        name: securityValidation.sanitized.name,
+        description: securityValidation.sanitized.description,
+        price: securityValidation.sanitized.price,
+        quantity: securityValidation.sanitized.quantity,
+        categoryId: securityValidation.sanitized.categoryId,
+        cityId: securityValidation.sanitized.cityId,
         etat: formData.etat,
-        quartier: formData.quartier.trim(),
+        quartier: securityValidation.sanitized.quartier,
         telephone: formData.telephone,
         images: formData.images,
       };
@@ -630,6 +617,7 @@ const PostAds: React.FC = () => {
           placeholderTextColor={colors.textSecondary}
           value={formData.name}
           onChangeText={(text) => handleInputChange('name', text)}
+          maxLength={100}
         />
       </View>
 
@@ -646,6 +634,7 @@ const PostAds: React.FC = () => {
           onChangeText={(text) => handleInputChange('description', text)}
           multiline
           numberOfLines={5}
+          maxLength={1000}
         />
         <View style={styles.characterCounter}>
           <Text style={[styles.helperText, { color: colors.textSecondary }]}>
@@ -673,7 +662,7 @@ const PostAds: React.FC = () => {
             placeholder={t('postAds.pricePlaceholder')}
             placeholderTextColor={colors.textSecondary}
             value={formData.price}
-            onChangeText={(text) => handleInputChange('price', text)}
+            onChangeText={(text) => handleInputChange('price', text.replace(/[^0-9]/g, ''))}
             keyboardType="numeric"
           />
           <Text style={styles.priceLabel}>FCFA</Text>
@@ -827,7 +816,8 @@ const PostAds: React.FC = () => {
           placeholder={t('postAds.neighborhoodPlaceholder')}
           placeholderTextColor={colors.textSecondary}
           value={formData.quartier}
-          onChangeText={(text) => handleInputChange('quartier', text)}
+          onChangeText={(text) => handleInputChange('quartier', filterQuartierChars(text).substring(0, 100))}
+          maxLength={100}
         />
       </View>
     </View>
@@ -856,7 +846,7 @@ const PostAds: React.FC = () => {
           placeholder={t('postAds.quantityPlaceholder')}
           placeholderTextColor={colors.textSecondary}
           value={formData.quantity}
-          onChangeText={(text) => handleInputChange('quantity', text)}
+          onChangeText={(text) => handleInputChange('quantity', text.replace(/[^0-9]/g, ''))}
           keyboardType="numeric"
         />
       </View>

@@ -192,6 +192,16 @@ const Login = () => {
     } catch (error: any) {
       const errorMessage = error?.message || error?.error?.message || t('auth.errors.generic.loginFailed')
 
+      // 🚦 Gestion du rate limiting (5 tentatives max / 15 minutes)
+      if (errorMessage.includes('Trop de tentatives')) {
+        showWarning(
+          t('auth.errors.rateLimit.title'),
+          t('auth.errors.rateLimit.message'),
+          8000 // Affichage prolongé pour message important
+        )
+        return
+      }
+
       if (errorMessage.includes('Email ou mot de passe incorrect')) {
         setIdentifierError(t('auth.errors.generic.incorrectCredentials'))
       } else if (errorMessage.includes('non vérifié')) {

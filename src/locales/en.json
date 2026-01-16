@@ -101,6 +101,11 @@
         "sendEmailFailed": "Error sending email",
         "resendCodeFailed": "Error resending code"
       },
+      "rateLimit": {
+        "title": "Too many attempts",
+        "message": "You have exceeded the limit of 5 login attempts. Please wait 15 minutes before trying again.",
+        "short": "Attempt limit reached"
+      },
       "token": {
         "expired": "Token expired",
         "expiredMessage": "The reset link has expired. Please make a new request.",
