@@ -148,40 +148,44 @@ const ForfaitSelectorModal: React.FC<ForfaitSelectorModalProps> = ({
                     ]}
                     onPress={() => onSelect(forfait.type, forfait.id)}
                   >
-                  <View style={styles.forfaitHeader}>
-                    <View
-                      style={[
-                        styles.iconBadge,
-                        { backgroundColor: `${getForfaitColor(forfait.type)}15` },
-                      ]}
-                    >
-                      <Icon
-                        name={getForfaitIcon(forfait.type)}
-                        size={28}
-                        color={getForfaitColor(forfait.type)}
-                      />
+                  <View style={styles.forfaitContent}>
+                    <View style={styles.forfaitHeader}>
+                      <View
+                        style={[
+                          styles.iconBadge,
+                          { backgroundColor: `${getForfaitColor(forfait.type)}15` },
+                        ]}
+                      >
+                        <Icon
+                          name={getForfaitIcon(forfait.type)}
+                          size={28}
+                          color={getForfaitColor(forfait.type)}
+                        />
+                      </View>
+                      <View style={styles.forfaitInfo}>
+                        <Text style={[styles.forfaitName, { color: colors.text }]}>
+                          {getForfaitLabel(forfait.type)}
+                        </Text>
+                        <Text style={[styles.forfaitDuration, { color: colors.textSecondary }]}>
+                          {forfait.duration} {t('userProfile.forfaitSelector.daysVisibility')}
+                        </Text>
+                      </View>
+                      <View style={styles.priceContainer}>
+                        <Text style={[styles.price, { color: COLORS.primary }]}>
+                          {forfait.price.toLocaleString()}
+                        </Text>
+                        <Text style={[styles.currency, { color: colors.textSecondary }]}>
+                          {t('userProfile.forfaitSelector.currency')}
+                        </Text>
+                      </View>
                     </View>
-                    <View style={styles.forfaitInfo}>
-                      <Text style={[styles.forfaitName, { color: colors.text }]}>
-                        {getForfaitLabel(forfait.type)}
-                      </Text>
-                      <Text style={[styles.forfaitDuration, { color: colors.textSecondary }]}>
-                        {forfait.duration} {t('userProfile.forfaitSelector.daysVisibility')}
-                      </Text>
-                      {forfait.description && (
-                        <Text style={[styles.forfaitDescription, { color: colors.textSecondary }]} numberOfLines={2}>
+                    {forfait.description && (
+                      <View style={styles.descriptionContainer}>
+                        <Text style={[styles.forfaitDescription, { color: colors.textSecondary }]}>
                           {forfait.description}
                         </Text>
-                      )}
-                    </View>
-                    <View style={styles.priceContainer}>
-                      <Text style={[styles.price, { color: COLORS.primary }]}>
-                        {forfait.price.toLocaleString()}
-                      </Text>
-                      <Text style={[styles.currency, { color: colors.textSecondary }]}>
-                        {t('userProfile.forfaitSelector.currency')}
-                      </Text>
-                    </View>
+                      </View>
+                    )}
                   </View>
                   </TouchableOpacity>
                 ))}
@@ -273,6 +277,14 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     marginBottom: 12,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+  },
+  forfaitContent: {
+    gap: 12,
   },
   forfaitHeader: {
     flexDirection: 'row',
@@ -290,17 +302,23 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   forfaitName: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
     marginBottom: 4,
+    letterSpacing: 0.2,
   },
   forfaitDuration: {
     fontSize: 13,
-    marginBottom: 4,
+    fontWeight: '500',
+  },
+  descriptionContainer: {
+    paddingLeft: 68,
+    paddingRight: 8,
   },
   forfaitDescription: {
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 13,
+    lineHeight: 19,
+    fontWeight: '400',
   },
   priceContainer: {
     alignItems: 'flex-end',
