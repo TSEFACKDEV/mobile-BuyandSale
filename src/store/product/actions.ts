@@ -117,6 +117,9 @@ export interface UpdateProductPayload {
   description?: string;
   categoryId?: string;
   cityId?: string;
+  etat?: 'NEUF' | 'OCCASION' | 'CORRECT';
+  quartier?: string;
+  telephone?: string;
   images?: any[]; // Optional new images
 }
 

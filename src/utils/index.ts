@@ -1,6 +1,3 @@
-// Export des helpers de toast
-export * from './toastHelpers';
-
 class Utils {
   // Récupérer le token d'accès depuis Redux Store
   static getAccessToken(): string | null {

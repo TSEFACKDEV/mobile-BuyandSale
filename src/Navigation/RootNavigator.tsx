@@ -380,7 +380,7 @@ const MainTabNavigator = () => {
           return <Icon name={iconName} size={iconSize} color={color} />;
         },
         tabBarActiveTintColor: '#FF6B35',
-        tabBarInactiveTintColor: '#6B7280',
+        tabBarInactiveTintColor: colors.textTertiary,
         tabBarStyle: {
           position: 'absolute',
           bottom: 0,
@@ -389,9 +389,9 @@ const MainTabNavigator = () => {
           height: Platform.OS === 'ios' ? 85 : 58 + (insets.bottom > 0 ? insets.bottom : 0),
           paddingBottom: Platform.OS === 'ios' ? 25 : Math.max(insets.bottom, 10),
           paddingTop: 6,
-          backgroundColor: '#FFFFFF',
+          backgroundColor: colors.surface,
           borderTopWidth: 1,
-          borderTopColor: '#E5E7EB',
+          borderTopColor: colors.border,
           shadowColor: '#000',
           shadowOffset: {
             width: 0,

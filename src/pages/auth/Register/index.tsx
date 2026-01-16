@@ -229,7 +229,7 @@ const Register = () => {
           })
         ).unwrap()
 
-        // 🎉 Inscription réussie - Navigation vers vérification OTP avec userId
+        //  Inscription réussie - Navigation vers vérification OTP avec userId
         showSuccess(
           t('auth.success.registration'),
           t('auth.success.verificationSent'),
@@ -242,7 +242,7 @@ const Register = () => {
           }
         )
       } catch (error: unknown) {
-        // 🚨 Gestion d'erreurs améliorée
+        //  Gestion d'erreurs améliorée
         let errorMessage = t('auth.errors.generic.registrationFailed')
 
         if (error instanceof Error) {

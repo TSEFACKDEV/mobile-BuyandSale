@@ -101,6 +101,11 @@
         "sendEmailFailed": "Erreur lors de l'envoi de l'email",
         "resendCodeFailed": "Erreur lors du renvoi du code"
       },
+      "rateLimit": {
+        "title": "Trop de tentatives",
+        "message": "Vous avez dépassé la limite de 5 tentatives de connexion. Veuillez patienter 15 minutes avant de réessayer.",
+        "short": "Limite de tentatives atteinte"
+      },
       "token": {
         "expired": "Token expiré",
         "expiredMessage": "Le lien de réinitialisation a expiré. Veuillez refaire une demande.",

@@ -1,8 +1,9 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { IMAGE_CONFIG } from '../../../utils/imageUtils';
 
 const { width } = Dimensions.get('window');
 export const IMAGE_SIZE = (width - 80) / 3;
-export const MAX_IMAGES = 5;
+export const MAX_IMAGES = IMAGE_CONFIG.MAX_IMAGES;
 
 export const styles = StyleSheet.create({
   container: {

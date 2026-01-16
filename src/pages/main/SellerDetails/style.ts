@@ -98,17 +98,22 @@ const createStyles = (theme: ThemeColors) =>
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 16,
+      flexWrap: 'wrap',
       marginBottom: 16,
+      paddingHorizontal: 8,
     },
     infoItem: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 6,
+      marginHorizontal: 8,
+      marginVertical: 4,
+      maxWidth: '45%',
     },
     infoText: {
       fontSize: 14,
       color: theme.textSecondary,
+      marginLeft: 6,
+      flexShrink: 1,
     },
     // Stats Row (Rating + Product Count)
     statsRow: {

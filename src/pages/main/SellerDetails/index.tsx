@@ -24,6 +24,7 @@ import ProductCard from '../../../components/ProductHomeCard';
 import SellerRatings from '../../../components/SellerRatings';
 import RatingModal from '../../../components/RatingModal';
 import ReportModal from '../../../components/ReportModal';
+import ConfirmDialog from '../../../components/ConfirmDialog';
 import { useDialog } from '../../../contexts/DialogContext';
 import { getImageUrl } from '../../../utils/imageUtils';
 import { normalizePhoneForWhatsApp, formatPhoneForDisplay } from '../../../utils/phoneUtils';
@@ -75,11 +76,32 @@ const SellerDetails: React.FC = () => {
   // Modals
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  
+  // ConfirmDialog state
+  const [confirmDialog, setConfirmDialog] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'default' as 'default' | 'destructive' | 'success' | 'warning',
+    onConfirm: () => {},
+    onCancel: () => {},
+    confirmText: '',
+    cancelText: '',
+  });
 
   // Handlers
   const handleContactSeller = () => {
     if (!seller?.phone) {
-      Alert.alert(t('sellerProfile.noPhone'));
+      setConfirmDialog({
+        visible: true,
+        title: t('sellerProfile.noPhone'),
+        message: '',
+        type: 'warning',
+        onConfirm: () => setConfirmDialog(prev => ({ ...prev, visible: false })),
+        onCancel: () => setConfirmDialog(prev => ({ ...prev, visible: false })),
+        confirmText: 'OK',
+        cancelText: '',
+      });
       return;
     }
     
@@ -90,7 +112,18 @@ const SellerDetails: React.FC = () => {
     const whatsappUrl = `https://wa.me/${normalizedPhone}?text=${message}`;
 
     Linking.openURL(whatsappUrl)
-      .catch(() => Alert.alert(t('common.error'), t('sellerProfile.whatsappError')));
+      .catch(() => {
+        setConfirmDialog({
+          visible: true,
+          title: t('common.error'),
+          message: t('sellerProfile.whatsappError'),
+          type: 'destructive',
+          onConfirm: () => setConfirmDialog(prev => ({ ...prev, visible: false })),
+          onCancel: () => setConfirmDialog(prev => ({ ...prev, visible: false })),
+          confirmText: 'OK',
+          cancelText: '',
+        });
+      });
   };
 
   const handleShareProfile = async () => {
@@ -283,7 +316,7 @@ const SellerDetails: React.FC = () => {
                 <View key={product.id} style={styles.productItem}>
                   <ProductCard
                     product={product}
-                    onPress={() => {}}
+                    onPress={() => navigation.navigate('ProductDetails' as any, { productId: product.id })}
                   />
                 </View>
               ))}
@@ -317,6 +350,18 @@ const SellerDetails: React.FC = () => {
           onSuccess={handleReportSuccess}
         />
       )}
+
+      {/* ConfirmDialog */}
+      <ConfirmDialog
+        visible={confirmDialog.visible}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        type={confirmDialog.type}
+        confirmText={confirmDialog.confirmText}
+        cancelText={confirmDialog.cancelText}
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={confirmDialog.onCancel}
+      />
     </SafeAreaView>
   );
 };

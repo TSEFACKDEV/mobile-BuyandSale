@@ -18,6 +18,10 @@ import * as ImagePicker from 'expo-image-picker';
 import { validateCameroonPhone } from '../utils/phoneUtils';
 import { useAppDispatch, useAppSelector } from '../hooks/store';
 import { useThemeColors } from '../contexts/ThemeContext';
+import { 
+  validateProductForm,
+  filterQuartierChars 
+} from '../utils/securityUtils';
 import { getProductByIdAction, updateProductAction } from '../store/product/actions';
 import { selectCategories } from '../store/category/slice';
 import { selectCities } from '../store/city/slice';
@@ -166,31 +170,23 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
   };
 
   const handleSubmit = async () => {
-    // Validation
-    if (!formData.name.trim()) {
-      showWarning('Erreur', 'Le nom du produit est requis');
+    // 🔒 VALIDATION DE SÉCURITÉ COMPLÈTE
+    const securityValidation = validateProductForm({
+      name: formData.name,
+      description: formData.description,
+      price: formData.price,
+      quantity: formData.quantity,
+      quartier: formData.quartier,
+      categoryId: formData.categoryId,
+      cityId: formData.cityId,
+    });
+
+    if (!securityValidation.isValid) {
+      showWarning('Erreur de validation', securityValidation.errors.join('\n'));
       return;
     }
-    if (!formData.description.trim()) {
-      showWarning('Erreur', 'La description est requise');
-      return;
-    }
-    if (!formData.price || Number(formData.price) <= 0) {
-      showWarning('Erreur', 'Le prix doit être supérieur à 0');
-      return;
-    }
-    if (!formData.categoryId) {
-      showWarning('Erreur', 'Veuillez sélectionner une catégorie');
-      return;
-    }
-    if (!formData.cityId) {
-      showWarning('Erreur', 'Veuillez sélectionner une ville');
-      return;
-    }
-    if (!formData.quartier.trim()) {
-      showWarning('Erreur', 'Le quartier est requis');
-      return;
-    }
+
+    // Validation téléphone
     if (!validateCameroonPhone(formData.telephone)) {
       showWarning('Erreur', 'Numéro de téléphone camerounais invalide (format: 6XX XX XX XX)');
       return;
@@ -198,15 +194,16 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
 
     setIsUpdating(true);
     try {
+      // ✅ Utiliser les données sanitizées (sécurisées)
       const updateData: any = {
-        name: formData.name,
-        description: formData.description,
-        price: Number(formData.price),
-        quantity: Number(formData.quantity),
-        categoryId: formData.categoryId,
-        cityId: formData.cityId,
+        name: securityValidation.sanitized.name,
+        description: securityValidation.sanitized.description,
+        price: Number(securityValidation.sanitized.price),
+        quantity: Number(securityValidation.sanitized.quantity),
+        categoryId: securityValidation.sanitized.categoryId,
+        cityId: securityValidation.sanitized.cityId,
         etat: formData.etat,
-        quartier: formData.quartier,
+        quartier: securityValidation.sanitized.quartier,
         telephone: formData.telephone,
       };
 
@@ -355,6 +352,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
                 onChangeText={(value) => handleInputChange('name', value)}
                 placeholder="Ex: iPhone 13 Pro Max"
                 placeholderTextColor={colors.textSecondary}
+                maxLength={100}
               />
             </View>
 
@@ -370,6 +368,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
                 multiline
                 numberOfLines={4}
                 textAlignVertical="top"
+                maxLength={1000}
               />
             </View>
 
@@ -380,7 +379,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
                 <TextInput
                   style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                   value={formData.price}
-                  onChangeText={(value) => handleInputChange('price', value)}
+                  onChangeText={(value) => handleInputChange('price', value.replace(/[^0-9]/g, ''))}
                   placeholder="0"
                   placeholderTextColor={colors.textSecondary}
                   keyboardType="numeric"
@@ -391,7 +390,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
                 <TextInput
                   style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                   value={formData.quantity}
-                  onChangeText={(value) => handleInputChange('quantity', value)}
+                  onChangeText={(value) => handleInputChange('quantity', value.replace(/[^0-9]/g, ''))}
                   placeholder="1"
                   placeholderTextColor={colors.textSecondary}
                   keyboardType="numeric"
@@ -466,9 +465,10 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
               <TextInput
                 style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                 value={formData.quartier}
-                onChangeText={(value) => handleInputChange('quartier', value)}
+                onChangeText={(value) => handleInputChange('quartier', filterQuartierChars(value).substring(0, 100))}
                 placeholder="Ex: Bonamoussadi"
                 placeholderTextColor={colors.textSecondary}
+                maxLength={100}
               />
             </View>
 

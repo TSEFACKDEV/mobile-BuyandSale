@@ -30,9 +30,12 @@ import { validateCameroonPhone } from '../../../utils/phoneUtils';
 import PhoneInput from '../../../components/PhoneInput';
 import { 
   validateImageComplete, 
-  validateImagesArray,
-  IMAGE_CONFIG 
+  validateImagesArray 
 } from '../../../utils/imageUtils';
+import { 
+  validateProductForm,
+  filterQuartierChars 
+} from '../../../utils/securityUtils';
 
 // Redux Selectors
 import {
@@ -125,7 +128,7 @@ const PostAds: React.FC = () => {
     visible: boolean;
     title: string;
     message: string;
-    type?: 'success' | 'error' | 'warning' | 'info';
+    type?: 'default' | 'destructive' | 'success' | 'warning';
     onConfirm?: () => void;
     onCancel?: () => void;
     confirmText?: string;
@@ -157,29 +160,12 @@ const PostAds: React.FC = () => {
     };
   }, [dispatch, categoryStatus, cityStatus]);
 
-  // Réinitialiser le formulaire quand on quitte la page
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        // Cleanup: réinitialiser le formulaire quand on quitte la page
-        resetForm();
-      };
-    }, [])
-  );
-
-  // Recharger les forfaits quand le modal s'ouvre
-  useEffect(() => {
-    if (showForfaitSelector && (!forfaits || forfaits.length === 0)) {
-      dispatch(getAllForfaitsAction());
-    }
-  }, [showForfaitSelector, dispatch]);
-
   // Handlers
   const handleInputChange = (field: keyof PostAdFormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setFormData({
       name: '',
       description: '',
@@ -198,7 +184,26 @@ const PostAds: React.FC = () => {
     setSelectedForfaitType(null);
     setSelectedForfaitPrice(0);
     setCurrentPaymentId(null);
-  };
+  }, []);
+
+  // Helpers pour dialog
+  const closeDialog = useCallback(() => {
+    setConfirmDialog({ visible: false, title: '', message: '' });
+  }, []);
+
+  const closeAndNavigateHome = useCallback(() => {
+    closeDialog();
+    navigation.navigate('HomeTab');
+  }, [closeDialog, navigation]);
+
+  // Réinitialiser le formulaire quand on quitte la page
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        resetForm();
+      };
+    }, [resetForm])
+  );
 
   const getCategoryName = () => {
     const category = categories.find(c => c.id === formData.categoryId);
@@ -221,6 +226,7 @@ const PostAds: React.FC = () => {
         message: t('postAds.maxImagesMessage').replace('{max}', MAX_IMAGES.toString()),
         type: 'warning',
         confirmText: 'OK',
+        onConfirm: closeDialog,
       });
       return;
     }
@@ -234,6 +240,7 @@ const PostAds: React.FC = () => {
         message: t('postAds.permissionMessage'),
         type: 'warning',
         confirmText: 'OK',
+        onConfirm: closeDialog,
       });
       return;
     }
@@ -258,7 +265,7 @@ const PostAds: React.FC = () => {
         const validation = await validateImageComplete({
           uri: asset.uri,
           fileSize: asset.fileSize,
-          type: asset.mimeType || asset.type,
+          type: asset.mimeType || asset.type || undefined,
         }, 'product');
 
         if (validation.isValid) {
@@ -288,6 +295,7 @@ const PostAds: React.FC = () => {
           message: errors.join('\n\n'),
           type: 'warning',
           confirmText: 'OK',
+          onConfirm: closeDialog,
         });
       } else if (validatedImages.length > 0) {
         // Toutes les images sont valides
@@ -297,6 +305,7 @@ const PostAds: React.FC = () => {
           message: `${validatedImages.length} image(s) ajoutée(s) avec succès`,
           type: 'success',
           confirmText: 'OK',
+          onConfirm: closeDialog,
         });
       }
     }
@@ -314,11 +323,9 @@ const PostAds: React.FC = () => {
       onConfirm: () => {
         const newImages = formData.images.filter((_, i) => i !== index);
         setFormData((prev) => ({ ...prev, images: newImages }));
-        setConfirmDialog({ visible: false, title: '', message: '' });
+        closeDialog();
       },
-      onCancel: () => {
-        setConfirmDialog({ visible: false, title: '', message: '' });
-      },
+      onCancel: closeDialog,
     });
   };
 
@@ -361,7 +368,7 @@ const PostAds: React.FC = () => {
         visible: true,
         title: t('postAds.validationError'),
         message: t('postAds.fillRequired'),
-        type: 'error',
+        type: 'destructive',
         confirmText: 'OK',
       });
     }
@@ -378,41 +385,25 @@ const PostAds: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // Validation finale
-      const validationErrors = [];
+      // 🔒 VALIDATION DE SÉCURITÉ COMPLÈTE
+      const securityValidation = validateProductForm({
+        name: formData.name,
+        description: formData.description,
+        price: formData.price,
+        quantity: formData.quantity,
+        quartier: formData.quartier,
+        categoryId: formData.categoryId,
+        cityId: formData.cityId,
+      });
 
-      if (!formData.name || formData.name.trim().length < 2) {
-        validationErrors.push(t('postAds.validations.nameMinLength'));
-      }
+      const validationErrors = [...securityValidation.errors];
 
-      if (!formData.description || formData.description.trim().length < 10) {
-        validationErrors.push(t('postAds.validations.descriptionMinLength'));
-      }
-
-      if (!formData.price || Number(formData.price) <= 0) {
-        validationErrors.push(t('postAds.validations.pricePositive'));
-      }
-
-      if (!formData.quantity || Number(formData.quantity) <= 0) {
-        validationErrors.push(t('postAds.validations.quantityPositive'));
-      }
-
-      if (!formData.categoryId) {
-        validationErrors.push(t('postAds.validations.categoryRequired'));
-      }
-
-      if (!formData.cityId) {
-        validationErrors.push(t('postAds.validations.cityRequired'));
-      }
-
-      if (!formData.quartier || formData.quartier.trim().length === 0) {
-        validationErrors.push(t('postAds.validations.neighborhoodRequired'));
-      }
-
+      // Validation téléphone
       if (!validateCameroonPhone(formData.telephone)) {
         validationErrors.push(t('postAds.validations.phoneInvalid'));
       }
 
+      // Validation images
       if (!formData.images || formData.images.length === 0) {
         validationErrors.push(t('postAds.validations.imagesRequired'));
       }
@@ -430,23 +421,23 @@ const PostAds: React.FC = () => {
           visible: true,
           title: t('postAds.validationErrors'),
           message: validationErrors.join('\n'),
-          type: 'error',
+          type: 'destructive',
           confirmText: 'OK',
         });
         setIsSubmitting(false);
         return;
       }
 
-      // Créer FormData pour l'upload
+      // ✅ Utiliser les données sanitizées (sécurisées)
       const productData: any = {
-        name: formData.name.trim(),
-        description: formData.description.trim(),
-        price: formData.price,
-        quantity: formData.quantity,
-        categoryId: formData.categoryId,
-        cityId: formData.cityId,
+        name: securityValidation.sanitized.name,
+        description: securityValidation.sanitized.description,
+        price: securityValidation.sanitized.price,
+        quantity: securityValidation.sanitized.quantity,
+        categoryId: securityValidation.sanitized.categoryId,
+        cityId: securityValidation.sanitized.cityId,
         etat: formData.etat,
-        quartier: formData.quartier.trim(),
+        quartier: securityValidation.sanitized.quartier,
         telephone: formData.telephone,
         images: formData.images,
       };
@@ -462,7 +453,7 @@ const PostAds: React.FC = () => {
             visible: true,
             title: t('postAds.errorProductId'),
             message: t('postAds.errorProductIdMessage'),
-            type: 'error',
+            type: 'destructive',
             confirmText: 'OK',
           });
           setIsSubmitting(false);
@@ -472,7 +463,7 @@ const PostAds: React.FC = () => {
         setCreatedProductId(createdProduct.id);
 
         // Proposer le boost si des forfaits sont disponibles
-        if (forfaits && Array.isArray(forfaits) && forfaits.length > 0) {
+        if (forfaits && forfaits.length > 0) {
           setTimeout(() => {
             if (isMountedRef.current) {
               setShowBoostOffer(true);
@@ -486,10 +477,7 @@ const PostAds: React.FC = () => {
             type: 'success',
             confirmText: 'OK',
             cancelText: '',
-            onConfirm: () => {
-              setConfirmDialog({ visible: false, title: '', message: '' });
-              navigation.navigate('HomeTab');
-            },
+            onConfirm: closeAndNavigateHome,
           });
         }
       } else {
@@ -498,7 +486,7 @@ const PostAds: React.FC = () => {
           visible: true,
           title: t('postAds.errorGeneric'),
           message: errorMsg,
-          type: 'error',
+          type: 'destructive',
           confirmText: 'OK',
         });
       }
@@ -507,7 +495,7 @@ const PostAds: React.FC = () => {
         visible: true,
         title: t('postAds.errorGeneric'),
         message: error.message || t('postAds.errorCreating'),
-        type: 'error',
+        type: 'destructive',
         confirmText: 'OK',
       });
     } finally {
@@ -537,10 +525,7 @@ const PostAds: React.FC = () => {
       type: 'success',
       confirmText: t('postAds.ok'),
       cancelText: '',
-      onConfirm: () => {
-        setConfirmDialog({ visible: false, title: '', message: '' });
-        navigation.navigate('HomeTab');
-      },
+      onConfirm: closeAndNavigateHome,
     });
   };
 
@@ -550,7 +535,7 @@ const PostAds: React.FC = () => {
         throw new Error('ID du produit non disponible');
       }
 
-      const selectedForfait = Array.isArray(forfaits) ? forfaits.find((f: any) => f.id === forfaitId) : null;
+      const selectedForfait = forfaits?.find((f: any) => f.id === forfaitId);
       if (!selectedForfait) {
         throw new Error(`Forfait avec ID ${forfaitId} non trouvé`);
       }
@@ -570,7 +555,7 @@ const PostAds: React.FC = () => {
         visible: true,
         title: t('common.error'),
         message: error.message,
-        type: 'error',
+        type: 'destructive',
         confirmText: 'OK',
       });
       setShowForfaitSelector(false);
@@ -587,13 +572,10 @@ const PostAds: React.FC = () => {
       visible: true,
       title: t('notifications.info'),
       message: t('postAds.publishedWithoutForfait'),
-      type: 'info',
+      type: 'default',
       confirmText: t('postAds.ok'),
       cancelText: '',
-      onConfirm: () => {
-        setConfirmDialog({ visible: false, title: '', message: '' });
-        navigation.navigate('HomeTab');
-      },
+      onConfirm: closeAndNavigateHome,
     });
   };
 
@@ -607,41 +589,19 @@ const PostAds: React.FC = () => {
     }, 300);
   };
 
-  const handlePaymentSuccess = () => {
+  // Helper pour fermer tous les modals et retourner à l'accueil
+  const closeAllModalsAndNavigateHome = useCallback(() => {
     if (!isMountedRef.current) return;
-
     setShowPaymentStatusModal(false);
     setShowPaymentModal(false);
     setShowForfaitSelector(false);
     setShowBoostOffer(false);
-
-    // Rediriger vers HomeTab où l'annonce boostée apparaîtra en haut
     navigation.navigate('HomeTab');
-  };
+  }, [navigation]);
 
-  const handlePaymentError = () => {
-    if (!isMountedRef.current) return;
-
-    setShowPaymentStatusModal(false);
-    setShowPaymentModal(false);
-    setShowForfaitSelector(false);
-    setShowBoostOffer(false);
-
-    // Rediriger directement sans Alert redondant
-    navigation.navigate('HomeTab');
-  };
-
-  const handlePaymentCancel = () => {
-    if (!isMountedRef.current) return;
-
-    setShowPaymentModal(false);
-    setShowPaymentStatusModal(false);
-    setShowForfaitSelector(false);
-    setShowBoostOffer(false);
-
-    // Rediriger vers Home pour éviter les duplications
-    navigation.navigate('HomeTab');
-  };
+  const handlePaymentSuccess = () => closeAllModalsAndNavigateHome();
+  const handlePaymentError = () => closeAllModalsAndNavigateHome();
+  const handlePaymentCancel = () => closeAllModalsAndNavigateHome();
 
   // Render des étapes
   const renderStep1 = () => (
@@ -657,6 +617,7 @@ const PostAds: React.FC = () => {
           placeholderTextColor={colors.textSecondary}
           value={formData.name}
           onChangeText={(text) => handleInputChange('name', text)}
+          maxLength={100}
         />
       </View>
 
@@ -673,6 +634,7 @@ const PostAds: React.FC = () => {
           onChangeText={(text) => handleInputChange('description', text)}
           multiline
           numberOfLines={5}
+          maxLength={1000}
         />
         <View style={styles.characterCounter}>
           <Text style={[styles.helperText, { color: colors.textSecondary }]}>
@@ -700,7 +662,7 @@ const PostAds: React.FC = () => {
             placeholder={t('postAds.pricePlaceholder')}
             placeholderTextColor={colors.textSecondary}
             value={formData.price}
-            onChangeText={(text) => handleInputChange('price', text)}
+            onChangeText={(text) => handleInputChange('price', text.replace(/[^0-9]/g, ''))}
             keyboardType="numeric"
           />
           <Text style={styles.priceLabel}>FCFA</Text>
@@ -854,7 +816,8 @@ const PostAds: React.FC = () => {
           placeholder={t('postAds.neighborhoodPlaceholder')}
           placeholderTextColor={colors.textSecondary}
           value={formData.quartier}
-          onChangeText={(text) => handleInputChange('quartier', text)}
+          onChangeText={(text) => handleInputChange('quartier', filterQuartierChars(text).substring(0, 100))}
+          maxLength={100}
         />
       </View>
     </View>
@@ -883,7 +846,7 @@ const PostAds: React.FC = () => {
           placeholder={t('postAds.quantityPlaceholder')}
           placeholderTextColor={colors.textSecondary}
           value={formData.quantity}
-          onChangeText={(text) => handleInputChange('quantity', text)}
+          onChangeText={(text) => handleInputChange('quantity', text.replace(/[^0-9]/g, ''))}
           keyboardType="numeric"
         />
       </View>
@@ -1167,7 +1130,7 @@ const PostAds: React.FC = () => {
 
       <ForfaitSelectorModal
         visible={showForfaitSelector}
-        forfaits={Array.isArray(forfaits) ? forfaits : []}
+        forfaits={forfaits || []}
         onSelect={handleForfaitSelected}
         onSkip={handleSkipForfait}
         onClose={() => setShowForfaitSelector(false)}
@@ -1197,14 +1160,9 @@ const PostAds: React.FC = () => {
         visible={confirmDialog.visible}
         title={confirmDialog.title}
         message={confirmDialog.message}
-        type={confirmDialog.type === 'error' ? 'destructive' : confirmDialog.type === 'info' ? 'default' : confirmDialog.type}
-        onConfirm={confirmDialog.onConfirm || (() => {
-          setConfirmDialog({ visible: false, title: '', message: '' });
-        })}
-        onCancel={confirmDialog.onCancel || (() => {
-          setConfirmDialog({ visible: false, title: '', message: '' });
-          navigation.navigate('HomeTab');
-        })}
+        type={confirmDialog.type}
+        onConfirm={confirmDialog.onConfirm || closeDialog}
+        onCancel={confirmDialog.onCancel || closeDialog}
         confirmText={confirmDialog.confirmText}
         cancelText={confirmDialog.cancelText}
       />
