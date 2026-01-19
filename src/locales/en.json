@@ -136,6 +136,7 @@
     "title": "My Profile",
     "tabs": {
       "activeProducts": "Active",
+      "expiredProducts": "Expired",
       "pendingProducts": "Pending",
       "payments": "Payments",
       "profile": "Profile",
@@ -180,7 +181,9 @@
       "avatarUpdateError": "Error updating avatar",
       "deleteConfirm": "Delete this ad?",
       "deleteConfirmText": "Do you want to delete",
-      "deleteSuccess": "Ad deleted successfully",
+      "deleteMessage": "Do you really want to delete the ad",
+      "deleteSuccess": "Ad deleted",
+      "deleteSuccessMessage": "Ad successfully deleted",
       "deleteError": "Error deleting ad",
       "logoutConfirm": "Do you want to logout?",
       "constraintError": "Cannot delete ad with dependencies",
@@ -202,10 +205,17 @@
       "upgradeForfait": "Upgrade package",
       "premiumOnly": "Premium only",
       "topOrPremium": "Top Ad or Premium",
-      "continue": "Continue"
+      "continue": "Continue",
+      "noExpiredAdsInfo": "No expired ads at the moment",
+      "reactivateConfirm": "Reactivate ad",
+      "reactivateMessage": "Do you want to reactivate the ad",
+      "reactivateSuccess": "Ad reactivated",
+      "reactivateSuccessMessage": "Your ad has been reactivated for 60 days",
+      "reactivateError": "Error reactivating ad"
     },
     "emptyStates": {
       "noActiveAds": "No active ads",
+      "noExpiredAds": "No expired ads",
       "noPendingAds": "No pending ads",
       "createFirstAd": "Create your first ad to start selling",
       "pendingInfo": "Your ads under review will appear here"
@@ -213,6 +223,7 @@
 
     "labels": {
       "myActiveAds": "My active ads",
+      "expiredAds": "My expired ads",
       "pendingAds": "Pending ads",
       "pending": "Pending",
       "personalInfo": "Personal Information",
