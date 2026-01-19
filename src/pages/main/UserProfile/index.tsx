@@ -42,7 +42,7 @@ import { Loading, ProductCardSkeleton } from '../../../components/LoadingVariant
 import PhoneInput from '../../../components/PhoneInput';
 import { styles } from './styles';
 
-type TabType = 'active' | 'pending' | 'payments' | 'profile';
+type TabType = 'active' | 'expired' | 'pending' | 'payments' | 'profile';
 
 // Constantes pour la hiérarchie des forfaits
 const FORFAIT_PRIORITY: Record<string, number> = {
@@ -101,81 +101,6 @@ const UserProfile: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('profile');
   const [refreshing, setRefreshing] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-
-  // ✨ Fonction pour calculer les jours restants d'un forfait
-  const calculateRemainingDays = useCallback((expiresAt: string | Date): number => {
-    const now = new Date();
-    const expiry = new Date(expiresAt);
-    const diff = expiry.getTime() - now.getTime();
-    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-    return Math.max(0, days);
-  }, []);
-
-  // ✨ Fonction pour obtenir les forfaits actifs d'un produit triés par priorité
-  // ✅ SIMPLIFICATION: Utiliser activeForfaits du serveur si disponible
-  const getActiveForfaits = useCallback((productForfaits: any[], activeForfaits?: any[]) => {
-    // Utiliser activeForfaits du serveur si disponible
-    if (activeForfaits && Array.isArray(activeForfaits) && activeForfaits.length > 0) {
-      return activeForfaits.map((af: any) => ({
-        isActive: true,
-        expiresAt: af.expiresAt,
-        forfait: { type: af.type }
-      }));
-    }
-
-    // Fallback: calculer côté client
-    if (!productForfaits || productForfaits.length === 0) return [];
-
-    const now = new Date();
-
-    return productForfaits
-      .filter((pf: any) => {
-        const expiryDate = new Date(pf.expiresAt);
-        return pf.isActive && expiryDate > now;
-      })
-      .sort((a: any, b: any) => {
-        const priorityA = FORFAIT_PRIORITY[a.forfait?.type as keyof typeof FORFAIT_PRIORITY] || 999;
-        const priorityB = FORFAIT_PRIORITY[b.forfait?.type as keyof typeof FORFAIT_PRIORITY] || 999;
-        return priorityA - priorityB;
-      });
-  }, []);
-
-  // ✨ Composant Badge Forfait
-  const ForfaitBadge = useCallback(({ forfait, expiresAt }: { forfait: any, expiresAt: string | Date }) => {
-    const remainingDays = calculateRemainingDays(expiresAt);
-    const type = forfait?.type;
-    
-    const badgeConfig = {
-      PREMIUM: {
-        style: styles.forfaitBadgePremium,
-        icon: 'crown',
-        label: 'premium',
-      },
-      TOP_ANNONCE: {
-        style: styles.forfaitBadgeTopAnnonce,
-        icon: 'trending-up',
-        label: 'top',
-      },
-      URGENT: {
-        style: styles.forfaitBadgeUrgent,
-        icon: 'flame',
-        label: 'urgent',
-      },
-    };
-
-    const config = badgeConfig[type as keyof typeof badgeConfig];
-    if (!config) return null;
-
-    return (
-      <View style={[styles.forfaitBadge, config.style]}>
-        <Icon name={config.icon} size={12} color="#FFFFFF" />
-        <Text style={styles.forfaitBadgeText}>{config.label}</Text>
-        {remainingDays > 0 && (
-          <Text style={styles.forfaitDaysText}>• {remainingDays}j</Text>
-        )}
-      </View>
-    );
-  }, [calculateRemainingDays]);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -203,6 +128,15 @@ const UserProfile: React.FC = () => {
     'user',
     { userId: user?.id, limit: 12 }
   );
+
+  // Filtrer les produits par statut
+  const activeProducts = useMemo(() => {
+    return userProducts.filter((product: any) => product.status === 'VALIDATED');
+  }, [userProducts]);
+
+  const expiredProducts = useMemo(() => {
+    return userProducts.filter((product: any) => product.status === 'EXPIRED');
+  }, [userProducts]);
 
   const { products: userPendingProducts, refetch: refetchPendingProducts, isLoading: isLoadingPendingProducts } = useProducts(
     'pending',
@@ -342,11 +276,10 @@ const UserProfile: React.FC = () => {
       // TODO: Implémenter updateUserAvatarAction dans le store mobile
       // Pour l'instant, on fait l'appel direct
       const API_CONFIG = require('../../../config/api.config').default;
-      const API_ENDPOINTS = require('../../../helpers/api').default;
       const fetchWithAuth = require('../../../utils/fetchWithAuth').default;
 
       const response = await fetchWithAuth(
-        `${API_CONFIG.BASE_URL}/${API_ENDPOINTS.USER_UPDATE.replace(':id', user!.id)}`,
+        `${API_CONFIG.BASE_URL}/users/${user!.id}`,
         {
           method: 'PUT',
           body: formData,
@@ -490,6 +423,86 @@ const UserProfile: React.FC = () => {
     setCurrentPaymentId(null);
   }, []);
 
+  const handleReactivateProduct = useCallback(async (productId: string, productName: string) => {
+    const confirmed = await showConfirm(
+      t('userProfile.messages.reactivateConfirm'),
+      `${t('userProfile.messages.reactivateMessage')} "${productName}" ?`,
+      async () => {
+        try {
+          const API_CONFIG = require('../../../config/api.config').default;
+          const fetchWithAuth = require('../../../utils/fetchWithAuth').default;
+
+          const response = await fetchWithAuth(
+            `${API_CONFIG.BASE_URL}/product/${productId}/reactivate`,
+            {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || 'Erreur lors de la réactivation');
+          }
+
+          showSuccess(
+            t('userProfile.messages.reactivateSuccess'),
+            t('userProfile.messages.reactivateSuccessMessage')
+          );
+          await refetchUserProducts();
+        } catch (error: any) {
+          showWarning(
+            t('userProfile.messages.reactivateError'),
+            error.message || t('userProfile.messages.reactivateError')
+          );
+        }
+      }
+    );
+  }, [showConfirm, showSuccess, showWarning, refetchUserProducts, t]);
+
+  const handleDeleteProduct = useCallback(async (productId: string, productName: string) => {
+    const confirmed = await showDestructive(
+      t('userProfile.messages.deleteConfirm'),
+      `${t('userProfile.messages.deleteMessage')} "${productName}" ?`,
+      async () => {
+        try {
+          const API_CONFIG = require('../../../config/api.config').default;
+          const fetchWithAuth = require('../../../utils/fetchWithAuth').default;
+
+          const response = await fetchWithAuth(
+            `${API_CONFIG.BASE_URL}/product/${productId}`,
+            {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+
+          if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Erreur lors de la suppression');
+          }
+
+          showSuccess(
+            t('userProfile.messages.deleteSuccess'),
+            t('userProfile.messages.deleteSuccessMessage')
+          );
+
+          await refetchUserProducts();
+        } catch (error: any) {
+          showWarning(
+            t('userProfile.messages.deleteError'),
+            error.message || 'Une erreur est survenue'
+          );
+        }
+      }
+    );
+  }, [showDestructive, showSuccess, showWarning, refetchUserProducts, t]);
+
   if (!isAuthenticated || !user) {
     return <Loading fullScreen message="Chargement du profil..." />;
   }
@@ -499,7 +512,8 @@ const UserProfile: React.FC = () => {
   }
 
   const tabs = [
-    { id: 'active' as TabType, label: t('userProfile.tabs.activeProducts'), icon: 'cube-outline', count: userProducts.length },
+    { id: 'active' as TabType, label: t('userProfile.tabs.activeProducts'), icon: 'cube-outline', count: activeProducts.length },
+    { id: 'expired' as TabType, label: t('userProfile.tabs.expiredProducts'), icon: 'archive-outline', count: expiredProducts.length },
     { id: 'pending' as TabType, label: t('userProfile.tabs.pendingProducts'), icon: 'time-outline', count: userPendingProducts.length },
     { id: 'payments' as TabType, label: t('userProfile.tabs.payments'), icon: 'card-outline', count: null },
     { id: 'profile' as TabType, label: t('userProfile.tabs.profile'), icon: 'person-outline', count: null },
@@ -656,7 +670,7 @@ const UserProfile: React.FC = () => {
             <View>
               <View style={styles.tabHeader}>
                 <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
-                  {t('userProfile.labels.myActiveAds')} ({userProducts.length})
+                  {t('userProfile.labels.myActiveAds')} ({activeProducts.length})
                 </Text>
                 <TouchableOpacity
                   style={styles.createButton}
@@ -670,7 +684,7 @@ const UserProfile: React.FC = () => {
                 <View style={styles.productsGrid}>
                   <ProductCardSkeleton count={4} />
                 </View>
-              ) : userProducts.length === 0 ? (
+              ) : activeProducts.length === 0 ? (
                 <View style={styles.emptyState}>
                   <Icon name="cube-outline" size={64} color="#9CA3AF" />
                   <Text style={[styles.emptyStateTitle, isDark && styles.emptyStateTitleDark]}>
@@ -689,7 +703,7 @@ const UserProfile: React.FC = () => {
                 </View>
               ) : (
                 <View style={styles.productsGrid}>
-                  {userProducts.map((product: any) => {
+                  {activeProducts.map((product: any) => {
                     const activeForfait = getActiveForfait(product);
                     const forfaitType = activeForfait?.forfait?.type;
                     
@@ -776,6 +790,83 @@ const UserProfile: React.FC = () => {
                       </View>
                     );
                   })}
+                </View>
+              )}
+            </View>
+          )}
+
+          {activeTab === 'expired' && (
+            <View>
+              <View style={styles.tabHeader}>
+                <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
+                  {t('userProfile.labels.expiredAds')} ({expiredProducts.length})
+                </Text>
+                <TouchableOpacity
+                  style={styles.createButton}
+                  onPress={() => (navigation as any).navigate('PostAd')}
+                >
+                  <Icon name="add-circle" size={20} color="#FFFFFF" />
+                  <Text style={styles.createButtonText}>{t('userProfile.actions.create')}</Text>
+                </TouchableOpacity>
+              </View>
+              {isLoadingUserProducts ? (
+                <View style={styles.productsGrid}>
+                  <ProductCardSkeleton count={4} />
+                </View>
+              ) : expiredProducts.length === 0 ? (
+                <View style={styles.emptyState}>
+                  <Icon name="archive-outline" size={64} color="#9CA3AF" />
+                  <Text style={[styles.emptyStateTitle, isDark && styles.emptyStateTitleDark]}>
+                    {t('userProfile.emptyStates.noExpiredAds')}
+                  </Text>
+                  <Text style={[styles.emptyStateDescription, isDark && styles.emptyStateDescriptionDark]}>
+                    {t('userProfile.messages.noExpiredAdsInfo')}
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.productsGrid}>
+                  {expiredProducts.map((product: any) => (
+                    <View key={product.id} style={[styles.productCard, isDark && styles.productCardDark]}>
+                      <Image
+                        source={{ 
+                          uri: product.images?.[0] 
+                            ? getImageUrl(product.images[0], 'product') 
+                            : PLACEHOLDER_IMAGE 
+                        }}
+                        style={styles.productImage}
+                      />
+                      <View style={styles.productInfo}>
+                        <Text style={[styles.productName, isDark && styles.productNameDark]} numberOfLines={2}>
+                          {product.name}
+                        </Text>
+                        <Text style={[styles.productPrice, isDark && styles.productPriceDark]}>
+                          {product.price.toLocaleString()} FCFA
+                        </Text>
+                        <View style={styles.productActions}>
+                          <TouchableOpacity
+                            style={styles.productActionButton}
+                            onPress={() => {
+                              navigation.navigate('ProductDetails', { productId: product.id });
+                            }}
+                          >
+                            <Icon name="eye-outline" size={18} color={colors.primary} />
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[styles.productActionButton, { backgroundColor: '#10B981' }]}
+                            onPress={() => handleReactivateProduct(product.id, product.name)}
+                          >
+                            <Icon name="refresh-outline" size={18} color="#FFFFFF" />
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[styles.productActionButton, { backgroundColor: '#EF4444' }]}
+                            onPress={() => handleDeleteProduct(product.id, product.name)}
+                          >
+                            <Icon name="trash-outline" size={18} color="#FFFFFF" />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+                  ))}
                 </View>
               )}
             </View>

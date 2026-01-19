@@ -136,6 +136,7 @@
     "title": "Mon Profil",
     "tabs": {
       "activeProducts": "Actifs",
+      "expiredProducts": "Expirés",
       "pendingProducts": "En attente",
       "payments": "Paiements",
       "profile": "Profil",
@@ -180,7 +181,9 @@
       "avatarUpdateError": "Erreur lors de la mise à jour de l'avatar",
       "deleteConfirm": "Supprimer cette annonce ?",
       "deleteConfirmText": "Voulez-vous supprimer",
-      "deleteSuccess": "Annonce supprimée avec succès",
+      "deleteMessage": "Voulez-vous vraiment supprimer l'annonce",
+      "deleteSuccess": "Annonce supprimée",
+      "deleteSuccessMessage": "Annonce supprimée avec succès",
       "deleteError": "Erreur lors de la suppression",
       "logoutConfirm": "Voulez-vous vous déconnecter ?",
       "constraintError": "Impossible de supprimer l'annonce avec des dépendances",
@@ -202,16 +205,24 @@
       "upgradeForfait": "Améliorer le forfait",
       "premiumOnly": "Premium uniquement",
       "topOrPremium": "Top Annonce ou Premium",
-      "continue": "Continuer"
+      "continue": "Continuer",
+      "noExpiredAdsInfo": "Aucune annonce expirée pour le moment",
+      "reactivateConfirm": "Réactiver l'annonce",
+      "reactivateMessage": "Voulez-vous réactiver l'annonce",
+      "reactivateSuccess": "Annonce réactivée",
+      "reactivateSuccessMessage": "Votre annonce a été réactivée pour 60 jours",
+      "reactivateError": "Erreur lors de la réactivation"
     },
     "emptyStates": {
       "noActiveAds": "Aucune annonce active",
+      "noExpiredAds": "Aucune annonce expirée",
       "noPendingAds": "Aucune annonce en attente",
       "createFirstAd": "Créez votre première annonce pour commencer à vendre",
       "pendingInfo": "Vos annonces en cours de modération apparaîtront ici"
     },
     "labels": {
       "myActiveAds": "Mes annonces actives",
+      "expiredAds": "Mes annonces expirées",
       "pendingAds": "Annonces en attente",
       "pending": "En attente",
       "personalInfo": "Informations personnelles",
