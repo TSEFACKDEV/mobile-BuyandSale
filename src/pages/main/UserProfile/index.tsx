@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -124,10 +124,33 @@ const UserProfile: React.FC = () => {
     location: user?.location || '',
   });
 
-  const { products: userProducts, refetch: refetchUserProducts, deleteProduct: deleteUserProduct, isLoading: isLoadingUserProducts } = useProducts(
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  const { products: userProducts, pagination, refetch: refetchUserProducts, deleteProduct: deleteUserProduct, isLoading: isLoadingUserProducts } = useProducts(
     'user',
-    { userId: user?.id, limit: 12 }
+    { userId: user?.id, page: currentPage, limit: 12 }
   );
+
+  // Update hasMore when pagination changes
+  useEffect(() => {
+    setHasMore(pagination?.nextPage !== null);
+  }, [pagination]);
+
+  // Reset when user changes
+  useEffect(() => {
+    if (user?.id) {
+      setCurrentPage(1);
+      setHasMore(true);
+    }
+  }, [user?.id]);
+
+  const handleLoadMore = () => {
+    if (!isLoadingUserProducts && hasMore) {
+      setCurrentPage(prev => prev + 1);
+    }
+  };
 
   // Filtrer les produits par statut
   const activeProducts = useMemo(() => {
@@ -147,7 +170,7 @@ const UserProfile: React.FC = () => {
   const { userRating, totalReviews: userTotalReviews } = useSellerReviews(user?.id, false);
 
   // Charger les forfaits au montage
-  React.useEffect(() => {
+  useEffect(() => {
     if (forfaitStatus === 'idle') {
       dispatch(getAllForfaitsAction());
     }
@@ -512,8 +535,8 @@ const UserProfile: React.FC = () => {
   }
 
   const tabs = [
-    { id: 'active' as TabType, label: t('userProfile.tabs.activeProducts'), icon: 'cube-outline', count: activeProducts.length },
-    { id: 'expired' as TabType, label: t('userProfile.tabs.expiredProducts'), icon: 'archive-outline', count: expiredProducts.length },
+    { id: 'active' as TabType, label: t('userProfile.tabs.activeProducts'), icon: 'cube-outline', count: pagination?.validatedCount !== undefined ? pagination.validatedCount : activeProducts.length },
+    { id: 'expired' as TabType, label: t('userProfile.tabs.expiredProducts'), icon: 'archive-outline', count: pagination?.expiredCount !== undefined ? pagination.expiredCount : expiredProducts.length },
     { id: 'pending' as TabType, label: t('userProfile.tabs.pendingProducts'), icon: 'time-outline', count: userPendingProducts.length },
     { id: 'payments' as TabType, label: t('userProfile.tabs.payments'), icon: 'card-outline', count: null },
     { id: 'profile' as TabType, label: t('userProfile.tabs.profile'), icon: 'person-outline', count: null },
@@ -670,7 +693,7 @@ const UserProfile: React.FC = () => {
             <View>
               <View style={styles.tabHeader}>
                 <Text style={[styles.sectionTitle, isDark && styles.sectionTitleDark]}>
-                  {t('userProfile.labels.myActiveAds')} ({activeProducts.length})
+                  {t('userProfile.labels.myActiveAds')} ({user?._count?.products || activeProducts.length})
                 </Text>
                 <TouchableOpacity
                   style={styles.createButton}
@@ -680,7 +703,7 @@ const UserProfile: React.FC = () => {
                   <Text style={styles.createButtonText}>{t('userProfile.actions.create')}</Text>
                 </TouchableOpacity>
               </View>
-              {isLoadingUserProducts ? (
+              {isLoadingUserProducts && currentPage === 1 ? (
                 <View style={styles.productsGrid}>
                   <ProductCardSkeleton count={4} />
                 </View>
@@ -702,95 +725,117 @@ const UserProfile: React.FC = () => {
                   </TouchableOpacity>
                 </View>
               ) : (
-                <View style={styles.productsGrid}>
-                  {activeProducts.map((product: any) => {
-                    const activeForfait = getActiveForfait(product);
-                    const forfaitType = activeForfait?.forfait?.type;
-                    
-                    return (
-                      <View key={product.id} style={[styles.productCard, isDark && styles.productCardDark]}>
-                        <Image
-                          source={{ 
-                            uri: product.images?.[0] 
-                              ? getImageUrl(product.images[0], 'product') 
-                              : PLACEHOLDER_IMAGE 
-                          }}
-                          style={styles.productImage}
-                        />
-                        {/* Badge forfait */}
-                        {forfaitType && (
-                          <View 
-                            style={[
-                              styles.forfaitBadge, 
-                              { backgroundColor: FORFAIT_COLORS[forfaitType] }
-                            ]}
-                          >
-                            <Icon name="star" size={10} color="#FFFFFF" />
-                            <Text style={styles.forfaitBadgeText}>
-                              {FORFAIT_LABELS[forfaitType]}
+                <>
+                  <View style={styles.productsGrid}>
+                    {activeProducts.map((product: any) => {
+                      const activeForfait = getActiveForfait(product);
+                      const forfaitType = activeForfait?.forfait?.type;
+                      
+                      return (
+                        <View key={product.id} style={[styles.productCard, isDark && styles.productCardDark]}>
+                          <Image
+                            source={{ 
+                              uri: product.images?.[0] 
+                                ? getImageUrl(product.images[0], 'product') 
+                                : PLACEHOLDER_IMAGE 
+                            }}
+                            style={styles.productImage}
+                          />
+                          {/* Badge forfait */}
+                          {forfaitType && (
+                            <View 
+                              style={[
+                                styles.forfaitBadge, 
+                                { backgroundColor: FORFAIT_COLORS[forfaitType] }
+                              ]}
+                            >
+                              <Icon name="star" size={10} color="#FFFFFF" />
+                              <Text style={styles.forfaitBadgeText}>
+                                {FORFAIT_LABELS[forfaitType]}
+                              </Text>
+                            </View>
+                          )}
+                          <View style={styles.productInfo}>
+                            <Text style={[styles.productName, isDark && styles.productNameDark]} numberOfLines={2}>
+                              {product.name}
                             </Text>
-                          </View>
-                        )}
-                        <View style={styles.productInfo}>
-                          <Text style={[styles.productName, isDark && styles.productNameDark]} numberOfLines={2}>
-                            {product.name}
-                          </Text>
-                          <Text style={[styles.productPrice, isDark && styles.productPriceDark]}>
-                            {product.price.toLocaleString()} FCFA
-                          </Text>
-                          <View style={styles.productActions}>
-                            <TouchableOpacity
-                              style={styles.productActionButton}
-                              onPress={() => {
-                                navigation.navigate('ProductDetails', { productId: product.id });
-                              }}
-                            >
-                              <Icon name="eye-outline" size={18} color={colors.primary} />
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                              style={styles.productActionButton}
-                              onPress={() => {
-                                setEditingProductId(product.id);
-                                setShowEditModal(true);
-                              }}
-                            >
-                              <Icon name="create-outline" size={18} color="#FACC15" />
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                              style={styles.productActionButton}
-                              onPress={() => showDestructive(
-                                t('userProfile.messages.confirmation'),
-                                `${t('userProfile.messages.deleteConfirmText')} "${product.name}" ?`,
-                                async () => {
-                                  try {
-                                    await deleteUserProduct(product.id);
-                                    showSuccess(t('userProfile.messages.success'), t('userProfile.messages.productDeleted'));
-                                    await refetchUserProducts();
-                                  } catch (error: any) {
-                                    showWarning(t('userProfile.messages.error'), error.message || t('userProfile.messages.deleteFailed'));
+                            <Text style={[styles.productPrice, isDark && styles.productPriceDark]}>
+                              {product.price.toLocaleString()} FCFA
+                            </Text>
+                            <View style={styles.productActions}>
+                              <TouchableOpacity
+                                style={styles.productActionButton}
+                                onPress={() => {
+                                  navigation.navigate('ProductDetails', { productId: product.id });
+                                }}
+                              >
+                                <Icon name="eye-outline" size={18} color={colors.primary} />
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                style={styles.productActionButton}
+                                onPress={() => {
+                                  setEditingProductId(product.id);
+                                  setShowEditModal(true);
+                                }}
+                              >
+                                <Icon name="create-outline" size={18} color="#FACC15" />
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                style={styles.productActionButton}
+                                onPress={() => showDestructive(
+                                  t('userProfile.messages.confirmation'),
+                                  `${t('userProfile.messages.deleteConfirmText')} "${product.name}" ?`,
+                                  async () => {
+                                    try {
+                                      await deleteUserProduct(product.id);
+                                      showSuccess(t('userProfile.messages.success'), t('userProfile.messages.productDeleted'));
+                                      await refetchUserProducts();
+                                    } catch (error: any) {
+                                      showWarning(t('userProfile.messages.error'), error.message || t('userProfile.messages.deleteFailed'));
+                                    }
                                   }
-                                }
-                              )}
-                            >
-                              <Icon name="trash-outline" size={18} color="#EF4444" />
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                              style={styles.productActionButton}
-                              onPress={() => handleBoostProduct(product.id, product.name)}
-                              disabled={forfaitType === 'PREMIUM'}
-                            >
-                              <Icon 
-                                name="rocket-outline" 
-                                size={18} 
-                                color={forfaitType === 'PREMIUM' ? '#9CA3AF' : '#10B981'} 
-                              />
-                            </TouchableOpacity>
+                                )}
+                              >
+                                <Icon name="trash-outline" size={18} color="#EF4444" />
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                style={styles.productActionButton}
+                                onPress={() => handleBoostProduct(product.id, product.name)}
+                                disabled={forfaitType === 'PREMIUM'}
+                              >
+                                <Icon 
+                                  name="rocket-outline" 
+                                  size={18} 
+                                  color={forfaitType === 'PREMIUM' ? '#9CA3AF' : '#10B981'} 
+                                />
+                              </TouchableOpacity>
+                            </View>
                           </View>
                         </View>
-                      </View>
-                    );
-                  })}
-                </View>
+                      );
+                    })}
+                  </View>
+                  
+                  {/* Load More Button */}
+                  {hasMore && (
+                    <TouchableOpacity
+                      style={styles.loadMoreButton}
+                      onPress={handleLoadMore}
+                      disabled={isLoadingUserProducts}
+                    >
+                      {isLoadingUserProducts ? (
+                        <ActivityIndicator size="small" color={colors.primary} />
+                      ) : (
+                        <>
+                          <Icon name="add-circle-outline" size={20} color={colors.primary} />
+                          <Text style={[styles.loadMoreText, { color: colors.primary }]}>
+                            {language === 'fr' ? 'Charger plus' : 'Load more'}
+                          </Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  )}
+                </>
               )}
             </View>
           )}

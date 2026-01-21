@@ -216,7 +216,7 @@ const createStyles = (theme: ThemeColors) =>
       borderRadius: 16,
       marginHorizontal: 10,
       padding: 10,
-      marginBottom: 10,
+      marginBottom: 80, // Espace pour la bottom navigation
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
@@ -258,6 +258,25 @@ const createStyles = (theme: ThemeColors) =>
       fontSize: 16,
       color: theme.textSecondary,
       marginTop: 12,
+    },
+    loadMoreButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      paddingVertical: 12,
+      paddingHorizontal: 24,
+      marginTop: 16,
+      borderRadius: 8,
+      backgroundColor: theme.surface,
+      borderWidth: 1,
+      borderColor: theme.primary,
+      width: '100%',
+    },
+    loadMoreText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: theme.primary,
     },
   });
 

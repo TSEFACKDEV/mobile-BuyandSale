@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -40,8 +40,13 @@ const Products = () => {
   
   const { data: categories } = useAppSelector((state) => state.category);
   const { data: cities } = useAppSelector((state) => state.city);
+  const favoriteState = useAppSelector((state) => state.favorite);
   const authData = useAppSelector(selectUserAuthenticated);
   const isAuthenticated = authData.entities !== null;
+
+  // Ref pour éviter les appels multiples pendant le chargement
+  const isLoadingRef = useRef(false);
+  const previousFiltersRef = useRef<string>('');
 
   // Local state
   const [searchQuery, setSearchQuery] = useState('');
@@ -66,10 +71,14 @@ const Products = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Charger catégories et villes une seule fois
+  // Charger catégories et villes seulement si elles ne sont pas déjà présentes
   useEffect(() => {
-    dispatch(getAllCategoriesAction({ limit: 50 }));
-    dispatch(fetchCitiesAction());
+    if (!categories || categories.length === 0) {
+      dispatch(getAllCategoriesAction({ limit: 50 }));
+    }
+    if (!cities || cities.length === 0) {
+      dispatch(fetchCitiesAction());
+    }
   }, []);
 
   // Synchroniser le categoryId des params avec les filtres
@@ -98,35 +107,93 @@ const Products = () => {
 
   // Charger les produits quand page ou filtres changent
   useEffect(() => {
+    // Créer une clé unique basée sur les filtres
+    const filtersKey = JSON.stringify({ 
+      page: currentPage, 
+      categoryId: filters.categoryId, 
+      cityId: filters.cityId, 
+      priceMin: filters.priceMin, 
+      priceMax: filters.priceMax, 
+      etat: filters.etat 
+    });
+
+    // Si on a déjà des produits et que c'est le premier mount, initialiser la ref
+    if (!previousFiltersRef.current && validatedProducts && validatedProducts.length > 0 && validatedProductsStatus === 'succeeded') {
+      previousFiltersRef.current = filtersKey;
+      return;
+    }
+
+    // Éviter les appels si les filtres n'ont pas changé et qu'on a déjà des produits chargés
+    if (previousFiltersRef.current === filtersKey && 
+        validatedProducts && 
+        validatedProducts.length > 0 && 
+        validatedProductsStatus === 'succeeded') {
+      return;
+    }
+
+    // Éviter les appels multiples si un chargement est déjà en cours
+    if (isLoadingRef.current || validatedProductsStatus === 'loading') {
+      return;
+    }
+
+    const loadProducts = async () => {
+      isLoadingRef.current = true;
+      previousFiltersRef.current = filtersKey;
+      
+      try {
+        await dispatch(
+          getValidatedProductsAction({
+            page: currentPage,
+            limit: 12,
+            categoryId: filters.categoryId,
+            cityId: filters.cityId,
+            priceMin: filters.priceMin,
+            priceMax: filters.priceMax,
+            etat: filters.etat,
+          })
+        ).unwrap();
+      } catch (error) {
+        console.error(t('products.loadingError'), error);
+      } finally {
+        isLoadingRef.current = false;
+      }
+    };
+
     loadProducts();
-    if (isAuthenticated) {
+  }, [dispatch, currentPage, filters.categoryId, filters.cityId, filters.priceMin, filters.priceMax, filters.etat, t]);
+
+  // Charger les favoris une seule fois si authentifié et pas déjà chargés
+  useEffect(() => {
+    if (isAuthenticated && favoriteState.status === 'idle') {
       dispatch(getUserFavoritesAction());
     }
-  }, [currentPage, filters]);
+  }, [isAuthenticated, favoriteState.status, dispatch]);
 
-  const loadProducts = async () => {
-    try {
-      await dispatch(
-        getValidatedProductsAction({
-          page: currentPage,
-          limit: 12,
-          categoryId: filters.categoryId,
-          cityId: filters.cityId,
-          priceMin: filters.priceMin,
-          priceMax: filters.priceMax,
-          etat: filters.etat,
-        })
-      ).unwrap();
-    } catch (error) {
-      console.error(t('products.loadingError'), error);
-    }
-  };
+  // Mémoriser le renderItem pour éviter les re-renders du FlatList
+  const renderItem = useCallback(
+    ({ item }: { item: any }) => <ProductCard product={item} />,
+    []
+  );
+
+  // Mémoriser le keyExtractor
+  const keyExtractor = useCallback((item: any) => item.id, []);
+
+  // Optimisation: définir la hauteur fixe des items pour FlatList
+  const getItemLayout = useCallback(
+    (_data: any, index: number) => ({
+      length: 220, // hauteur approximative d'une carte produit
+      offset: 220 * Math.floor(index / 2), // 2 colonnes
+      index,
+    }),
+    []
+  );
 
   // Trier les produits par priorité de forfait
   const sortedProducts = useMemo(() => {
     if (!validatedProducts) return [];
     return sortProductsByForfaitPriority(validatedProducts);
   }, [validatedProducts]);
+
 
   // Filtrer par recherche
   const filteredProducts = useMemo(() => {
@@ -189,22 +256,24 @@ const Products = () => {
   };
 
   // Render stats and filters (without search bar)
-  const renderListHeader = useCallback(() => (
-    <View style={[styles.header, { backgroundColor: theme.background }]}>
-      {/* Statistiques et filtres */}
-      <View style={styles.statsRow}>
-        <View style={styles.leftStats}>
-          <View style={styles.statItem}>
-            <Ionicons name="cube-outline" size={18} color={theme.primary} />
-            <Text style={[styles.statText, { color: theme.textSecondary }]}>
-              {filteredProducts.length} {filteredProducts.length !== 1 
-                ? (language === 'fr' ? 'résultats' : 'results')
-                : (language === 'fr' ? 'résultat' : 'result')}
-            </Text>
+  const renderListHeader = useCallback(() => {
+    const totalCount = validatedProductsPagination?.total || filteredProducts.length;
+    return (
+      <View style={[styles.header, { backgroundColor: theme.background }]}>
+        {/* Statistiques et filtres */}
+        <View style={styles.statsRow}>
+          <View style={styles.leftStats}>
+            <View style={styles.statItem}>
+              <Ionicons name="cube-outline" size={18} color={theme.primary} />
+              <Text style={[styles.statText, { color: theme.textSecondary }]}>
+                {totalCount} {totalCount !== 1 
+                  ? (language === 'fr' ? 'résultats' : 'results')
+                  : (language === 'fr' ? 'résultat' : 'result')}
+              </Text>
+            </View>
           </View>
-        </View>
-        <View style={styles.actionButtons}>
-          {activeFiltersCount > 0 && (
+          <View style={styles.actionButtons}>
+            {activeFiltersCount > 0 && (
             <TouchableOpacity 
               onPress={handleClearFilters}
               style={[styles.clearFiltersButton, { backgroundColor: '#EF4444' }]}
@@ -230,7 +299,8 @@ const Products = () => {
         </View>
       </View>
     </View>
-  ), [theme, filteredProducts.length, activeFiltersCount, language, t]);
+    );
+  }, [theme, validatedProductsPagination?.total, filteredProducts.length, activeFiltersCount, language, t]);
 
   // Render empty state
   const renderEmpty = () => {
@@ -331,8 +401,9 @@ const Products = () => {
       <FlatList
         ListHeaderComponent={renderListHeader}
         data={filteredProducts}
-        renderItem={({ item }) => <ProductCard product={item} />}
-        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        getItemLayout={getItemLayout}
         numColumns={2}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.listContent}
@@ -349,6 +420,10 @@ const Products = () => {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
         showsVerticalScrollIndicator={false}
+        maxToRenderPerBatch={6}
+        updateCellsBatchingPeriod={100}
+        windowSize={10}
+        initialNumToRender={12}
       />
 
       {/* Filter Modal */}

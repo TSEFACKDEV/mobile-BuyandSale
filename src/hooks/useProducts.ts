@@ -10,6 +10,7 @@ import {
   selectSellerProducts,
   selectSellerProductsStatus,
   selectCurrentSeller,
+  selectSellerPagination,
   selectUserProducts,
   selectUserProductsStatus,
   selectUserPagination,
@@ -42,6 +43,7 @@ export const useProducts = (
   const sellerProducts = useAppSelector(selectSellerProducts);
   const sellerStatus = useAppSelector(selectSellerProductsStatus);
   const sellerMetadata = useAppSelector(selectCurrentSeller);
+  const sellerPagination = useAppSelector(selectSellerPagination);
 
   const userProducts = useAppSelector(selectUserProducts);
   const userStatus = useAppSelector(selectUserProductsStatus);
@@ -65,6 +67,12 @@ export const useProducts = (
   
   const metadata = context === 'seller' 
     ? sellerMetadata 
+    : context === 'user' 
+      ? userMetadata 
+      : null;
+  
+  const pagination = context === 'seller' 
+    ? sellerPagination 
     : context === 'user' 
       ? userMetadata 
       : null;
@@ -146,6 +154,7 @@ export const useProducts = (
   return {
     products,
     metadata,
+    pagination,
     isLoading,
     refetch,
     deleteProduct,

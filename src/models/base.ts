@@ -15,4 +15,6 @@ export interface PaginationMeta {
   nextPage: number | null;
   totalPage: number;
   total: number;
+  validatedCount?: number;  // Nombre total de produits VALIDATED
+  expiredCount?: number;    // Nombre total de produits EXPIRED
 }

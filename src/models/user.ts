@@ -4,7 +4,6 @@
 export interface Token {
   type: 'Bearer';
   AccessToken: string;
-  refreshToken: string;
 }
 
 // 👥 RÔLES ET PERMISSIONS

@@ -93,4 +93,7 @@ const SellerCard: React.FC<SellerCardProps> = ({ seller, index }) => {
   );
 };
 
-export default SellerCard;
+export default React.memo(SellerCard, (prevProps, nextProps) => {
+  // Ne re-render que si l'ID du vendeur change
+  return prevProps.seller.id === nextProps.seller.id;
+});

@@ -46,9 +46,18 @@ const Home = () => {
   const sellersLoading = publicSellersStatus === 'PENDING';
   const [refreshing, setRefreshing] = React.useState(false);
 
-  // Charger les données au montage
+  // Charger les données au montage SEULEMENT si elles ne sont pas déjà présentes
   useEffect(() => {
-    loadInitialData();
+    // Ne charger que si les données principales sont vides
+    const needsInitialLoad = 
+      !categories || categories.length === 0 ||
+      !homeProducts || homeProducts.length === 0 ||
+      !cities || cities.length === 0 ||
+      !publicSellers || publicSellers.length === 0;
+
+    if (needsInitialLoad) {
+      loadInitialData();
+    }
   }, []);
 
   const loadInitialData = async (retryCount = 2) => {
