@@ -7,7 +7,6 @@ import {
   RefreshControl,
   TouchableOpacity,
   TextInput,
-  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoute, useFocusEffect } from '@react-navigation/native';
@@ -33,11 +32,9 @@ const Products = () => {
   const routeParams = route.params as { categoryId?: string } | undefined;
 
   // Redux state
-  const productState = useAppSelector((state) => state.product);
-  const validatedProducts = productState.validatedProducts;
-  const validatedProductsStatus = productState.validatedProductsStatus;
-  const validatedProductsPagination = productState.validatedProductsPagination;
-  
+  const validatedProducts = useAppSelector((state) => state.product.validatedProducts);
+  const validatedProductsStatus = useAppSelector((state) => state.product.validatedProductsStatus);
+  const validatedProductsPagination = useAppSelector((state) => state.product.validatedProductsPagination);
   const { data: categories } = useAppSelector((state) => state.category);
   const { data: cities } = useAppSelector((state) => state.city);
   const favoriteState = useAppSelector((state) => state.favorite);
@@ -79,7 +76,7 @@ const Products = () => {
     if (!cities || cities.length === 0) {
       dispatch(fetchCitiesAction());
     }
-  }, []);
+  }, [dispatch, categories, cities]);
 
   // Synchroniser le categoryId des params avec les filtres
   useEffect(() => {
@@ -160,7 +157,7 @@ const Products = () => {
     };
 
     loadProducts();
-  }, [dispatch, currentPage, filters.categoryId, filters.cityId, filters.priceMin, filters.priceMax, filters.etat, t]);
+  }, [currentPage, filters, validatedProducts, validatedProductsStatus, dispatch, t]);
 
   // Charger les favoris une seule fois si authentifié et pas déjà chargés
   useEffect(() => {
@@ -177,16 +174,6 @@ const Products = () => {
 
   // Mémoriser le keyExtractor
   const keyExtractor = useCallback((item: any) => item.id, []);
-
-  // Optimisation: définir la hauteur fixe des items pour FlatList
-  const getItemLayout = useCallback(
-    (_data: any, index: number) => ({
-      length: 220, // hauteur approximative d'une carte produit
-      offset: 220 * Math.floor(index / 2), // 2 colonnes
-      index,
-    }),
-    []
-  );
 
   // Trier les produits par priorité de forfait
   const sortedProducts = useMemo(() => {
@@ -209,16 +196,10 @@ const Products = () => {
   }, [sortedProducts, debouncedSearchQuery]);
 
   // Refresh
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    setCurrentPage(1);
-    await loadProducts();
-    if (isAuthenticated) {
-      await dispatch(getUserFavoritesAction());
-    }
-    await dispatch(getAllCategoriesAction({ limit: 50 }));
-    await dispatch(fetchCitiesAction());
-    setRefreshing(false);
+  const handleRefresh = () => {
+    previousFiltersRef.current = ''; // Forcer le rechargement
+    isLoadingRef.current = false;
+    setCurrentPage(1); // Le useEffect rechargera automatiquement
   };
 
   // Appliquer les filtres du modal
@@ -403,7 +384,6 @@ const Products = () => {
         data={filteredProducts}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
-        getItemLayout={getItemLayout}
         numColumns={2}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.listContent}
