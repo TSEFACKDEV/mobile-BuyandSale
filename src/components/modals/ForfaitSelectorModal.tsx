@@ -15,10 +15,6 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 const { width } = Dimensions.get('window');
 
-const COLORS = {
-  primary: '#FF6B35',
-};
-
 interface Forfait {
   id: string;
   type: string;
@@ -95,8 +91,9 @@ const ForfaitSelectorModal: React.FC<ForfaitSelectorModalProps> = ({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View style={styles.overlay}>
-        <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
+      <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={onClose}>
+        <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
+          <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
           {/* Header */}
           <View style={[styles.header, { borderBottomColor: colors.border }]}>
             <View style={styles.headerContent}>
@@ -171,7 +168,7 @@ const ForfaitSelectorModal: React.FC<ForfaitSelectorModalProps> = ({
                         </Text>
                       </View>
                       <View style={styles.priceContainer}>
-                        <Text style={[styles.price, { color: COLORS.primary }]}>
+                        <Text style={[styles.price, { color: '#FF6B35' }]}>
                           {forfait.price.toLocaleString()}
                         </Text>
                         <Text style={[styles.currency, { color: colors.textSecondary }]}>
@@ -204,8 +201,9 @@ const ForfaitSelectorModal: React.FC<ForfaitSelectorModalProps> = ({
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </View>
+          </View>
+        </TouchableOpacity>
+      </TouchableOpacity>
     </Modal>
   );
 };
@@ -215,10 +213,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
+    padding: 16,
   },
   modalContainer: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderRadius: 20,
     height: '80%',
     paddingBottom: 20,
     flexDirection: 'column',
