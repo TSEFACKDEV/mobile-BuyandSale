@@ -87,16 +87,19 @@ const ProductDetails = () => {
     ? allFavorites.some((fav) => fav.productId === product.id)
     : false;
 
-  // Charger le produit au montage
+  // Vérifier si l'utilisateur est authentifié
+  const isAuthenticated = useAppSelector((state) => state.authentification.auth.entities !== null);
+
+  // Charger le produit au montage SEULEMENT si l'utilisateur est authentifié
   useEffect(() => {
-    if (productId) {
+    if (productId && isAuthenticated) {
       dispatch(getProductByIdAction(productId));
     }
 
     return () => {
       dispatch(clearCurrentProduct());
     };
-  }, [productId, dispatch]);
+  }, [productId, isAuthenticated, dispatch]);
 
   // Helpers
   const formatPrice = (price: number) => {

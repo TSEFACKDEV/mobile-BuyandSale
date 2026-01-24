@@ -33,6 +33,7 @@ export const loginAction = createAsyncThunk<
         headers: {
           'Content-type': 'application/json',
         },
+        credentials: 'include', // Important pour recevoir le cookie refresh token
         body: JSON.stringify(args),
       }
     );
@@ -79,12 +80,13 @@ export const logoutAction = createAsyncThunk<void, void, ThunkApi>(
   'auth/logout',
   async () => {
     try {
-      // Appel backend pour nettoyer
+      // Appel backend pour nettoyer les cookies
       await fetch(`${API_CONFIG.BASE_URL}/${API_ENDPOINTS.USER_LOGOUT}`, {
         method: 'POST',
         headers: {
           'Content-type': 'application/json',
         },
+        credentials: 'include', // Important pour envoyer le cookie
       });
 
       return;
@@ -164,18 +166,8 @@ export const handleSocialAuthCallback = createAsyncThunk<
       throw new Error(errorMessage);
     }
 
-    // Retourner les données avec le token d'accès
-    return {
-      ...data,
-      data: {
-        ...data.data,
-        token: {
-          type: 'Bearer' as const,
-          AccessToken: token,
-          refreshToken: '', // Géré par les cookies côté backend
-        },
-      },
-    };
+    // Retourner les données
+    return data;
   } catch (error: unknown) {
     return apiThunk.rejectWithValue({
       message: (error as Error).message || 'Erreur d\'authentification sociale',

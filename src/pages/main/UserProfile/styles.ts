@@ -698,4 +698,22 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
   },
+  loadMoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    marginTop: 16,
+    marginHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#2563EB',
+  },
+  loadMoreText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });

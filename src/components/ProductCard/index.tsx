@@ -131,7 +131,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     >
       {/* Image */}
       <View style={styles.imageContainer}>
-        <Image source={{ uri: firstImage }} style={styles.image} resizeMode="cover" />
+        <Image 
+          source={{ uri: firstImage }} 
+          style={styles.image} 
+          resizeMode="cover"
+        />
 
         {/* Badge forfait */}
         {primaryForfait && (
@@ -143,8 +147,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               },
             ]}
           >
-            <Ionicons name={primaryForfait.icon as any} size={12} color={primaryForfait.badge.textColor} />
-            <Text style={[styles.forfaitText, { marginLeft: 4 }]}>
+            <Ionicons name={primaryForfait.icon as any} size={9} color={primaryForfait.badge.textColor} />
+            <Text style={[styles.forfaitText, { marginLeft: 3, color: primaryForfait.badge.textColor }]}>
               {primaryForfait.label.toUpperCase()}
             </Text>
           </View>
@@ -216,4 +220,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   );
 };
 
-export default ProductCard;
+export default React.memo(ProductCard, (prevProps, nextProps) => {
+  // Ne re-render que si l'ID du produit change
+  return prevProps.product.id === nextProps.product.id;
+});

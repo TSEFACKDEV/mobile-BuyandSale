@@ -138,26 +138,27 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
       onRequestClose={onClose}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.overlay}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.keyboardView}
-          >
-            <TouchableWithoutFeedback>
-              <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
-                {/* Header */}
-                <View style={styles.header}>
-                  <Text style={[styles.title, { color: colors.text }]}>
-                    {t('userProfile.payment.title')}
-                  </Text>
-                  <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                    <Icon name="close" size={24} color={colors.text} />
-                  </TouchableOpacity>
-                </View>
+        <View style={{ flex: 1 }}>
+          <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={onClose}>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.keyboardView}
+            >
+              <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
+                <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
+                  {/* Header */}
+                  <View style={styles.header}>
+                    <Text style={[styles.title, { color: colors.text }]}>
+                      {t('userProfile.payment.title')}
+                    </Text>
+                    <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                      <Icon name="close" size={24} color={colors.text} />
+                    </TouchableOpacity>
+                  </View>
 
-                {/* Content with ScrollView */}
-                <ScrollView 
-                  style={styles.scrollView}
+                  {/* Content with ScrollView */}
+                  <ScrollView 
+                    style={styles.scrollView}
                   contentContainerStyle={styles.content}
                   keyboardShouldPersistTaps="handled"
                   showsVerticalScrollIndicator={false}
@@ -261,9 +262,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                     )}
                   </TouchableOpacity>
                 </View>
-              </View>
-            </TouchableWithoutFeedback>
-          </KeyboardAvoidingView>
+                </View>
+              </TouchableOpacity>
+            </KeyboardAvoidingView>
+          </TouchableOpacity>
         </View>
       </TouchableWithoutFeedback>
     </Modal>
@@ -275,13 +277,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
+    padding: 16,
   },
   keyboardView: {
     width: '100%',
   },
   modalContainer: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderRadius: 20,
     maxHeight: '90%',
   },
   header: {

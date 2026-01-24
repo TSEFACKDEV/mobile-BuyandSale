@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -58,12 +58,17 @@ const SellerDetails: React.FC = () => {
   const authData = useAppSelector(selectUserAuthenticated);
   const currentUser = authData.entities;
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
   // Use hooks like React
   const {
     products: sellerProducts,
     metadata,
+    pagination,
     isLoading: isSellerProductsLoading,
-  } = useProducts('seller', { sellerId, limit: 12 });
+  } = useProducts('seller', { sellerId, page: currentPage, limit: 12 });
 
   const { ratingStats, refreshReviews } = useSellerReviews(sellerId, true);
   const userReview = useAppSelector((state) =>
@@ -146,6 +151,23 @@ const SellerDetails: React.FC = () => {
     showSuccess(t('sellerProfile.reportSuccess'), t('sellerProfile.reportModal.success'));
   };
 
+  // Update hasMore when pagination changes
+  useEffect(() => {
+    setHasMore(pagination?.nextPage !== null);
+  }, [pagination]);
+
+  // Reset when seller changes
+  useEffect(() => {
+    setCurrentPage(1);
+    setHasMore(true);
+  }, [sellerId]);
+
+  const handleLoadMore = () => {
+    if (!isSellerProductsLoading && hasMore) {
+      setCurrentPage(prev => prev + 1);
+    }
+  };
+
   if (!seller) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
@@ -157,7 +179,7 @@ const SellerDetails: React.FC = () => {
   }
 
   const sellerName = `${seller.firstName} ${seller.lastName}`;
-  const count = sellerProducts?.length || 0;
+  const count = pagination?.total || sellerProducts?.length || 0;
   const plural = count > 1 ? 's' : '';
 
   return (
@@ -306,7 +328,7 @@ const SellerDetails: React.FC = () => {
               : `${seller.firstName}'s Products (${count})`}
           </Text>
 
-          {isSellerProductsLoading ? (
+          {isSellerProductsLoading && currentPage === 1 ? (
             <View style={styles.loadingContainer}>
               <Text style={styles.loadingText}>{t('common.loading')}</Text>
             </View>
@@ -320,6 +342,26 @@ const SellerDetails: React.FC = () => {
                   />
                 </View>
               ))}
+              
+              {/* Load More Button */}
+              {hasMore && (
+                <TouchableOpacity
+                  style={styles.loadMoreButton}
+                  onPress={handleLoadMore}
+                  disabled={isSellerProductsLoading}
+                >
+                  {isSellerProductsLoading ? (
+                    <Text style={styles.loadMoreText}>{t('common.loading')}</Text>
+                  ) : (
+                    <>
+                      <Icon name="add-circle-outline" size={20} color={theme.primary} />
+                      <Text style={styles.loadMoreText}>
+                        {language === 'fr' ? 'Charger plus' : 'Load more'}
+                      </Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              )}
             </View>
           ) : (
             <View style={styles.emptyContainer}>

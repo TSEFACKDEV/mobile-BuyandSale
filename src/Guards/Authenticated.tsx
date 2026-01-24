@@ -28,13 +28,12 @@ const Authenticated: React.FC<AuthenticatedProps> = ({ children }) => {
   const user = authState.auth.entities;
 
   useEffect(() => {
-    // Si pas connecté, réinitialiser la navigation : Main (Home) + Auth (Login)
+    // Si pas connecté, rediriger directement vers Login (sans passer par Home)
     if (!isAuthenticated || !user) {
       navigation.dispatch(
         CommonActions.reset({
-          index: 1,
+          index: 0,
           routes: [
-            { name: 'Main', params: { screen: 'MainTab', params: { screen: 'HomeTab' } } },
             { name: 'Auth', params: { screen: 'Login' } },
           ],
         })
@@ -42,13 +41,12 @@ const Authenticated: React.FC<AuthenticatedProps> = ({ children }) => {
       return;
     }
 
-    // Si utilisateur suspendu, réinitialiser vers page de suspension
+    // Si utilisateur suspendu, rediriger vers page de suspension
     if (user.status === 'SUSPENDED') {
       navigation.dispatch(
         CommonActions.reset({
-          index: 1,
+          index: 0,
           routes: [
-            { name: 'Main', params: { screen: 'MainTab', params: { screen: 'HomeTab' } } },
             { name: 'Auth', params: { screen: 'AccountSuspended' } },
           ],
         })

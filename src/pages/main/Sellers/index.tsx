@@ -81,6 +81,29 @@ const Sellers = () => {
     }
   }, [pagination, page, status]);
 
+  // Mémoriser le renderItem pour éviter les re-renders du FlatList
+  const renderItem = useCallback(
+    ({ item, index }: { item: any; index: number }) => (
+      <View style={styles.cardWrapper}>
+        <SellerCard seller={item} index={index} />
+      </View>
+    ),
+    [styles.cardWrapper]
+  );
+
+  // Mémoriser le keyExtractor
+  const keyExtractor = useCallback((item: any) => item.id, []);
+
+  // Optimisation: définir la hauteur fixe des items pour FlatList
+  const getItemLayout = useCallback(
+    (_data: any, index: number) => ({
+      length: 180, // hauteur approximative d'une carte vendeur
+      offset: 180 * Math.floor(index / 2), // 2 colonnes
+      index,
+    }),
+    []
+  );
+
   // Rendu du header (stats uniquement)
   const renderListHeader = useCallback(() => (
     <View style={styles.header}>
@@ -164,16 +187,13 @@ const Sellers = () => {
 
       <FlatList
         data={filteredSellers}
-        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        getItemLayout={getItemLayout}
         numColumns={2}
         columnWrapperStyle={styles.row}
         ListHeaderComponent={renderListHeader}
         ListEmptyComponent={renderEmpty}
-        renderItem={({ item, index }) => (
-          <View style={styles.cardWrapper}>
-            <SellerCard seller={item} index={index} />
-          </View>
-        )}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -186,6 +206,10 @@ const Sellers = () => {
         onEndReachedThreshold={0.5}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        maxToRenderPerBatch={6}
+        updateCellsBatchingPeriod={100}
+        windowSize={10}
+        initialNumToRender={12}
         ListFooterComponent={
           status === LoadingType.PENDING && !refreshing && sellers.length > 0 ? (
             <View style={styles.footerLoading}>

@@ -32,67 +32,69 @@ const BoostOfferModal: React.FC<BoostOfferModalProps> = ({
       animationType="fade"
       onRequestClose={onDecline}
     >
-      <View style={styles.overlay}>
-        <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
-          {/* Icon */}
-          <View style={styles.iconContainer}>
-            <Icon name="rocket" size={64} color="#FF6B35" />
-          </View>
-
-          {/* Title */}
-          <Text style={[styles.title, { color: colors.text }]}>
-            Boostez votre annonce !
-          </Text>
-
-          {/* Description */}
-          <Text style={[styles.description, { color: colors.textSecondary }]}>
-            Augmentez la visibilité de votre annonce avec nos forfaits de boost.
-            Votre produit sera mis en avant et attirera plus d'acheteurs !
-          </Text>
-
-          {/* Features */}
-          <View style={styles.featuresContainer}>
-            <View style={styles.feature}>
-              <Icon name="eye" size={20} color="#34C759" />
-              <Text style={[styles.featureText, { color: colors.text }]}>
-                Plus de visibilité
-              </Text>
+      <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={onDecline}>
+        <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
+          <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
+            {/* Icon */}
+            <View style={styles.iconContainer}>
+              <Icon name="rocket" size={64} color="#FF6B35" />
             </View>
-            <View style={styles.feature}>
-              <Icon name="trending-up" size={20} color="#34C759" />
-              <Text style={[styles.featureText, { color: colors.text }]}>
-                Ventes plus rapides
-              </Text>
+
+            {/* Title */}
+            <Text style={[styles.title, { color: colors.text }]}>
+              Boostez votre annonce !
+            </Text>
+
+            {/* Description */}
+            <Text style={[styles.description, { color: colors.textSecondary }]}>
+              Augmentez la visibilité de votre annonce avec nos forfaits de boost.
+              Votre produit sera mis en avant et attirera plus d'acheteurs !
+            </Text>
+
+            {/* Features */}
+            <View style={styles.featuresContainer}>
+              <View style={styles.feature}>
+                <Icon name="eye" size={20} color="#34C759" />
+                <Text style={[styles.featureText, { color: colors.text }]}>
+                  Plus de visibilité
+                </Text>
+              </View>
+              <View style={styles.feature}>
+                <Icon name="trending-up" size={20} color="#34C759" />
+                <Text style={[styles.featureText, { color: colors.text }]}>
+                  Ventes plus rapides
+                </Text>
+              </View>
+              <View style={styles.feature}>
+                <Icon name="star" size={20} color="#34C759" />
+                <Text style={[styles.featureText, { color: colors.text }]}>
+                  Position prioritaire
+                </Text>
+              </View>
             </View>
-            <View style={styles.feature}>
-              <Icon name="star" size={20} color="#34C759" />
-              <Text style={[styles.featureText, { color: colors.text }]}>
-                Position prioritaire
-              </Text>
+
+            {/* Buttons */}
+            <View style={styles.buttonsContainer}>
+              <TouchableOpacity
+                style={[styles.button, styles.acceptButton]}
+                onPress={onAccept}
+              >
+                <Icon name="checkmark-circle" size={20} color="#FFF" />
+                <Text style={styles.acceptButtonText}>Oui, je veux booster</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.button, styles.declineButton, { borderColor: colors.border }]}
+                onPress={onDecline}
+              >
+                <Text style={[styles.declineButtonText, { color: colors.text }]}>
+                  Non merci, peut-être plus tard
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
-
-          {/* Buttons */}
-          <View style={styles.buttonsContainer}>
-            <TouchableOpacity
-              style={[styles.button, styles.acceptButton]}
-              onPress={onAccept}
-            >
-              <Icon name="checkmark-circle" size={20} color="#FFF" />
-              <Text style={styles.acceptButtonText}>Oui, je veux booster</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.button, styles.declineButton, { borderColor: colors.border }]}
-              onPress={onDecline}
-            >
-              <Text style={[styles.declineButtonText, { color: colors.text }]}>
-                Non merci, peut-être plus tard
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
+        </TouchableOpacity>
+      </TouchableOpacity>
     </Modal>
   );
 };

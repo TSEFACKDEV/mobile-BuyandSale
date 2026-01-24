@@ -198,8 +198,9 @@ const PaymentStatusModal: React.FC<PaymentStatusModalProps> = ({
       animationType="fade"
       onRequestClose={status !== 'PENDING' ? onClose : undefined}
     >
-      <View style={styles.overlay}>
-        <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
+      <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={status !== 'PENDING' ? onClose : undefined} disabled={status === 'PENDING'}>
+        <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
+          <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
           {/* Status Icon */}
           <View style={styles.iconContainer}>
             {getStatusIcon()}
@@ -245,8 +246,9 @@ const PaymentStatusModal: React.FC<PaymentStatusModalProps> = ({
               </Text>
             </TouchableOpacity>
           )}
-        </View>
-      </View>
+          </View>
+        </TouchableOpacity>
+      </TouchableOpacity>
     </Modal>
   );
 };

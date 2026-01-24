@@ -282,7 +282,16 @@ const productSlice = createSlice({
       getUserProductsAction.fulfilled,
       (state, action: PayloadAction<ProductListResponse>) => {
         state.userProductsStatus = 'succeeded';
-        state.userProducts = action.payload.products;
+        // Si c'est la page 1, remplacer la liste, sinon ajouter à la liste existante
+        const isFirstPage = action.payload.links?.currentPage === 1;
+        if (isFirstPage) {
+          state.userProducts = action.payload.products;
+        } else {
+          // Ajouter les nouveaux produits à la liste existante (infinite scroll)
+          const existingIds = new Set(state.userProducts.map(p => p.id));
+          const newProducts = action.payload.products.filter(p => !existingIds.has(p.id));
+          state.userProducts = [...state.userProducts, ...newProducts];
+        }
         state.userProductsPagination = action.payload.links;
       }
     );
