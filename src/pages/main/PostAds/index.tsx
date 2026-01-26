@@ -491,10 +491,24 @@ const PostAds: React.FC = () => {
         });
       }
     } catch (error: any) {
+      const errorMessage = error.message || t('postAds.errorCreating');
+      
+      // 🚦 Gestion du rate limiting
+      if (errorMessage.includes('Limite de création de produits atteinte')) {
+        setConfirmDialog({
+          visible: true,
+          title: 'Limite atteinte',
+          message: 'Vous créez des annonces trop rapidement. Veuillez patienter 1 minute avant de continuer.',
+          type: 'warning',
+          confirmText: 'OK',
+        });
+        return;
+      }
+      
       setConfirmDialog({
         visible: true,
         title: t('postAds.errorGeneric'),
-        message: error.message || t('postAds.errorCreating'),
+        message: errorMessage,
         type: 'destructive',
         confirmText: 'OK',
       });

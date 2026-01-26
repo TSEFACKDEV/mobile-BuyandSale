@@ -49,7 +49,12 @@ const apiRequest = async <T>(
   
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || 'Erreur API');
+    throw new Error(
+      error.message || 
+      error.error || 
+      error.meta?.message || 
+      'Erreur API'
+    );
   }
 
   const data = await response.json();

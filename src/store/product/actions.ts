@@ -462,7 +462,12 @@ export const createProductAction = createAsyncThunk<
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.meta?.message || 'Erreur lors de la création du produit');
+        throw new Error(
+          data.meta?.message || 
+          data.message || 
+          data.error || 
+          'Erreur lors de la création du produit'
+        );
       }
 
       return data.data;

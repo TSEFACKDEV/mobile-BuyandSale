@@ -103,7 +103,7 @@
       },
       "rateLimit": {
         "title": "Trop de tentatives",
-        "message": "Vous avez dépassé la limite de 5 tentatives de connexion. Veuillez patienter 15 minutes avant de réessayer.",
+        "message": "Vous avez dépassé la limite de tentatives de connexion. Veuillez patienter 15 minutes avant de réessayer.",
         "short": "Limite de tentatives atteinte"
       },
       "token": {

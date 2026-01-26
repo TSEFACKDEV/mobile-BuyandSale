@@ -46,7 +46,12 @@ export const loginAction = createAsyncThunk<
     }
 
     if (!response.ok) {
-      const errorMessage = data?.meta?.message || data?.message || 'Erreur de connexion';
+      // Support pour les formats d'erreur multiples
+      const errorMessage = 
+        data?.meta?.message ||       // Format API standard
+        data?.message ||              // Format alternatif
+        data?.error ||                // Format rate limiter
+        'Erreur de connexion';
 
       // Vérifier si c'est une erreur de suspension
       if (

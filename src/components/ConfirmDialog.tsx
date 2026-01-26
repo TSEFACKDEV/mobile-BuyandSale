@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Dimensions,
   Platform,
+  ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
@@ -84,8 +85,14 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           {/* Title */}
           <Text style={styles.title}>{title}</Text>
 
-          {/* Message */}
-          <Text style={styles.message}>{message}</Text>
+          {/* Message - Scrollable pour les messages longs */}
+          <ScrollView 
+            style={styles.messageContainer}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+          >
+            <Text style={styles.message}>{message}</Text>
+          </ScrollView>
 
           {/* Actions */}
           <View style={styles.actions}>
@@ -155,13 +162,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 8,
   },
+  messageContainer: {
+    maxHeight: 200,
+    marginBottom: 24,
+  },
   message: {
     fontSize: 15,
     fontWeight: '400',
     color: '#8E8E93',
     textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 21,
+    lineHeight: 22,
   },
   actions: {
     flexDirection: 'row',

@@ -192,12 +192,12 @@ const Login = () => {
     } catch (error: any) {
       const errorMessage = error?.message || error?.error?.message || t('auth.errors.generic.loginFailed')
 
-      // 🚦 Gestion du rate limiting (5 tentatives max / 15 minutes)
+      // 🚦 Gestion du rate limiting (10 tentatives max / 15 minutes)
       if (errorMessage.includes('Trop de tentatives')) {
+        // Utiliser un message clair au lieu du message technique du serveur
         showWarning(
           t('auth.errors.rateLimit.title'),
-          t('auth.errors.rateLimit.message'),
-          8000 // Affichage prolongé pour message important
+          t('auth.errors.rateLimit.message')
         )
         return
       }

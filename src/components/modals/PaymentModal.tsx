@@ -120,7 +120,17 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         Alert.alert(t('userProfile.payment.error'), errorMsg);
       }
     } catch (error: any) {
-      Alert.alert(t('userProfile.payment.error'), error.message || t('userProfile.payment.errorPaymentFailed'));
+      const errorMessage = error.message || t('userProfile.payment.errorPaymentFailed');
+      
+      // 🚦 Gestion du rate limiting
+      if (errorMessage.includes('Trop de vérifications de paiement') || errorMessage.includes('Trop de tentatives')) {
+        Alert.alert(
+          'Limite atteinte',
+          'Trop de tentatives de paiement. Veuillez patienter quelques secondes avant de réessayer.'
+        );
+      } else {
+        Alert.alert(t('userProfile.payment.error'), errorMessage);
+      }
     } finally {
       setIsProcessing(false);
     }
