@@ -4,7 +4,7 @@ import API_CONFIG from '../../config/api.config';
 import fetchWithAuth from '../../utils/fetchWithAuth';
 import type { ThunkApi } from '../../models/store';
 import type { ApiResponse } from '../../models/base';
-import type { AuthUser, UserLoginForm, ProfileResponse } from '../../models/user';
+import type { AuthUser, UserLoginForm, ProfileResponse, Token } from '../../models/user';
 
 // Action de connexion
 export const loginAction = createAsyncThunk<
@@ -33,7 +33,6 @@ export const loginAction = createAsyncThunk<
         headers: {
           'Content-type': 'application/json',
         },
-        credentials: 'include', // Important pour recevoir le cookie refresh token
         body: JSON.stringify(args),
       }
     );
@@ -85,13 +84,12 @@ export const logoutAction = createAsyncThunk<void, void, ThunkApi>(
   'auth/logout',
   async () => {
     try {
-      // Appel backend pour nettoyer les cookies
+      // Appel backend pour nettoyer les cookies (si web)
       await fetch(`${API_CONFIG.BASE_URL}/${API_ENDPOINTS.USER_LOGOUT}`, {
         method: 'POST',
         headers: {
           'Content-type': 'application/json',
         },
-        credentials: 'include', // Important pour envoyer le cookie
       });
 
       return;
@@ -176,6 +174,54 @@ export const handleSocialAuthCallback = createAsyncThunk<
   } catch (error: unknown) {
     return apiThunk.rejectWithValue({
       message: (error as Error).message || 'Erreur d\'authentification sociale',
+    });
+  }
+});
+
+// Action pour rafraîchir le token d'accès
+export const refreshTokenAction = createAsyncThunk<
+  ApiResponse<{ token: Token }>,
+  void,
+  ThunkApi
+>('auth/refreshToken', async (_, apiThunk) => {
+  try {
+    const state = apiThunk.getState();
+    const refreshToken = state.authentification?.auth?.entities?.token?.RefreshToken;
+
+    if (!refreshToken) {
+      // Pas de refresh token, déconnecter l'utilisateur
+      apiThunk.dispatch(logoutAction());
+      throw new Error('NO_REFRESH_TOKEN');
+    }
+
+    const response = await fetch(
+      `${API_CONFIG.BASE_URL}/${API_ENDPOINTS.USER_REFRESH_TOKEN}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refreshToken }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      // Si le refresh token est invalide ou expiré, déconnecter l'utilisateur
+      if (response.status === 401 || response.status === 403) {
+        apiThunk.dispatch(logoutAction());
+        throw new Error('REFRESH_TOKEN_EXPIRED');
+      }
+      throw new Error(data.meta?.message || 'Échec du rafraîchissement');
+    }
+
+    return data;
+  } catch (error: unknown) {
+    return apiThunk.rejectWithValue({
+      message:
+        (error as Error).message ||
+        'Erreur lors du rafraîchissement du token',
     });
   }
 });

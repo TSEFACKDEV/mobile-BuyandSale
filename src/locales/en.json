@@ -53,6 +53,13 @@
     "previous": "Previous",
     "next": "Next"
   },
+  "bottomNav": {
+    "home": "Home",
+    "products": "Products",
+    "postAd": "Post",
+    "sellers": "Sellers",
+    "profile": "Profile"
+  },
   "auth": {
     "errors": {
       "title": "Error",

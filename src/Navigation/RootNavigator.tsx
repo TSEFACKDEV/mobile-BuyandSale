@@ -305,6 +305,7 @@ const PostAdsWithNav = () => (
 // =====================
 const MainTabNavigator = () => {
   const colors = useThemeColors();
+  const { t } = useTranslation();
   const authState = useAppSelector((state) => state.authentification);
   const user = authState.auth.entities;
   const insets = useSafeAreaInsets();
@@ -415,8 +416,8 @@ const MainTabNavigator = () => {
         name="HomeTab"
         component={HomeStackNavigator}
         options={{
-          tabBarLabel: 'Accueil',
-          title: 'Accueil',
+          tabBarLabel: t('bottomNav.home'),
+          title: t('bottomNav.home'),
         }}
       />
 
@@ -425,8 +426,8 @@ const MainTabNavigator = () => {
         name="Products"
         component={ProductsStackNavigator}
         options={{
-          tabBarLabel: 'Produits',
-          title: 'Produits',
+          tabBarLabel: t('bottomNav.products'),
+          title: t('bottomNav.products'),
         }}
       />
 
@@ -435,8 +436,8 @@ const MainTabNavigator = () => {
         name="PostAd"
         component={PostAdsWithNav}
         options={{
-          tabBarLabel: 'Publier',
-          title: 'Publier',
+          tabBarLabel: t('bottomNav.postAd'),
+          title: t('bottomNav.postAd'),
         }}
       />
 
@@ -445,8 +446,8 @@ const MainTabNavigator = () => {
         name="Sellers"
         component={SellersStackNavigator}
         options={{
-          tabBarLabel: 'Vendeurs',
-          title: 'Vendeurs',
+          tabBarLabel: t('bottomNav.sellers'),
+          title: t('bottomNav.sellers'),
         }}
       />
 
@@ -457,7 +458,7 @@ const MainTabNavigator = () => {
           component={HomeStackNavigator}
           options={{
             tabBarLabel: '',
-            title: 'Profil',
+            title: t('bottomNav.profile'),
           }}
           listeners={({ navigation }) => ({
             tabPress: (e) => {

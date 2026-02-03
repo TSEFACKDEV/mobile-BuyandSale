@@ -4,6 +4,7 @@
 export interface Token {
   type: 'Bearer';
   AccessToken: string;
+  RefreshToken?: string; // Token de rafraîchissement (30 jours)
 }
 
 // 👥 RÔLES ET PERMISSIONS
