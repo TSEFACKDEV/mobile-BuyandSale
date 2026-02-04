@@ -256,6 +256,15 @@ const Register = () => {
         // Messages d'erreur spécifiques avec Alert pour meilleure visibilité
         const lowerErrorMessage = errorMessage.toLowerCase();
         
+        // 🚦 Gestion du rate limiting
+        if (errorMessage.includes('Trop de tentatives')) {
+          showWarning(
+            t('auth.errors.rateLimit.title'),
+            t('auth.errors.rateLimit.message')
+          );
+          return;
+        }
+        
         if (lowerErrorMessage.includes('email') && (lowerErrorMessage.includes('existe') || lowerErrorMessage.includes('already exists'))) {
           const emailExistsMessage = t('auth.errors.validation.emailExists')
           setEmailError(emailExistsMessage)

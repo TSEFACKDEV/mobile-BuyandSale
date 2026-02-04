@@ -53,6 +53,13 @@
     "previous": "Previous",
     "next": "Next"
   },
+  "bottomNav": {
+    "home": "Home",
+    "products": "Products",
+    "postAd": "Post",
+    "sellers": "Sellers",
+    "profile": "Profile"
+  },
   "auth": {
     "errors": {
       "title": "Error",
@@ -103,7 +110,7 @@
       },
       "rateLimit": {
         "title": "Too many attempts",
-        "message": "You have exceeded the limit of 5 login attempts. Please wait 15 minutes before trying again.",
+        "message": "You have exceeded the login attempt limit. Please wait 15 minutes before trying again.",
         "short": "Attempt limit reached"
       },
       "token": {

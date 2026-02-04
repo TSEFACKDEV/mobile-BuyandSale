@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, TextInput, FlatList, RefreshControl, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
 import { useThemeColors } from '../../../contexts/ThemeContext';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useAppDispatch, useAppSelector } from '../../../hooks/store';
@@ -9,13 +10,27 @@ import { selectUsers, selectUsersStatus, selectUsersError } from '../../../store
 import { LoadingType } from '../../../models/store';
 import SellerCard from '../../../components/SellerCard';
 import TopNavigation from '../../../components/TopNavigation';
+import BoostOfferModal from '../../../components/modals/BoostOfferModal';
+import { useBoostReminder } from '../../../hooks/useBoostReminder';
 import createStyles from './style';
 
 const Sellers = () => {
   const colors = useThemeColors();
   const { t, language } = useTranslation();
   const dispatch = useAppDispatch();
+  const navigation = useNavigation<any>();
   const styles = createStyles(colors);
+
+  // Boost reminder
+  const { shouldShow, productToBoost, handleAccept, handleDecline } = useBoostReminder();
+
+  const handleBoostAccept = () => {
+    handleAccept();
+    navigation.navigate('HomeTab', {
+      screen: 'UserProfile',
+      params: { initialTab: 'ProductTab' },
+    });
+  };
 
   // États Redux (comme React)
   const sellers = useAppSelector(selectUsers);
@@ -218,6 +233,16 @@ const Sellers = () => {
           ) : null
         }
       />
+
+      {/* Modal de suggestion de boost */}
+      {shouldShow && productToBoost && (
+        <BoostOfferModal
+          visible={shouldShow}
+          product={productToBoost}
+          onAccept={handleBoostAccept}
+          onDecline={handleDecline}
+        />
+      )}
     </View>
   );
 };

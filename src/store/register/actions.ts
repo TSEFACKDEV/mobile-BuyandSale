@@ -28,8 +28,12 @@ export const registerAction = createAsyncThunk<
     const data = await response.json()
 
     if (!response.ok) {
-      // ✅ Extraction correcte du message depuis data.meta.message (structure backend)
-      const errorMessage = data?.meta?.message || data?.message || 'Erreur lors de l\'inscription'
+      // ✅ Support pour les formats d'erreur multiples
+      const errorMessage = 
+        data?.meta?.message ||       // Format API standard
+        data?.message ||              // Format alternatif
+        data?.error ||                // Format rate limiter
+        'Erreur lors de l\'inscription'
       throw new Error(errorMessage)
     }
 

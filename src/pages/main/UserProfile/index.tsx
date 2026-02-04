@@ -20,7 +20,7 @@ import { useSellerReviews } from '../../../hooks/useSellerReviews';
 import { useDialog } from '../../../contexts/DialogContext';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { useTheme, useThemeColors } from '../../../contexts/ThemeContext';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { logoutAction, getUserProfileAction, updateUserAction } from '../../../store/authentification/actions';
@@ -85,6 +85,7 @@ const getActiveForfait = (product: any) => {
 const UserProfile: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  const route = useRoute();
   const { theme } = useTheme();
   const colors = useThemeColors();
   const { t, language } = useTranslation();
@@ -98,7 +99,13 @@ const UserProfile: React.FC = () => {
   const isAuthenticated = user !== null;
   const isLoggingOut = authState.auth.status === LoadingType.PENDING && !user;
   
-  const [activeTab, setActiveTab] = useState<TabType>('profile');
+  // Récupérer le paramètre initialTab depuis la navigation
+  const params = route.params as { initialTab?: string } | undefined;
+  const initialTab = params?.initialTab;
+
+  const [activeTab, setActiveTab] = useState<TabType>(
+    initialTab === 'ProductTab' ? 'active' : 'profile'
+  );
   const [refreshing, setRefreshing] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);

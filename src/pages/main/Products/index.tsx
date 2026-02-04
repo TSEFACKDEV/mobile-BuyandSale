@@ -9,7 +9,7 @@ import {
   TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRoute, useFocusEffect } from '@react-navigation/native';
+import { useRoute, useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../../../hooks/store';
 import { getValidatedProductsAction } from '../../../store/product/actions';
 import { getUserFavoritesAction } from '../../../store/favorite/actions';
@@ -17,6 +17,8 @@ import { selectUserAuthenticated } from '../../../store/authentification/slice';
 import ProductCard from '../../../components/ProductCard';
 import FilterModal from '../../../components/FilterModal';
 import TopNavigation from '../../../components/TopNavigation';
+import { BoostOfferModal } from '../../../components/modals';
+import { useBoostReminder } from '../../../hooks/useBoostReminder';
 import { useThemeColors } from '../../../contexts/ThemeContext';
 import { useTranslation } from '../../../hooks/useTranslation';
 import { sortProductsByForfaitPriority } from '../../../config/forfaits.config';
@@ -26,6 +28,7 @@ import styles from './style';
 
 const Products = () => {
   const dispatch = useAppDispatch();
+  const navigation = useNavigation();
   const theme = useThemeColors();
   const { t, language } = useTranslation();
   const route = useRoute();
@@ -40,6 +43,24 @@ const Products = () => {
   const favoriteState = useAppSelector((state) => state.favorite);
   const authData = useAppSelector(selectUserAuthenticated);
   const isAuthenticated = authData.entities !== null;
+
+  // Hook pour le boost reminder
+  const {
+    shouldShow: shouldShowBoostReminder,
+    productToBoost,
+    handleAccept: handleBoostAcceptBase,
+    handleDecline: handleBoostDecline,
+  } = useBoostReminder();
+
+  // Gérer l'acceptation : naviguer vers UserProfile avec l'onglet ProductTab
+  const handleBoostAccept = () => {
+    handleBoostAcceptBase(); // Enregistrer la fréquence
+    // Navigation vers la tab HomeTab, puis vers UserProfile avec initialTab
+    (navigation as any).navigate('HomeTab', { 
+      screen: 'UserProfile',
+      params: { initialTab: 'ProductTab' }
+    });
+  };
 
   // Ref pour éviter les appels multiples pendant le chargement
   const isLoadingRef = useRef(false);
@@ -415,6 +436,16 @@ const Products = () => {
         categories={categories || []}
         cities={cities || []}
       />
+
+      {/* Modal de rappel de boost */}
+      {shouldShowBoostReminder && productToBoost && (
+        <BoostOfferModal
+          visible={shouldShowBoostReminder}
+          product={productToBoost}
+          onAccept={handleBoostAccept}
+          onDecline={handleBoostDecline}
+        />
+      )}
     </View>
   );
 };
