@@ -163,12 +163,22 @@
     "profile": {
       "memberSince": "Member since",
       "personalInfo": "Personal Information",
-      "firstName": "First Name",
-      "lastName": "Last Name",
+      "firstName": "First Name (optional)",
+      "lastName": "Name or Business Name",
+      "lastNameHelper": "Enter your full name or business name",
+      "lastNamePlaceholder": "Ex: John Doe or John Doe Business",
       "email": "Email",
       "phone": "Phone",
       "location": "Location",
-      "locationPlaceholder": "City, Region..."
+      "locationPlaceholder": "City, Region...",
+      "seller": {
+        "memberSince": "Member since",
+        "sellerName": "Seller Name",
+        "commerceName": "Business Name",
+        "contact": "Contact",
+        "products": "Products",
+        "noProducts": "No products"
+      }
     },
     "messages": {
       "loading": "Loading...",

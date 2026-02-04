@@ -27,6 +27,7 @@ import ReportModal from '../../../components/ReportModal';
 import ConfirmDialog from '../../../components/ConfirmDialog';
 import { useDialog } from '../../../contexts/DialogContext';
 import { getImageUrl } from '../../../utils/imageUtils';
+import { getDisplayName } from '../../../helper/userHelper';
 import { normalizePhoneForWhatsApp, formatPhoneForDisplay } from '../../../utils/phoneUtils';
 import createStyles from './style';
 import type { HomeStackParamList } from '../../../types/navigation';
@@ -178,7 +179,7 @@ const SellerDetails: React.FC = () => {
     );
   }
 
-  const sellerName = `${seller.firstName} ${seller.lastName}`;
+  const sellerName = getDisplayName(seller.firstName, seller.lastName);
   const count = pagination?.total || sellerProducts?.length || 0;
   const plural = count > 1 ? 's' : '';
 
@@ -324,8 +325,8 @@ const SellerDetails: React.FC = () => {
         <View style={styles.productsCard}>
           <Text style={styles.productsTitle}>
             {language === 'fr' 
-              ? `Produits de ${seller.firstName} (${count})`
-              : `${seller.firstName}'s Products (${count})`}
+              ? `Produits de ${sellerName} (${count})`
+              : `${sellerName}'s Products (${count})`}
           </Text>
 
           {isSellerProductsLoading && currentPage === 1 ? (

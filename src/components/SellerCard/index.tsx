@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useThemeColors } from '../../contexts/ThemeContext';
 import type { AuthUser } from '../../models/user';
 import { getImageUrl, PLACEHOLDER_IMAGE } from '../../utils/imageUtils';
+import { getDisplayName } from '../../helper/userHelper';
 import createStyles from './style';
 
 interface SellerCardProps {
@@ -56,7 +57,7 @@ const SellerCard: React.FC<SellerCardProps> = ({ seller, index }) => {
         </View>
 
         <Text style={styles.name} numberOfLines={2}>
-          {seller.firstName} {seller.lastName}
+          {getDisplayName(seller.firstName, seller.lastName)}
         </Text>
 
         <View style={styles.statsContainer}>

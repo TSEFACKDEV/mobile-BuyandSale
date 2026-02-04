@@ -45,7 +45,7 @@ export interface UserRole {
 // 👤 UTILISATEUR COMPLET (après connexion)
 export interface AuthUser {
   id: string;
-  firstName: string;
+  firstName?: string | null; // Optionnel - Prénom peut être null si nom de commerce
   lastName: string;
   email: string;
   phone: string;

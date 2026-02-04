@@ -54,7 +54,7 @@ const Contact: React.FC = () => {
   const contactSuccess = useAppSelector(selectContactSuccess);
 
   const [formData, setFormData] = useState<FormData>({
-    name: user?.firstName || '',
+    name: user?.firstName ? `${user.firstName} ${user.lastName}` : user?.lastName || '',
     email: user?.email || '',
     subject: '',
     message: '',

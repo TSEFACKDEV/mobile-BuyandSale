@@ -35,7 +35,7 @@ const Register = () => {
   const registerState = useAppSelector(selectUserRegisted)
   const isLoading = registerState.status === LoadingType.PENDING
 
-  const [firstName, setFirstName] = useState<string>('')
+  // Suppression du prénom
   const [lastName, setLastName] = useState<string>('')
   const [email, setEmail] = useState<string>('')
   const [phone, setPhone] = useState<string>('')
@@ -47,7 +47,7 @@ const Register = () => {
   // Configuration Google Auth
   const [request, response, promptAsync] = GoogleAuthService.useGoogleAuth()
 
-  const [firstNameError, setFirstNameError] = useState('')
+  // Suppression de l'erreur prénom
   const [lastNameError, setLastNameError] = useState('')
   const [emailError, setEmailError] = useState('')
   const [phoneError, setPhoneError] = useState('')
@@ -143,7 +143,6 @@ const Register = () => {
   }
 
   const handleRegister = async () => {
-    setFirstNameError('')
     setLastNameError('')
     setEmailError('')
     setPhoneError('')
@@ -153,11 +152,6 @@ const Register = () => {
 
     let isValid = true
 
-    // Validation Prénom
-    if (!firstName.trim()) {
-      setFirstNameError(t('auth.errors.validation.firstNameRequired'))
-      isValid = false
-    }
 
     // Validation Nom
     if (!lastName.trim()) {
@@ -221,7 +215,7 @@ const Register = () => {
         // ✅ Dispatch de l'action Redux registerAction
         const result = await dispatch(
           registerAction({
-            firstName: firstName.trim(),
+            // Suppression de l'envoi du prénom
             lastName: lastName.trim(),
             email: email.trim(),
             phone: normalizePhoneNumber(phone),
@@ -317,24 +311,11 @@ const Register = () => {
 
         {/* Form Section */}
         <View style={styles.formContainer}>
-          {/* First Name Input */}
-          <TextInput
-            label="Prénom"
-            type="text"
-            value={firstName}
-            onChangeText={(text) => {
-              setFirstName(text)
-              setFirstNameError('')
-            }}
-            placeholder="JOHN"
-            error={firstNameError}
-            required
-            leftIcon="person-outline"
-          />
+
 
           {/* Last Name Input */}
           <TextInput
-            label="Nom"
+            label="Nom ou nom de commerce"
             type="text"
             value={lastName}
             onChangeText={(text) => {
