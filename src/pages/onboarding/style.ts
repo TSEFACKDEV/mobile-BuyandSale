@@ -18,6 +18,62 @@ const COLORS = {
 };
 
 const styles = StyleSheet.create({
+    // Logo image (première slide)
+    logoImage: {
+      width: width * 0.85,
+      height: height * 0.32,
+      alignSelf: 'center',
+      resizeMode: 'contain',
+    },
+    // Titre d'accueil (première slide)
+    welcomeTitle: {
+      fontSize: 34,
+      fontWeight: 'bold',
+      color: COLORS.primary,
+      marginBottom: 16,
+      textAlign: 'center',
+      letterSpacing: -0.5,
+      lineHeight: 44,
+      textShadowColor: COLORS.accent,
+      textShadowOffset: { width: 0, height: 2 },
+      textShadowRadius: 8,
+    },
+    // Description d'accueil (première slide)
+    welcomeDescription: {
+      fontSize: 20,
+      color: COLORS.text,
+      textAlign: 'center',
+      lineHeight: 30,
+      fontWeight: '500',
+      marginBottom: 24,
+      paddingHorizontal: 8,
+      textShadowColor: COLORS.light,
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 4,
+    },
+    // Titre des autres slides
+    slideTitle: {
+      fontSize: 24,
+      fontWeight: '700',
+      color: COLORS.primary,
+      marginBottom: 10,
+      textAlign: 'center',
+      letterSpacing: -0.2,
+      lineHeight: 32,
+      textShadowColor: COLORS.gradient2,
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 4,
+    },
+    // Description des autres slides
+    slideDescription: {
+      fontSize: 16,
+      color: COLORS.textLight,
+      textAlign: 'center',
+      lineHeight: 24,
+      fontWeight: '400',
+      marginBottom: 18,
+      paddingHorizontal: 8,
+    },
   container: {
     flex: 1,
     backgroundColor: COLORS.white,

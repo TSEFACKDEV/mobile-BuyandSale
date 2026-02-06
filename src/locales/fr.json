@@ -170,12 +170,22 @@
     "profile": {
       "memberSince": "Membre depuis",
       "personalInfo": "Informations Personnelles",
-      "firstName": "Prénom",
-      "lastName": "Nom",
+      "firstName": "Prénom (optionnel)",
+      "lastName": "Nom ou nom de commerce",
+      "lastNameHelper": "Entrez votre nom complet ou le nom de votre commerce",
+      "lastNamePlaceholder": "Ex: Jean Dupont ou Jean Dupont Commerce",
       "email": "Email",
       "phone": "Téléphone",
       "location": "Localisation",
-      "locationPlaceholder": "Ville, Région..."
+      "locationPlaceholder": "Ville, Région...",
+      "seller": {
+        "memberSince": "Membre depuis",
+        "sellerName": "Nom du vendeur",
+        "commerceName": "Nom du commerce",
+        "contact": "Contact",
+        "products": "Annonces",
+        "noProducts": "Aucune annonce"
+      }
     },
     "messages": {
       "loading": "Chargement...",
@@ -718,6 +728,8 @@
       "errorProductIdMessage": "Impossible de récupérer l'identifiant du produit créé.",
       "successCreated": "Succès",
       "successCreatedMessage": "Annonce créée avec succès !",
+      "validityNotice": "✅ Votre annonce sera valide pendant 60 jours. Après expiration, vous pourrez la renouveler gratuitement si elle n'a pas été vendue.",
+      "expirationInfo": "⏰ Durée: 60 jours | 🔄 Renouvellement: Gratuit et illimité",
       "errorCreating": "Erreur lors de la création du produit",
       "errorGeneric": "Erreur",
       "validations": {

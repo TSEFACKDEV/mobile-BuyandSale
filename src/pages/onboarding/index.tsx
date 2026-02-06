@@ -51,14 +51,15 @@ const Onboarding = () => {
       image: require('../../../assets/splash-icon.png'),
       title: 'Bienvenue sur Buy and Sale',
       description: 'La première marketplace camerounaise pour acheter et vendre facilement',
-      backgroundColor: '#FFF5E6'
+      backgroundColor: '#FFF',
+      icon: 'basket'
     },
     {
       id: '2',
       image: require('../../../assets/onboarding/slide1.png'),
       title: 'Vendez vos produits',
       description: 'Mettez en ligne vos articles en quelques clics et trouvez des acheteurs',
-      backgroundColor: '#E6F7FF',
+      backgroundColor: '#FFF',
       icon: 'pricetag'
     },
     {
@@ -66,7 +67,7 @@ const Onboarding = () => {
       image: require('../../../assets/onboarding/slide2.png'),
       title: 'Achetez en confiance',
       description: 'Découvrez une large sélection de produits de qualité vérifiée',
-      backgroundColor: '#F0E6FF',
+      backgroundColor: '#FFF',
       icon: 'checkmark-circle'
     },
     {
@@ -74,14 +75,35 @@ const Onboarding = () => {
       image: require('../../../assets/onboarding/slide1.png'),
       title: 'Commencez maintenant',
       description: 'Rejoignez la communauté Buy and Sale et transformez votre commerce',
-      backgroundColor: '#E6FFE6',
+      backgroundColor: '#FFF',
       icon: 'rocket'
     }
   ];
 
-  const Slide = ({ item }: { item: Slide }) => {
+  const Slide = ({ item, index }: { item: Slide, index: number }) => {
+    // Première slide : pas d'icône, logo plus grand, texte d'accueil stylisé
+    if (index === 0) {
+      return (
+        <View style={[styles.slide, { width, backgroundColor: item.backgroundColor }]}> 
+          <View style={[styles.slideContent, { justifyContent: 'flex-start' }]}> 
+            {/* Logo plus grand */}
+            <Image 
+              source={item.image}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+            {/* Texte d'accueil captivant */}
+            <View style={styles.textContainer}>
+              <Text style={styles.welcomeTitle}>{item.title}</Text>
+              <Text style={styles.welcomeDescription}>{item.description}</Text>
+            </View>
+          </View>
+        </View>
+      );
+    }
+    // Autres slides : icône, image, titres/design améliorés, padding bottom
     return (
-      <View style={[styles.slide, { width, backgroundColor: item.backgroundColor }]}>
+      <View style={[styles.slide, { width, backgroundColor: item.backgroundColor }]}> 
         <View style={styles.slideContent}>
           {/* Icône de slide avec couleur primary */}
           <View style={styles.iconCircle}>
@@ -91,20 +113,20 @@ const Onboarding = () => {
               color={COLORS.white} 
             />
           </View>
-
           {/* Image */}
           <Image 
             source={item.image}
             style={styles.image}
             resizeMode="contain"
           />
-
           {/* Texte */}
           <View style={styles.textContainer}>
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.description}>{item.description}</Text>
+            <Text style={styles.slideTitle}>{item.title}</Text>
+            <Text style={styles.slideDescription}>{item.description}</Text>
           </View>
         </View>
+        {/* Padding bottom supplémentaire */}
+        <View style={{ height: 24 }} />
       </View>
     );
   };
@@ -226,7 +248,7 @@ const Onboarding = () => {
       <FlatList
         ref={flatListRef}
         data={slides}
-        renderItem={({ item }) => <Slide item={item} />}
+        renderItem={({ item, index }) => <Slide item={item} index={index} />}
         horizontal
         showsHorizontalScrollIndicator={false}
         pagingEnabled

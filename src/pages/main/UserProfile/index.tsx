@@ -296,7 +296,7 @@ const UserProfile: React.FC = () => {
       } as any);
 
       // Ajouter les champs requis
-      formData.append('firstName', user!.firstName);
+      formData.append('firstName', user!.firstName ?? '');
       formData.append('lastName', user!.lastName);
       formData.append('email', user!.email);
       if (user!.phone) {
