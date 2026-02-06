@@ -7,7 +7,6 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "scheme": "buyandsale",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -25,11 +24,13 @@
             },
             "192.168.1.28": {
               "NSExceptionAllowsInsecureHTTPLoads": true
+            },
+            "192.168.1.28.nip.io": {
+              "NSExceptionAllowsInsecureHTTPLoads": true
             }
           }
         }
-      },
-      "associatedDomains": ["applinks:auth.expo.io"]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -38,8 +39,7 @@
       },
       "package": "com.buyandsale.app",
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "googleServicesFile": "./google-services.json"
+      "predictiveBackGestureEnabled": false
     },
     "web": {
       "favicon": "./assets/favicon.png"

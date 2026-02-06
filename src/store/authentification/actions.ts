@@ -139,11 +139,11 @@ export const getUserProfileAction = createAsyncThunk<
 // Action pour gérer le callback OAuth Google
 export const handleSocialAuthCallback = createAsyncThunk<
   ApiResponse<AuthUser>,
-  string,
+  { accessToken: string; refreshToken?: string },
   ThunkApi
->('auth/socialCallback', async (token, apiThunk) => {
+>('auth/socialCallback', async ({ accessToken, refreshToken }, apiThunk) => {
   try {
-    if (!token) {
+    if (!accessToken) {
       throw new Error('Token non reçu depuis le service d\'authentification');
     }
 
@@ -154,7 +154,7 @@ export const handleSocialAuthCallback = createAsyncThunk<
         method: 'GET',
         headers: {
           'Content-type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       }
     );
@@ -169,8 +169,21 @@ export const handleSocialAuthCallback = createAsyncThunk<
       throw new Error(errorMessage);
     }
 
-    // Retourner les données
-    return data;
+    // Construire la réponse avec user + token (comme loginAction)
+    const userWithToken = {
+      meta: data.meta,
+      data: {
+        user: data.data,
+        token: {
+          type: 'Bearer' as const,
+          AccessToken: accessToken,
+          RefreshToken: refreshToken,
+        },
+      },
+    };
+
+    // Retourner les données au bon format
+    return userWithToken;
   } catch (error: unknown) {
     return apiThunk.rejectWithValue({
       message: (error as Error).message || 'Erreur d\'authentification sociale',

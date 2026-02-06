@@ -11,17 +11,16 @@ import styles from './style'
 import COLORS from '../../colors'
 import { useAppDispatch, useAppSelector } from '../../../hooks/store'
 import { registerAction } from '../../../store/register/actions'
-import { handleSocialAuthCallback } from '../../../store/authentification/actions'
 import { selectUserRegisted } from '../../../store/register/slice'
 import { LoadingType } from '../../../models/store'
 import type { UserRegisterForm } from '../../../models/user'
-import { GoogleAuthService } from '../../../services/googleAuthService'
 import { Loading } from '../../../components/LoadingVariants'
 import { normalizePhoneNumber, validateCameroonPhone } from '../../../utils/phoneUtils'
 import PasswordStrengthIndicator from '../../../components/PasswordStrengthIndicator'
 import PhoneInput from '../../../components/PhoneInput'
 import { useTranslation } from '../../../hooks/useTranslation'
 import { useDialog } from '../../../contexts/DialogContext'
+import { useGoogleAuth } from '../../../hooks/useGoogleAuth'
 
 type RegisterNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Register'>
 
@@ -42,10 +41,8 @@ const Register = () => {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [agreedToTerms, setAgreedToTerms] = useState(false)
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
 
-  // Configuration Google Auth
-  const [request, response, promptAsync] = GoogleAuthService.useGoogleAuth()
+  const { signInWithGoogle, isLoading: isGoogleLoading } = useGoogleAuth()
 
   const [firstNameError, setFirstNameError] = useState('')
   const [lastNameError, setLastNameError] = useState('')
@@ -54,88 +51,6 @@ const Register = () => {
   const [passwordError, setPasswordError] = useState('')
   const [confirmPasswordError, setConfirmPasswordError] = useState('')
   const [termsError, setTermsError] = useState('')
-
-  // 🔐 Gérer la réponse de Google OAuth
-  useEffect(() => {
-    if (response?.type === 'success') {
-      handleGoogleSuccess(response.authentication?.accessToken);
-    } else if (response?.type === 'error') {
-      setIsGoogleLoading(false);
-      showWarning(t('auth.errors.title'), t('auth.errors.google.authFailed'));
-    } else if (response?.type === 'cancel') {
-      setIsGoogleLoading(false);
-    }
-  }, [response]);
-
-  // 🔐 Traiter le succès de l'authentification Google
-  const handleGoogleSuccess = async (googleAccessToken?: string) => {
-    if (!googleAccessToken) {
-      showWarning('Erreur', 'Token Google non reçu');
-      setIsGoogleLoading(false);
-      return;
-    }
-
-    try {
-
-
-      // Échanger le token Google avec notre backend
-      const result = await GoogleAuthService.authenticateWithBackend(
-        googleAccessToken
-      );
-
-      if (result.success && result.accessToken) {
-        // Dispatch l'action Redux pour sauvegarder les données utilisateur
-        const resultAction = await dispatch(
-          handleSocialAuthCallback(result.accessToken)
-        );
-
-        if (handleSocialAuthCallback.fulfilled.match(resultAction)) {
-          showSuccess('Succès', 'Inscription Google réussie !');
-          // La navigation se fera automatiquement via RootNavigator
-        } else {
-          throw new Error('Échec de récupération du profil utilisateur');
-        }
-      } else {
-        throw new Error(result.error || 'Authentification Google échouée');
-      }
-    } catch (error) {
-      // TODO: Implémenter système de logging
-      showWarning(
-        'Erreur',
-        error instanceof Error ? error.message : 'Erreur d\'authentification Google'
-      );
-    } finally {
-      setIsGoogleLoading(false);
-    }
-  };
-
-  // 🔐 Initier l'authentification Google
-  const handleGoogleRegister = async () => {
-    if (!GoogleAuthService.isConfigured()) {
-      showWarning(
-        t('auth.titles.configMissing'),
-        t('auth.errors.google.configMissing')
-      );
-      return;
-    }
-
-    if (!request) {
-      showWarning(
-        t('auth.errors.title'),
-        t('auth.errors.google.notAvailable')
-      );
-      return;
-    }
-
-    setIsGoogleLoading(true);
-    try {
-      await promptAsync();
-    } catch (error) {
-      // TODO: Implémenter système de logging
-      setIsGoogleLoading(false);
-      showWarning(t('auth.errors.title'), t('auth.errors.google.initFailed'));
-    }
-  };
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -502,10 +417,10 @@ const Register = () => {
           <Pressable
             style={[
               styles.googleButton,
-              (!request || isGoogleLoading || isLoading) && styles.buttonDisabled,
+              (isGoogleLoading || isLoading) && styles.buttonDisabled,
             ]}
-            onPress={handleGoogleRegister}
-            disabled={!request || isGoogleLoading || isLoading}
+            onPress={signInWithGoogle}
+            disabled={isGoogleLoading || isLoading}
           >
             {isGoogleLoading ? (
               <>

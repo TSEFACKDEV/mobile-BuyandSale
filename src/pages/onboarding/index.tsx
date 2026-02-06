@@ -12,6 +12,7 @@ import {
   ImageSourcePropType
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Button from '../../components/Button';
 import styles, { COLORS } from './style';
@@ -47,11 +48,10 @@ const Onboarding = () => {
   const slides: Slide[] = [
     {
       id: '1',
-      image: require('../../../assets/onboarding/logo.png'),
+      image: require('../../../assets/splash-icon.png'),
       title: 'Bienvenue sur Buy and Sale',
       description: 'La première marketplace camerounaise pour acheter et vendre facilement',
-      backgroundColor: '#FFF5E6',
-      icon: 'basket'
+      backgroundColor: '#FFF5E6'
     },
     {
       id: '2',

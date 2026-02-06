@@ -1,12 +1,12 @@
-import { Platform } from 'react-native';
-
 // Configuration de l'API selon l'environnement
 const getApiUrl = (): string => {
   // En développement
   if (__DEV__) {
-    // TEMPORAIRE: Utiliser l'IP locale pour tous les appareils
-    // Si ça ne fonctionne pas, essayez 10.0.2.2 pour Android Emulator
-    return 'http://192.168.1.28:3001/api/buyandsale';
+    // IMPORTANT: Utiliser nip.io pour que le sessionId soit préservé avec Google OAuth
+    // nip.io est un service DNS wildcard qui résout vers l'IP (nécessaire pour Google OAuth)
+    // EXPLICATION: 192.168.1.28.nip.io résout automatiquement vers 192.168.1.28
+    // Cela permet à Google OAuth d'accepter l'URL (rejette les IPs brutes)
+    return 'http://192.168.1.28.nip.io:3001/api/buyandsale';
     
     /* VERSION AVEC DÉTECTION AUTO (à réactiver si besoin)
     if (Platform.OS === 'android') {
@@ -21,8 +21,21 @@ const getApiUrl = (): string => {
     */
   }
   
-  // En production, utiliser l'URL de production
-  return 'https://your-production-api.com/api/buyandsale';
+  // ====================================
+  // 🚀 PRODUCTION - À MODIFIER AVANT DE DÉPLOYER !
+  // ====================================
+  // Remplace par ton URL de production avec HTTPS
+  // Option A: Si l'API est sur un sous-domaine dédié
+  return 'https://api.buyandsale.cm/api/buyandsale';
+  
+  // Option B: Si l'API est sur le même domaine que le frontend
+  // return 'https://buyandsale.cm/api/buyandsale';
+  
+  // ⚠️ IMPORTANT:
+  // 1. Utilise HTTPS en production (obligatoire)
+  // 2. Mets à jour GOOGLE_CALLBACK_URL dans server/.env.production
+  // 3. Ajoute cette URL dans Google OAuth Console
+  // 4. Voir PRODUCTION_DEPLOYMENT_GUIDE.md pour plus de détails
 };
 
 export const API_CONFIG = {

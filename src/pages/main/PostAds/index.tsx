@@ -50,7 +50,7 @@ import {
 
 // Modals (depuis components)
 import {
-  BoostOfferModal,
+  CreateAdSuccessModal,
   ForfaitSelectorModal,
   PaymentModal,
   PaymentStatusModal,
@@ -113,7 +113,7 @@ const PostAds: React.FC = () => {
   const [showCityPicker, setShowCityPicker] = useState(false);
   
   // États pour les forfaits
-  const [showBoostOffer, setShowBoostOffer] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showForfaitSelector, setShowForfaitSelector] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showPaymentStatusModal, setShowPaymentStatusModal] = useState(false);
@@ -193,8 +193,9 @@ const PostAds: React.FC = () => {
 
   const closeAndNavigateHome = useCallback(() => {
     closeDialog();
+    resetForm(); // ✅ Reset avant navigation
     navigation.navigate('HomeTab');
-  }, [closeDialog, navigation]);
+  }, [closeDialog, navigation, resetForm]);
 
   // Réinitialiser le formulaire quand on quitte la page
   useFocusEffect(
@@ -461,25 +462,10 @@ const PostAds: React.FC = () => {
         }
 
         setCreatedProductId(createdProduct.id);
+        setIsSubmitting(false);
 
-        // Proposer le boost si des forfaits sont disponibles
-        if (forfaits && forfaits.length > 0) {
-          setTimeout(() => {
-            if (isMountedRef.current) {
-              setShowBoostOffer(true);
-            }
-          }, 500);
-        } else {
-          setConfirmDialog({
-            visible: true,
-            title: t('postAds.successCreated'),
-            message: t('postAds.successCreatedMessage'),
-            type: 'success',
-            confirmText: 'OK',
-            cancelText: '',
-            onConfirm: closeAndNavigateHome,
-          });
-        }
+        // Afficher la modal de succès avec proposition de boost
+        setShowSuccessModal(true);
       } else {
         const errorMsg = (result.payload as any)?.message || t('postAds.errorCreating');
         setConfirmDialog({
@@ -517,28 +503,24 @@ const PostAds: React.FC = () => {
     }
   };
 
-  // Handlers pour les forfaits
-  const handleAcceptBoost = () => {
-    if (!isMountedRef.current) return;
-    setShowBoostOffer(false);
+  // Handlers pour la modal de succès
+  const handleViewForfaits = () => {
+    setShowSuccessModal(false);
+    // NE PAS reset ici, on a encore besoin de createdProductId pour le forfait
     setTimeout(() => {
-      if (isMountedRef.current) {
-        setShowForfaitSelector(true);
-      }
+      setShowForfaitSelector(true);
     }, 100);
   };
 
-  const handleDeclineBoost = () => {
-    if (!isMountedRef.current) return;
-    setShowBoostOffer(false);
-
+  const handleSkipBoost = () => {
+    setShowSuccessModal(false);
+    resetForm();
     setConfirmDialog({
       visible: true,
       title: t('postAds.successCreated'),
       message: t('postAds.successCreatedMessage'),
       type: 'success',
-      confirmText: t('postAds.ok'),
-      cancelText: '',
+      confirmText: 'OK',
       onConfirm: closeAndNavigateHome,
     });
   };
@@ -580,7 +562,6 @@ const PostAds: React.FC = () => {
     if (!isMountedRef.current) return;
 
     setShowForfaitSelector(false);
-    setShowBoostOffer(false);
 
     setConfirmDialog({
       visible: true,
@@ -609,9 +590,10 @@ const PostAds: React.FC = () => {
     setShowPaymentStatusModal(false);
     setShowPaymentModal(false);
     setShowForfaitSelector(false);
-    setShowBoostOffer(false);
+    setShowSuccessModal(false);
+    resetForm(); // ✅ Reset à la fin du processus
     navigation.navigate('HomeTab');
-  }, [navigation]);
+  }, [navigation, resetForm]);
 
   const handlePaymentSuccess = () => closeAllModalsAndNavigateHome();
   const handlePaymentError = () => closeAllModalsAndNavigateHome();
@@ -1136,18 +1118,19 @@ const PostAds: React.FC = () => {
         </View>
       </Modal>
 
-      <BoostOfferModal
-        visible={showBoostOffer}
-        onAccept={handleAcceptBoost}
-        onDecline={handleDeclineBoost}
+      <CreateAdSuccessModal
+        visible={showSuccessModal}
+        onViewForfaits={handleViewForfaits}
+        onSkip={handleSkipBoost}
       />
+
 
       <ForfaitSelectorModal
         visible={showForfaitSelector}
         forfaits={forfaits || []}
         onSelect={handleForfaitSelected}
         onSkip={handleSkipForfait}
-        onClose={() => setShowForfaitSelector(false)}
+        onClose={handleSkipForfait}
         productName={formData.name || 'votre annonce'}
         isLoading={forfaitStatus === 'loading'}
       />

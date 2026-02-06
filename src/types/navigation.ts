@@ -9,7 +9,6 @@ export type AuthStackParamList = {
   ResetPassword: undefined;
   VerifyOTP: { userId?: string; method?: 'SMS' | 'EMAIL'; contact?: string };
   AccountSuspended: undefined;
-  SocialCallback: { token?: string };
   UseCondition: undefined;
   Confidentiality: undefined;
 };

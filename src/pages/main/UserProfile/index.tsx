@@ -309,7 +309,7 @@ const UserProfile: React.FC = () => {
       const fetchWithAuth = require('../../../utils/fetchWithAuth').default;
 
       const response = await fetchWithAuth(
-        `${API_CONFIG.BASE_URL}/users/${user!.id}`,
+        `${API_CONFIG.BASE_URL}/user/${user!.id}`,
         {
           method: 'PUT',
           body: formData,

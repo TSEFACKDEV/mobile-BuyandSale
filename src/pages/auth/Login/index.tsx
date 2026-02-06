@@ -11,15 +11,14 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import styles from './style'
 import COLORS from '../../colors'
 import { useAppDispatch, useAppSelector } from '../../../hooks/store'
-import { loginAction, handleSocialAuthCallback } from '../../../store/authentification/actions'
+import { loginAction } from '../../../store/authentification/actions'
 import { selectUserAuthenticated } from '../../../store/authentification/slice'
 import { LoadingType } from '../../../models/store'
-import { GoogleAuthService } from '../../../services/googleAuthService'
-import API_CONFIG from '../../../config/api.config'
 import { Loading } from '../../../components/LoadingVariants'
 import { normalizePhoneNumber, validateCameroonPhone } from '../../../utils/phoneUtils'
 import { useTranslation } from '../../../hooks/useTranslation'
 import { useDialog } from '../../../contexts/DialogContext'
+import { useGoogleAuth } from '../../../hooks/useGoogleAuth'
 
 type LoginNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>
 
@@ -36,10 +35,7 @@ const Login = () => {
   const [password, setPassword] = useState('')
   const [identifierError, setIdentifierError] = useState('')
   const [passwordError, setPasswordError] = useState('')
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
-
-  // Configuration Google Auth avec Expo AuthSession
-  const [request, response, promptAsync] = GoogleAuthService.useGoogleAuth()
+  const { signInWithGoogle, isLoading: isGoogleLoading } = useGoogleAuth()
 
   // Gérer le bouton retour Android
   useEffect(() => {
@@ -49,89 +45,6 @@ const Login = () => {
     });
     return () => backHandler.remove();
   }, [navigation]);
-
-  // 🔐 Gérer la réponse de Google OAuth
-  useEffect(() => {
-    if (response?.type === 'success') {
-      handleGoogleSuccess(response.authentication?.accessToken);
-    } else if (response?.type === 'error') {
-      setIsGoogleLoading(false);
-      showWarning(t('auth.errors.title'), t('auth.errors.google.authFailed'));
-    } else if (response?.type === 'cancel') {
-      setIsGoogleLoading(false);
-    }
-  }, [response]);
-
-  // 🔐 Traiter le succès de l'authentification Google
-  const handleGoogleSuccess = async (googleAccessToken?: string) => {
-    if (!googleAccessToken) {
-      showWarning(t('auth.errors.title'), t('auth.errors.google.tokenNotReceived'));
-      setIsGoogleLoading(false);
-      return;
-    }
-
-    try {
-
-
-      // Échanger le token Google avec notre backend
-      const result = await GoogleAuthService.authenticateWithBackend(
-        googleAccessToken
-      );
-
-      if (result.success && result.accessToken) {
-        // Dispatch l'action Redux pour sauvegarder les données utilisateur
-        const resultAction = await dispatch(
-          handleSocialAuthCallback(result.accessToken)
-        );
-
-        if (handleSocialAuthCallback.fulfilled.match(resultAction)) {
-          showSuccess(t('auth.success.title'), t('auth.success.googleLogin'));
-          // La navigation se fera automatiquement via RootNavigator
-        } else {
-          throw new Error(t('auth.errors.google.profileFailed'));
-        }
-      } else {
-        throw new Error(result.error || t('auth.errors.google.authFailed'));
-      }
-    } catch (error) {
-      // TODO: Implémenter système de logging
-      showWarning(
-        t('auth.errors.title'),
-        error instanceof Error ? error.message : t('auth.errors.google.authFailed')
-      );
-    } finally {
-      setIsGoogleLoading(false);
-    }
-  };
-
-  // 🔐 Initier l'authentification Google
-  const handleGoogleLogin = async () => {
-    // Vérifier que la configuration Google est présente
-    if (!GoogleAuthService.isConfigured()) {
-      showWarning(
-        'Configuration manquante',
-        'L\'authentification Google n\'est pas configurée. Veuillez contacter l\'administrateur.'
-      );
-      return;
-    }
-
-    if (!request) {
-      showWarning(
-        'Erreur',
-        'Authentification Google non disponible pour le moment.'
-      );
-      return;
-    }
-
-    setIsGoogleLoading(true);
-    try {
-      await promptAsync();
-    } catch (error) {
-      // TODO: Implémenter système de logging
-      setIsGoogleLoading(false);
-      showWarning('Erreur', 'Impossible d\'initier l\'authentification Google');
-    }
-  };
 
   // Validation avec phoneUtils (comme web)
   const validateIdentifier = (value: string): { isValid: boolean; error: string } => {
@@ -312,10 +225,10 @@ const Login = () => {
           <Pressable
             style={[
               styles.googleButton,
-              (!request || isGoogleLoading || isLoading) && styles.buttonDisabled,
+              (isGoogleLoading || isLoading) && styles.buttonDisabled,
             ]}
-            onPress={handleGoogleLogin}
-            disabled={!request || isGoogleLoading || isLoading}
+            onPress={signInWithGoogle}
+            disabled={isGoogleLoading || isLoading}
           >
             {isGoogleLoading ? (
               <>

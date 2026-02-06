@@ -1,8 +1,8 @@
 import React from 'react';
-import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { ActivityIndicator, View, Linking, Image, Text, Platform } from 'react-native';
+import { ActivityIndicator, View, Image, Text, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 
@@ -14,7 +14,6 @@ import ForgotPassword from '../pages/auth/ForgotPassWord';
 import ResetPassword from '../pages/auth/ResetPassWord';
 import VerifyOTP from '../pages/auth/VerifyOTP';
 import AccountSuspended from '../pages/auth/AccountSuspended';
-import SocialCallback from '../pages/auth/SocialCallback';
 import Home from '../pages/main/Home';
 import ProductDetails from '../pages/main/ProductDetails';
 import Products from '../pages/main/Products';
@@ -107,10 +106,6 @@ const AuthNavigator = () => {
         name="AccountSuspended" 
         component={AccountSuspended}
       />
-      <AuthStack.Screen 
-        name="SocialCallback" 
-        component={SocialCallback}
-      />
       {/* Pages légales accessibles depuis l'inscription */}
       <AuthStack.Group
         screenOptions={{
@@ -193,7 +188,6 @@ const HomeStackNavigator = () => {
 };
 
 // =====================
-// =====================
 // Products Stack Navigator
 // =====================
 const ProductsStackNavigator = () => {
@@ -209,6 +203,30 @@ const ProductsStackNavigator = () => {
         name="ProductsList" 
         component={Products}
       />
+      <ProductsStack.Screen
+        name="ProductDetails"
+        options={{
+          title: 'Détails du produit',
+        }}
+      >
+        {() => (
+          <Authenticated>
+            <ProductDetails />
+          </Authenticated>
+        )}
+      </ProductsStack.Screen>
+      <ProductsStack.Screen
+        name="SellerDetails"
+        options={{
+          title: 'Profil du vendeur',
+        }}
+      >
+        {() => (
+          <Authenticated>
+            <SellerDetails />
+          </Authenticated>
+        )}
+      </ProductsStack.Screen>
     </ProductsStack.Navigator>
   );
 };
@@ -235,6 +253,18 @@ const SellersStackNavigator = () => {
         {() => (
           <Authenticated>
             <SellerDetails />
+          </Authenticated>
+        )}
+      </SellersStack.Screen>
+      <SellersStack.Screen
+        name="ProductDetails"
+        options={{
+          title: 'Détails du produit',
+        }}
+      >
+        {() => (
+          <Authenticated>
+            <ProductDetails />
           </Authenticated>
         )}
       </SellersStack.Screen>
@@ -532,47 +562,7 @@ const MainStackNavigator = () => (
 export const RootNavigator = () => {
   const { isOnboardingComplete, isUserLoggedIn, isLoading } = useAuth();
 
-  // Configuration du Deep Linking pour OAuth callback
-  const linking: LinkingOptions<RootStackParamList> = {
-    prefixes: [
-      'buyandsale://',
-      'http://localhost:19006',
-      'exp://localhost:19000',
-    ],
-    config: {
-      screens: {
-        Auth: {
-          screens: {
-            SocialCallback: 'auth/social-callback',
-          },
-        },
-        Main: 'main',
-        Onboarding: 'onboarding',
-      },
-    },
-    async getInitialURL() {
-      // Vérifier si l'app a été ouverte via un deep link
-      const url = await Linking.getInitialURL();
-      
-      if (url != null) {
-        return url;
-      }
-      
-      return undefined;
-    },
-    subscribe(listener) {
-      // Écouter les deep links pendant que l'app est ouverte
-      const onReceiveURL = ({ url }: { url: string }) => {
-        listener(url);
-      };
 
-      const subscription = Linking.addEventListener('url', onReceiveURL);
-
-      return () => {
-        subscription.remove();
-      };
-    },
-  };
 
   // Écran de chargement
   if (isLoading) {
@@ -584,7 +574,7 @@ export const RootNavigator = () => {
   }
 
   return (
-    <NavigationContainer linking={linking}>
+    <NavigationContainer>
       <RootStack.Navigator
         screenOptions={{
           headerShown: false,
