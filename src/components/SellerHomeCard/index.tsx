@@ -5,7 +5,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useThemeColors } from '../../contexts/ThemeContext';
 import type { AuthUser } from '../../models/user';
 import { getImageUrl, PLACEHOLDER_IMAGE } from '../../utils/imageUtils';
-import { getDisplayName } from '../../helper/userHelper';
+import { getDisplayName } from '../../helpers/userHelper';
 import createStyles from './style';
 
 interface SellerCardProps {

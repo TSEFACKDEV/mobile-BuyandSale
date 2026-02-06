@@ -27,7 +27,7 @@ import ReportModal from '../../../components/ReportModal';
 import ConfirmDialog from '../../../components/ConfirmDialog';
 import { useDialog } from '../../../contexts/DialogContext';
 import { getImageUrl } from '../../../utils/imageUtils';
-import { getDisplayName } from '../../../helper/userHelper';
+import { getDisplayName } from '../../../helpers/userHelper';
 import { normalizePhoneForWhatsApp, formatPhoneForDisplay } from '../../../utils/phoneUtils';
 import createStyles from './style';
 import type { HomeStackParamList } from '../../../types/navigation';
