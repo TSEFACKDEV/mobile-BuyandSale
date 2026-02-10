@@ -11,6 +11,7 @@ import {
   Dimensions,
   StatusBar,
   Modal,
+  FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
@@ -21,21 +22,29 @@ import { useAppDispatch, useAppSelector } from '../../../hooks/store';
 import { toggleFavoriteAction } from '../../../store/favorite/actions';
 import { 
   recordProductViewAction, 
-  getProductByIdAction 
+  getProductByIdAction,
+  getValidatedProductsAction 
 } from '../../../store/product/actions';
 import { 
   selectCurrentProduct, 
   selectCurrentProductStatus,
-  clearCurrentProduct 
+  clearCurrentProduct,
+  clearValidatedProducts,
+  selectValidatedProducts
 } from '../../../store/product/slice';
 import { getImageUrl } from '../../../utils/imageUtils';
 import { normalizePhoneForWhatsApp } from '../../../utils/phoneUtils';
 import { HomeStackParamList } from '../../../types/navigation';
+import ProductCard from '../../../components/ProductCard';
 import createStyles from './style';
 
 type ProductDetailsRouteProp = RouteProp<HomeStackParamList, 'ProductDetails'>;
 
 const { width } = Dimensions.get('window');
+
+// Fonction utilitaire pour normaliser les mots
+const normalizeWords = (text: string) =>
+  text.toLowerCase().split(/\s+/).filter(word => word.length > 2);
 
 const ProductDetails = () => {
   const { theme } = useTheme();
@@ -61,6 +70,9 @@ const ProductDetails = () => {
   const product = useAppSelector(selectCurrentProduct);
   const productStatus = useAppSelector(selectCurrentProductStatus);
   const allFavorites = useAppSelector((state) => state.favorite.data || []);
+
+  // Récupérer les produits similaires
+  const similarProducts = useAppSelector(selectValidatedProducts);
 
   // Si erreur d'authentification, rediriger vers login
   useEffect(() => {
@@ -98,8 +110,21 @@ const ProductDetails = () => {
 
     return () => {
       dispatch(clearCurrentProduct());
+      dispatch(clearValidatedProducts());
     };
   }, [productId, isAuthenticated, dispatch]);
+
+  // Charger les produits similaires quand le produit est chargé
+  useEffect(() => {
+    if (product?.categoryId) {
+      dispatch(
+        getValidatedProductsAction({
+          categoryId: product.categoryId,
+          limit: 12,
+        })
+      );
+    }
+  }, [product?.categoryId, dispatch]);
 
   // Helpers
   const formatPrice = (price: number) => {
@@ -130,6 +155,36 @@ const ProductDetails = () => {
     return stateMap[state] ? t(stateMap[state]) : state;
   };
 
+  // Calculer les produits similaires avec scoring
+  const scoredSimilarProducts = React.useMemo(() => {
+    if (!product || !similarProducts.length) return [];
+
+    const currentWords = normalizeWords(product.name);
+
+    const scored = similarProducts
+      .filter((p) => p.id !== product.id)
+      .map((p) => {
+        let score = 0;
+        
+        if (p.cityId === product.cityId) score += 10;
+        
+        const productWords = normalizeWords(p.name);
+        const commonWords = currentWords.filter(word =>
+          productWords.some(pw => pw.includes(word) || word.includes(pw))
+        );
+        score += commonWords.length * 5;
+
+        return { product: p, score };
+      })
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6);
+
+    if (scored.length > 0) return scored.map(({ product }) => product);
+
+    return similarProducts.filter((p) => p.id !== product.id).slice(0, 6);
+  }, [product, similarProducts]);
+
   // Handlers
   const handleToggleFavorite = async () => {
     if (!product?.id || isTogglingFavorite) return;
@@ -157,7 +212,7 @@ const ProductDetails = () => {
         message: `${product.name} - ${formatPrice(product.price)}\n\n${product.description}`,
       });
     } catch (error) {
-      // TODO: Implémenter système de logging
+      // Silently fail
     }
   };
 
@@ -526,6 +581,27 @@ const ProductDetails = () => {
                   </TouchableOpacity>
                 </View>
               )}
+            </View>
+          )}
+
+          {/* Section Produits Similaires */}
+          {scoredSimilarProducts.length > 0 && (
+            <View style={styles.similarSection}>
+              <Text style={styles.similarTitle}>
+                {t('productDetails.similarProducts')}
+              </Text>
+              <FlatList
+                data={scoredSimilarProducts}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <View style={styles.similarCardWrapper}>
+                    <ProductCard product={item} containerStyle={styles.similarCard} />
+                  </View>
+                )}
+                contentContainerStyle={styles.similarList}
+              />
             </View>
           )}
 

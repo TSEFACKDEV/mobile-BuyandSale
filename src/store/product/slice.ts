@@ -159,6 +159,14 @@ const productSlice = createSlice({
       state.currentProductError = null;
     },
 
+    // Réinitialiser les produits validés
+    clearValidatedProducts: (state) => {
+      state.validatedProducts = [];
+      state.validatedProductsStatus = 'idle';
+      state.validatedProductsError = null;
+      state.validatedProductsPagination = null;
+    },
+
     // Réinitialiser les erreurs de création
     clearCreateProductError: (state) => {
       state.createProductError = null;
@@ -479,6 +487,7 @@ const productSlice = createSlice({
 
 export const {
   clearCurrentProduct,
+  clearValidatedProducts,
   clearCreateProductError,
   clearUpdateProductError,
 } = productSlice.actions;

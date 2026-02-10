@@ -663,7 +663,8 @@
       "interestedMessage": "Bonjour, je suis intéressé(e) par votre produit",
       "today": "Aujourd'hui",
       "yesterday": "Hier",
-      "daysAgo": "Il y a {days} jours"
+      "daysAgo": "Il y a {days} jours",
+      "similarProducts": "Annonces similaires"
     },
     "postAds": {
       "title": "Créer une annonce",

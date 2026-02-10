@@ -10,13 +10,16 @@ import { selectUserAuthenticated } from '../../store/authentification/slice';
 import { useThemeColors } from '../../contexts/ThemeContext';
 import type { Product } from '../../store/product/actions';
 import { getPrimaryForfait } from '../../config/forfaits.config';
+import { formatPrice, formatRelativeShort } from '../../utils/formatUtils';
 import styles from './style';
+import { ViewStyle } from 'react-native';
 
 interface ProductCardProps {
   product: Product;
+  containerStyle?: ViewStyle;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, containerStyle }) => {
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
   const theme = useThemeColors();
@@ -54,26 +57,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const borderColor = primaryForfait?.card.borderColor || theme.border;
   const borderWidth = primaryForfait?.card.borderWidth || 1;
-
-  // Formater le prix
-  const formatPrice = (price: number) => {
-    return `${price.toLocaleString('fr-FR')} FCFA`;
-  };
-
-  // Formater la date relative
-  const formatRelativeDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 60) return `${diffMins}min`;
-    if (diffHours < 24) return `${diffHours}h`;
-    if (diffDays < 30) return `${diffDays}j`;
-    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
-  };
 
   // Gérer le toggle favori
   const handleToggleFavorite = async () => {
@@ -125,6 +108,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           borderColor: borderColor,
           borderWidth: borderWidth,
         },
+        containerStyle,
       ]}
       onPress={handlePress}
       activeOpacity={0.7}
@@ -190,7 +174,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <View style={styles.metaItem}>
             <Ionicons name="time-outline" size={12} color={theme.textSecondary} />
             <Text style={[styles.metaText, { color: theme.textSecondary }]}>
-              {formatRelativeDate(product.createdAt)}
+              {formatRelativeShort(product.createdAt)}
             </Text>
           </View>
         </View>
@@ -220,7 +204,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   );
 };
 
-export default React.memo(ProductCard, (prevProps, nextProps) => {
-  // Ne re-render que si l'ID du produit change
-  return prevProps.product.id === nextProps.product.id;
-});
+export default React.memo(
+  ProductCard,
+  (prevProps, nextProps) =>
+    prevProps.product.id === nextProps.product.id &&
+    prevProps.containerStyle === nextProps.containerStyle
+);

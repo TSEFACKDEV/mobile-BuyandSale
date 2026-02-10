@@ -10,22 +10,8 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
 
   // Header
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    // paddingVertical: 4,
-    backgroundColor: theme.colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
   headerButton: {
     padding: 8,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    gap: 12,
   },
 
   // Carousel
@@ -411,6 +397,28 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '600',
+  },
+
+  // Section Produits Similaires
+  similarSection: {
+    marginTop: 24,
+    marginBottom: 16,
+  },
+  similarTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: theme.colors.text,
+    marginBottom: 16,
+    paddingHorizontal: 16,
+  },
+  similarList: {
+    paddingHorizontal: 12,
+  },
+  similarCardWrapper: {
+    marginHorizontal: 4,
+  },
+  similarCard: {
+    width: 180,
   },
 
   // Spacing

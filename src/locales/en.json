@@ -664,7 +664,8 @@
     "interestedMessage": "Hello, I am interested in your product",
     "today": "Today",
     "yesterday": "Yesterday",
-    "daysAgo": "{days} days ago"
+    "daysAgo": "{days} days ago",
+    "similarProducts": "Similar Listings"
   },
   "postAds": {
     "title": "Create Ad",
