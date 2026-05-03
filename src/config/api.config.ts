@@ -2,11 +2,13 @@
 const getApiUrl = (): string => {
   // En développement
   if (__DEV__) {
-    // IMPORTANT: Utiliser nip.io pour que le sessionId soit préservé avec Google OAuth
-    // nip.io est un service DNS wildcard qui résout vers l'IP (nécessaire pour Google OAuth)
-    // EXPLICATION: 192.168.1.28.nip.io résout automatiquement vers 192.168.1.28
-    // Cela permet à Google OAuth d'accepter l'URL (rejette les IPs brutes)
-    return 'http://192.168.1.28.nip.io:3001/api/buyandsale';
+    // Lire depuis EXPO_PUBLIC_API_URL définie dans .env (préfixe EXPO_PUBLIC_ requis)
+    const envUrl = process.env.EXPO_PUBLIC_API_URL;
+    if (envUrl) {
+      return envUrl;
+    }
+    // Fallback : mettre à jour l'IP ici si .env absent
+    return 'http://192.168.1.55:3001/api/buyandsale';
     
     /* VERSION AVEC DÉTECTION AUTO (à réactiver si besoin)
     if (Platform.OS === 'android') {

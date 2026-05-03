@@ -98,9 +98,9 @@ const Sellers = () => {
 
   // Mémoriser le renderItem pour éviter les re-renders du FlatList
   const renderItem = useCallback(
-    ({ item, index }: { item: any; index: number }) => (
+    ({ item }: { item: any }) => (
       <View style={styles.cardWrapper}>
-        <SellerCard seller={item} index={index} />
+        <SellerCard seller={item} />
       </View>
     ),
     [styles.cardWrapper]

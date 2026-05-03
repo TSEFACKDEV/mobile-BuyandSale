@@ -25,7 +25,7 @@ import {
 import { getProductByIdAction, updateProductAction } from '../store/product/actions';
 import { selectCategories } from '../store/category/slice';
 import { selectCities } from '../store/city/slice';
-import { getImageUrl, PLACEHOLDER_IMAGE } from '../utils/imageUtils';
+import { getImageUrl, PLACEHOLDER_IMAGE, IMAGE_CONFIG } from '../utils/imageUtils';
 import { Loading } from './LoadingVariants';
 import PhoneInput from './PhoneInput';
 import { useDialog } from '../contexts/DialogContext';
@@ -137,8 +137,8 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
         const selectedImages = result.assets.map(asset => asset.uri);
         setFormData(prev => {
           const totalImages = prev.existingImages.length + prev.newImages.length + selectedImages.length;
-          if (totalImages > 5) {
-            showWarning('Limite atteinte', 'Vous ne pouvez avoir que 5 images maximum');
+          if (totalImages > IMAGE_CONFIG.MAX_IMAGES) {
+            showWarning('Limite atteinte', `Vous ne pouvez avoir que ${IMAGE_CONFIG.MAX_IMAGES} images maximum`);
             return prev;
           }
           return {
@@ -332,11 +332,11 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
                     </TouchableOpacity>
                   </View>
                 ))}
-                {(formData.existingImages.length + formData.newImages.length) < 5 && (
+                {(formData.existingImages.length + formData.newImages.length) < IMAGE_CONFIG.MAX_IMAGES && (
                   <TouchableOpacity style={styles.addImageButton} onPress={pickImage}>
                     <Icon name="add-circle-outline" size={32} color={colors.textSecondary} />
                     <Text style={[styles.addImageText, { color: colors.textSecondary }]}>
-                      Ajouter
+                      Ajouter ({formData.existingImages.length + formData.newImages.length}/{IMAGE_CONFIG.MAX_IMAGES})
                     </Text>
                   </TouchableOpacity>
                 )}

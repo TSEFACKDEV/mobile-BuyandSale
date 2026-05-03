@@ -33,7 +33,9 @@ import {
   selectValidatedProducts
 } from '../../../store/product/slice';
 import { getImageUrl } from '../../../utils/imageUtils';
-import { normalizePhoneForWhatsApp } from '../../../utils/phoneUtils';
+import { normalizePhoneForWhatsApp, formatPhoneForDisplay } from '../../../utils/phoneUtils';
+import { useSellerReviews } from '../../../hooks/useSellerReviews';
+import SellerRatings from '../../../components/SellerRatings';
 import { HomeStackParamList } from '../../../types/navigation';
 import ProductCard from '../../../components/ProductCard';
 import createStyles from './style';
@@ -64,7 +66,6 @@ const ProductDetails = () => {
   const [isImageModalVisible, setIsImageModalVisible] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
   const carouselRef = useRef<ScrollView>(null);
-  const modalCarouselRef = useRef<ScrollView>(null);
 
   // Récupérer le produit depuis le store
   const product = useAppSelector(selectCurrentProduct);
@@ -74,27 +75,6 @@ const ProductDetails = () => {
   // Récupérer les produits similaires
   const similarProducts = useAppSelector(selectValidatedProducts);
 
-  // Si erreur d'authentification, rediriger vers login
-  useEffect(() => {
-    if (productStatus === 'failed' && !product) {
-      Alert.alert(
-        t('productDetails.sessionExpired'),
-        t('productDetails.sessionExpiredMessage'),
-        [
-          {
-            text: t('productDetails.reconnect'),
-            onPress: () => {
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'Auth' as never }],
-              });
-            }
-          }
-        ]
-      );
-    }
-  }, [productStatus, product, navigation, t]);
-
   const isFavorite = product?.id
     ? allFavorites.some((fav) => fav.productId === product.id)
     : false;
@@ -102,9 +82,9 @@ const ProductDetails = () => {
   // Vérifier si l'utilisateur est authentifié
   const isAuthenticated = useAppSelector((state) => state.authentification.auth.entities !== null);
 
-  // Charger le produit au montage SEULEMENT si l'utilisateur est authentifié
+  // Charger le produit au montage (page publique)
   useEffect(() => {
-    if (productId && isAuthenticated) {
+    if (productId) {
       dispatch(getProductByIdAction(productId));
     }
 
@@ -112,7 +92,7 @@ const ProductDetails = () => {
       dispatch(clearCurrentProduct());
       dispatch(clearValidatedProducts());
     };
-  }, [productId, isAuthenticated, dispatch]);
+  }, [productId, dispatch]);
 
   // Charger les produits similaires quand le produit est chargé
   useEffect(() => {
@@ -145,15 +125,15 @@ const ProductDetails = () => {
 
   const formatState = (state: string) => {
     const stateMap: { [key: string]: string } = {
-      'Neuf': 'productDetails.stateNew',
-      'Occasion': 'productDetails.stateUsed',
-      'Correct': 'productDetails.stateFair',
-      'new': 'productDetails.stateNew',
-      'used': 'productDetails.stateUsed',
-      'fair': 'productDetails.stateFair'
+      'NEUF': 'productDetails.stateNew',
+      'OCCASION': 'productDetails.stateUsed',
+      'CORRECT': 'productDetails.stateFair',
     };
     return stateMap[state] ? t(stateMap[state]) : state;
   };
+
+  // Ratings du vendeur
+  const { ratingStats } = useSellerReviews(product?.user?.id);
 
   // Calculer les produits similaires avec scoring
   const scoredSimilarProducts = React.useMemo(() => {
@@ -162,8 +142,8 @@ const ProductDetails = () => {
     const currentWords = normalizeWords(product.name);
 
     const scored = similarProducts
-      .filter((p) => p.id !== product.id)
-      .map((p) => {
+      .filter((p: any) => p.id !== product.id)
+      .map((p: any) => {
         let score = 0;
         
         if (p.cityId === product.cityId) score += 10;
@@ -176,13 +156,13 @@ const ProductDetails = () => {
 
         return { product: p, score };
       })
-      .filter(({ score }) => score > 0)
-      .sort((a, b) => b.score - a.score)
+      .filter(({ score }: { score: number }) => score > 0)
+      .sort((a: { score: number }, b: { score: number }) => b.score - a.score)
       .slice(0, 6);
 
-    if (scored.length > 0) return scored.map(({ product }) => product);
+    if (scored.length > 0) return scored.map(({ product }: { product: any }) => product);
 
-    return similarProducts.filter((p) => p.id !== product.id).slice(0, 6);
+    return similarProducts.filter((p: any) => p.id !== product.id).slice(0, 6);
   }, [product, similarProducts]);
 
   // Handlers
@@ -217,6 +197,10 @@ const ProductDetails = () => {
   };
 
   const handleContactSeller = () => {
+    if (!isAuthenticated) {
+      (navigation as any).navigate('Auth');
+      return;
+    }
     const phoneNumber = product?.telephone || product?.user.phone;
     if (!phoneNumber) return;
 
@@ -472,7 +456,7 @@ const ProductDetails = () => {
               {t('productDetails.description')}
             </Text>
             <Text style={styles.descriptionText}>
-              {product.description}
+              {product.description || t('productDetails.noDescription')}
             </Text>
           </View>
 
@@ -539,19 +523,26 @@ const ProductDetails = () => {
                     <Text style={styles.sellerRole}>
                       {t('productDetails.seller')}
                     </Text>
+                    <SellerRatings statistics={ratingStats} showDetails={false} />
                   </View>
 
                   <Icon name="chevron-forward" size={18} color={theme.colors.textSecondary} />
                 </View>
               </TouchableOpacity>
 
-              {/* Boutons de contact */}
-              {(product.telephone || product.user.phone) && (
+              {/* Boutons de contact — hasPhone visible pour tous, numéro révélé après auth */}
+              {(product.hasPhone || product.telephone || product.user?.phone) && (
                 <View style={styles.contactButtons}>
                   {!showPhoneNumber ? (
                     <TouchableOpacity
                       style={[styles.contactButton, styles.phoneButton]}
-                      onPress={() => setShowPhoneNumber(true)}
+                      onPress={() => {
+                        if (!isAuthenticated) {
+                          (navigation as any).navigate('Auth');
+                          return;
+                        }
+                        setShowPhoneNumber(true);
+                      }}
                     >
                       <Icon name="call-outline" size={17} color={theme.colors.text} />
                       <Text style={[styles.buttonText, { color: theme.colors.text }]}>
@@ -565,7 +556,7 @@ const ProductDetails = () => {
                     >
                       <Icon name="call" size={17} color="#10B981" />
                       <Text style={[styles.buttonText, { color: '#10B981' }]}>
-                        {product.telephone || product.user.phone}
+                        {formatPhoneForDisplay(product.telephone || product.user?.phone || '')}
                       </Text>
                     </TouchableOpacity>
                   )}
@@ -634,7 +625,6 @@ const ProductDetails = () => {
             {/* Carousel plein écran */}
             <View style={styles.modalImageContainer}>
               <ScrollView
-                ref={modalCarouselRef}
                 horizontal
                 pagingEnabled
                 showsHorizontalScrollIndicator={false}

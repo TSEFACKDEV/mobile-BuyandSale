@@ -25,6 +25,15 @@ export type HomeStackParamList = {
 // Products Stack (écrans de produits)
 export type ProductsStackParamList = {
   ProductsList: { categoryId?: string };
+  ProductDetails: { productId: string };
+  SellerDetails: { sellerId: string };
+};
+
+// Sellers Stack
+export type SellersStackParamList = {
+  SellersList: undefined;
+  SellerDetails: { sellerId: string };
+  ProductDetails: { productId: string };
 };
 
 // Bottom Tab Navigator (navigation principale optimisée)

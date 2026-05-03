@@ -19,7 +19,7 @@ export const IMAGE_CONFIG = {
   MAX_FILE_SIZE_PRODUCT: 10 * 1024 * 1024,  // 10MB
   
   // Quantités - ⚠️ LIMITE BACKEND: 1-5 images maximum
-  MAX_IMAGES: 5,
+  MAX_IMAGES: 10,
   MIN_IMAGES: 1,
   
   // Formats supportés (MIME types)

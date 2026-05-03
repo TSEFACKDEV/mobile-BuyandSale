@@ -41,6 +41,7 @@ import {
   AuthStackParamList,
   HomeStackParamList,
   ProductsStackParamList,
+  SellersStackParamList,
   BottomTabParamList,
 } from '../types/navigation';
 
@@ -56,7 +57,7 @@ const RootStack = createNativeStackNavigator<RootStackParamList>();
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
 const ProductsStack = createNativeStackNavigator<ProductsStackParamList>();
-const SellersStack = createNativeStackNavigator();
+const SellersStack = createNativeStackNavigator<SellersStackParamList>();
 const BottomTab = createBottomTabNavigator<BottomTabParamList>();
 const MainStack = createNativeStackNavigator();
 
@@ -146,9 +147,7 @@ const HomeStackNavigator = () => {
         }}
       >
         {() => (
-          <Authenticated>
-            <ProductDetails />
-          </Authenticated>
+          <ProductDetails />
         )}
       </HomeStack.Screen>
       <HomeStack.Screen
@@ -210,9 +209,7 @@ const ProductsStackNavigator = () => {
         }}
       >
         {() => (
-          <Authenticated>
-            <ProductDetails />
-          </Authenticated>
+          <ProductDetails />
         )}
       </ProductsStack.Screen>
       <ProductsStack.Screen
@@ -263,9 +260,7 @@ const SellersStackNavigator = () => {
         }}
       >
         {() => (
-          <Authenticated>
-            <ProductDetails />
-          </Authenticated>
+          <ProductDetails />
         )}
       </SellersStack.Screen>
     </SellersStack.Navigator>
@@ -560,8 +555,7 @@ const MainStackNavigator = () => (
 // Root Navigator (Onboarding -> Auth -> Main)
 // =====================
 export const RootNavigator = () => {
-  const { isOnboardingComplete, isUserLoggedIn, isLoading } = useAuth();
-
+  const { isOnboardingComplete, isLoading } = useAuth();
 
 
   // Écran de chargement

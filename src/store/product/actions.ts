@@ -17,7 +17,8 @@ export interface Product {
   status: 'PENDING' | 'VALIDATED' | 'REJECTED';
   etat: 'NEUF' | 'OCCASION' | 'CORRECT';
   quartier?: string;
-  telephone: string;
+  telephone?: string; // undefined pour les utilisateurs non connectés
+  hasPhone?: boolean; // indique si un numéro existe (visible pour tous)
   viewCount?: number;
   categoryId: string;
   cityId: string;
