@@ -69,7 +69,7 @@ const Confidentiality: React.FC = () => {
 
   const productsInfo = [
     t('privacy.content.products.images') ||
-      'Images de vos produits (maximum 5 par annonce)',
+      'Images de vos produits (maximum 10 par annonce)',
     t('privacy.content.products.descriptions') ||
       'Descriptions, prix, quantités et état des produits',
     t('privacy.content.products.location') ||
@@ -144,7 +144,7 @@ const Confidentiality: React.FC = () => {
             <Icon name="time-outline" size={16} color="#FFF" />
             <Text style={styles.lastUpdatedText}>
               {t('privacy.lastUpdated') || 'Dernière mise à jour'} :{' '}
-              {t('privacy.lastUpdatedDate') || '2 septembre 2025'}
+              {t('privacy.lastUpdatedDate') || '15 mars 2026'}
             </Text>
           </View>
         </LinearGradient>

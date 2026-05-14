@@ -13,7 +13,6 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>('fr');
-  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const loadLanguage = async () => {
@@ -21,11 +20,14 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
         const savedLanguage = await AsyncStorage.getItem('appLanguage');
         if (savedLanguage === 'en' || savedLanguage === 'fr') {
           setLanguageState(savedLanguage);
+        } else {
+          // Détecter la langue du téléphone (disponible nativement via Intl)
+          const deviceLocale = Intl.DateTimeFormat().resolvedOptions().locale;
+          const lang = deviceLocale?.slice(0, 2).toLowerCase();
+          setLanguageState(lang === 'en' ? 'en' : 'fr');
         }
       } catch (error) {
         // Erreur silencieuse
-      } finally {
-        setIsInitialized(true);
       }
     };
 
@@ -46,7 +48,6 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     await setLanguage(newLang);
   };
 
-  // Toujours fournir le Provider, même pendant l'initialisation
   return (
     <LanguageContext.Provider value={{ language, setLanguage, toggleLanguage }}>
       {children}

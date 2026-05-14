@@ -132,7 +132,7 @@ const UseCondition: React.FC = () => {
             <Icon name="calendar-outline" size={16} color={colors.primary} />
             <Text style={styles.lastUpdatedText}>
               {t('terms.lastUpdated') || 'Dernière mise à jour'} :{' '}
-              {t('terms.lastUpdatedDate') || '2 septembre 2025'}
+              {t('terms.lastUpdatedDate') || '15 mars 2026'}
             </Text>
           </View>
         </View>

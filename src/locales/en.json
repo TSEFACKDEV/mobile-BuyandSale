@@ -432,7 +432,7 @@
     "title": "Terms of Use",
     "subtitle": "Rules and conditions for using the BuyAndSale platform. Please read these terms carefully before using our services.",
     "lastUpdated": "Last updated",
-    "lastUpdatedDate": "September 2, 2025",
+    "lastUpdatedDate": "March 15, 2026",
     "important": {
       "title": "Important to remember",
       "description": "By using BuyAndSale, you accept these terms in their entirety. These rules are essential to maintain a safe and fair environment for all our users."
@@ -517,7 +517,7 @@
     "title": "Privacy Policy",
     "subtitle": "Your privacy is our priority. Discover how we collect, use and protect your personal data on BuyAndSale.",
     "lastUpdated": "Last updated",
-    "lastUpdatedDate": "September 2, 2025",
+    "lastUpdatedDate": "March 15, 2026",
     "summary": {
       "title": "Summary in brief",
       "description": "BuyAndSale only collects data necessary for the operation of our Cameroonian marketplace. Your personal information is never sold to third parties and remains secured by cutting-edge technologies."
@@ -584,7 +584,7 @@
         "avatar": "Profile picture: Optional avatar you upload"
       },
       "products": {
-        "images": "Images of your products (maximum 5 per ad)",
+        "images": "Images of your products (maximum 10 per ad)",
         "descriptions": "Descriptions, prices, quantities and condition of products",
         "location": "Location (city and neighborhood in Cameroon)",
         "phone": "Phone number for direct contact"

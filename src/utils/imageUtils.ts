@@ -16,10 +16,10 @@ import API_CONFIG from '../config/api.config';
 export const IMAGE_CONFIG = {
   // Tailles limites (en bytes)
   MAX_FILE_SIZE_AVATAR: 5 * 1024 * 1024,    // 5MB
-  MAX_FILE_SIZE_PRODUCT: 10 * 1024 * 1024,  // 10MB
+  MAX_FILE_SIZE_PRODUCT: 5 * 1024 * 1024,   // 5MB
   
-  // Quantités - ⚠️ LIMITE BACKEND: 1-5 images maximum
-  MAX_IMAGES: 5,
+  // Quantités - ⚠️ LIMITE BACKEND: 1-10 images maximum
+  MAX_IMAGES: 10,
   MIN_IMAGES: 1,
   
   // Formats supportés (MIME types)
@@ -33,7 +33,7 @@ export const IMAGE_CONFIG = {
   MESSAGES: {
     INVALID_FORMAT: 'Format non supporté. Utilisez JPG, PNG ou WebP uniquement.',
     TOO_LARGE_AVATAR: "L'image ne doit pas dépasser 5MB",
-    TOO_LARGE_PRODUCT: "L'image ne doit pas dépasser 10MB",
+    TOO_LARGE_PRODUCT: "L'image ne doit pas dépasser 5MB",
     VALIDATION_ERROR: 'Erreur lors de la validation du fichier',
   }
 } as const;

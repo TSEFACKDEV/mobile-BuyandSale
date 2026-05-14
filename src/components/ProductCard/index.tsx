@@ -1,5 +1,5 @@
 import React, { useMemo, useRef } from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { CommonActions } from '@react-navigation/native';
@@ -11,8 +11,8 @@ import { useThemeColors } from '../../contexts/ThemeContext';
 import type { Product } from '../../store/product/actions';
 import { getPrimaryForfait } from '../../config/forfaits.config';
 import { formatPrice, formatRelativeShort } from '../../utils/formatUtils';
+import ForfaitCardWrapper from '../ForfaitCardWrapper';
 import styles from './style';
-import { ViewStyle } from 'react-native';
 
 interface ProductCardProps {
   product: Product;
@@ -54,9 +54,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, containerStyle }) =>
     () => getPrimaryForfait(product.productForfaits),
     [product.productForfaits]
   );
-
-  const borderColor = primaryForfait?.card.borderColor || theme.border;
-  const borderWidth = primaryForfait?.card.borderWidth || 1;
 
   // Gérer le toggle favori
   const handleToggleFavorite = async () => {
@@ -100,16 +97,22 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, containerStyle }) =>
   };
 
   return (
+    <ForfaitCardWrapper
+      forfaitType={primaryForfait?.type ?? null}
+      borderRadius={12}
+      backgroundColor={theme.surface}
+      style={[{
+        width: '48.5%',
+        marginBottom: 12,
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      }, containerStyle]}
+    >
     <TouchableOpacity
-      style={[
-        styles.card,
-        {
-          backgroundColor: theme.surface,
-          borderColor: borderColor,
-          borderWidth: borderWidth,
-        },
-        containerStyle,
-      ]}
+      style={{ flex: 1, borderRadius: 12, overflow: 'hidden', backgroundColor: theme.surface }}
       onPress={handlePress}
       activeOpacity={0.7}
     >
@@ -201,6 +204,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, containerStyle }) =>
         </View>
       </View>
     </TouchableOpacity>
+    </ForfaitCardWrapper>
   );
 };
 

@@ -431,7 +431,7 @@
     "title": "Conditions d'utilisation",
     "subtitle": "Règles et conditions d'utilisation de la plateforme BuyAndSale. Veuillez lire attentivement ces conditions avant d'utiliser nos services.",
     "lastUpdated": "Dernière mise à jour",
-    "lastUpdatedDate": "2 septembre 2025",
+    "lastUpdatedDate": "15 mars 2026",
     "important": {
       "title": "Important à retenir",
       "description": "En utilisant BuyAndSale, vous acceptez ces conditions dans leur intégralité. Ces règles sont essentielles pour maintenir un environnement sûr et équitable pour tous nos utilisateurs."
@@ -516,7 +516,7 @@
     "title": "Politique de confidentialité",
     "subtitle": "Votre confidentialité est notre priorité. Découvrez comment nous collectons, utilisons et protégeons vos données personnelles sur BuyAndSale.",
     "lastUpdated": "Dernière mise à jour",
-    "lastUpdatedDate": "2 septembre 2025",
+    "lastUpdatedDate": "15 mars 2026",
     "summary": {
       "title": "Résumé en bref",
       "description": "BuyAndSale collecte uniquement les données nécessaires au fonctionnement de notre marketplace camerounaise. Vos informations personnelles ne sont jamais vendues à des tiers et restent sécurisées par des technologies de pointe."
@@ -583,7 +583,7 @@
         "avatar": "Photo de profil : Avatar optionnel que vous uploadez"
       },
       "products": {
-        "images": "Images de vos produits (maximum 5 par annonce)",
+        "images": "Images de vos produits (maximum 10 par annonce)",
         "descriptions": "Descriptions, prix, quantités et état des produits",
         "location": "Localisation (ville et quartier au Cameroun)",
         "phone": "Numéro de téléphone pour contact direct"

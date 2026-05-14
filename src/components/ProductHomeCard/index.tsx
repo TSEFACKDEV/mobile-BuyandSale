@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useThemeColors } from '../../contexts/ThemeContext';
 import type { Product } from '../../store/product/actions';
 import { getPrimaryForfait } from '../../config/forfaits.config';
+import ForfaitCardWrapper from '../ForfaitCardWrapper';
 import createStyles from './style';
 
 interface ProductCardProps {
@@ -49,7 +50,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
 
   return (
     <TouchableOpacity onPress={handlePress} activeOpacity={0.7}>
-      <View style={[styles.container, primaryForfait && styles.containerWithBorder, primaryForfait && { borderColor: primaryForfait.card.borderColor }]}>
+      <ForfaitCardWrapper
+        forfaitType={primaryForfait?.type ?? null}
+        borderRadius={8}
+        backgroundColor={colors.surface}
+        style={styles.container}
+      >
+        <View style={{ flex: 1 }}>
         {/* Image */}
         <View style={styles.imageContainer}>
           {imageUrl ? (
@@ -102,7 +109,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
             )}
           </View>
         </View>
-      </View>
+        </View>
+      </ForfaitCardWrapper>
     </TouchableOpacity>
   );
 };
