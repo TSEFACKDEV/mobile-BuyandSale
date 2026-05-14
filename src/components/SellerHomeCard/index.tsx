@@ -19,10 +19,10 @@ const SellerCard: React.FC<SellerCardProps> = ({ seller, onPress }) => {
 
   // Statistiques (comme la version web React)
   const productCount = seller._count?.products || 0;
-  const reviewsCount = seller._count?.reviewsReceived || 0;
-  const averageRating = seller.reviewsReceived?.length
-    ? seller.reviewsReceived.reduce((sum, review) => sum + review.rating, 0) /
-      seller.reviewsReceived.length
+  const reviews = seller.reviewsReceived || [];
+  const reviewsCount = Math.max(reviews.length, seller._count?.reviewsReceived || 0);
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
     : 0;
 
   const handlePress = () => {

@@ -18,7 +18,7 @@ export const IMAGE_CONFIG = {
   MAX_FILE_SIZE_AVATAR: 5 * 1024 * 1024,    // 5MB
   MAX_FILE_SIZE_PRODUCT: 5 * 1024 * 1024,   // 5MB
   
-  // Quantités - ⚠️ LIMITE BACKEND: 1-10 images maximum
+  // Quantités - ⚠️ LIMITE BACKEND: 1-5 images maximum
   MAX_IMAGES: 10,
   MIN_IMAGES: 1,
   

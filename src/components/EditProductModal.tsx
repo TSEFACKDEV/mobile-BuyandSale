@@ -336,7 +336,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
                   <TouchableOpacity style={styles.addImageButton} onPress={pickImage}>
                     <Icon name="add-circle-outline" size={32} color={colors.textSecondary} />
                     <Text style={[styles.addImageText, { color: colors.textSecondary }]}>
-                      Ajouter
+                      Ajouter ({formData.existingImages.length + formData.newImages.length}/{IMAGE_CONFIG.MAX_IMAGES})
                     </Text>
                   </TouchableOpacity>
                 )}

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NativeModules, Platform } from 'react-native';
 
 export type Language = 'fr' | 'en';
 
@@ -11,6 +12,26 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+/**
+ * Détecte la langue du système (sans expo-localization).
+ * Retourne 'fr' ou 'en', avec 'fr' comme fallback (app ciblée Cameroun).
+ */
+const getDeviceLanguage = (): Language => {
+  try {
+    const locale: string =
+      Platform.OS === 'ios'
+        ? NativeModules.SettingsManager?.settings?.AppleLocale ||
+          NativeModules.SettingsManager?.settings?.AppleLanguages?.[0] ||
+          'fr'
+        : NativeModules.I18nManager?.localeIdentifier || 'fr';
+
+    const lang = locale.substring(0, 2).toLowerCase();
+    return lang === 'en' ? 'en' : 'fr';
+  } catch {
+    return 'fr';
+  }
+};
+
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>('fr');
 
@@ -19,12 +40,12 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
       try {
         const savedLanguage = await AsyncStorage.getItem('appLanguage');
         if (savedLanguage === 'en' || savedLanguage === 'fr') {
+          // L'utilisateur a déjà fait un choix explicite → on le respecte
           setLanguageState(savedLanguage);
         } else {
-          // Détecter la langue du téléphone (disponible nativement via Intl)
-          const deviceLocale = Intl.DateTimeFormat().resolvedOptions().locale;
-          const lang = deviceLocale?.slice(0, 2).toLowerCase();
-          setLanguageState(lang === 'en' ? 'en' : 'fr');
+          // Première ouverture → détecter la langue du système
+          const deviceLang = getDeviceLanguage();
+          setLanguageState(deviceLang);
         }
       } catch (error) {
         // Erreur silencieuse

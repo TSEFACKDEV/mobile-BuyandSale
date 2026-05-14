@@ -10,10 +10,9 @@ import createStyles from './style';
 
 interface SellerCardProps {
   seller: AuthUser;
-  index?: number;
 }
 
-const SellerCard: React.FC<SellerCardProps> = ({ seller, index }) => {
+const SellerCard: React.FC<SellerCardProps> = ({ seller }) => {
   const colors = useThemeColors();
   const navigation = useNavigation();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -25,10 +24,10 @@ const SellerCard: React.FC<SellerCardProps> = ({ seller, index }) => {
 
   // Statistiques (comme la version web React)
   const productCount = seller._count?.products || 0;
-  const reviewsCount = seller._count?.reviewsReceived || 0;
-  const averageRating = seller.reviewsReceived?.length
-    ? seller.reviewsReceived.reduce((sum, review) => sum + review.rating, 0) /
-      seller.reviewsReceived.length
+  const reviews = seller.reviewsReceived || [];
+  const reviewsCount = Math.max(reviews.length, seller._count?.reviewsReceived || 0);
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
     : 0;
 
   const avatarUrl = getImageUrl(seller.avatar, 'avatar');
