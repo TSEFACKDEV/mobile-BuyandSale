@@ -24,7 +24,7 @@ interface Props {
 
 /**
  * Wrapper animé pour les cartes produit selon leur forfait :
- * - URGENT      : bordure rouge pulsante (opacité 0.25 → 1, 500ms/cycle)
+ * - URGENT      : bordure rouge clignotante (opacity 1→0→1, 1s/cycle)
  * - TOP_ANNONCE : arc bleu rotatif horaire, rapide (1.4s)
  * - PREMIUM     : double arc violet rotatif anti-horaire, lent (3s)
  * - null        : aucun effet, rendu transparent
@@ -64,7 +64,7 @@ const ForfaitCardWrapper: React.FC<Props> = ({
         })
       );
     } else if (forfaitType === 'URGENT') {
-      // Pulse opacité de la bordure rouge
+      // Bordure rouge clignotante : visible → invisible → visible (1s, identique au web)
       animation = Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, {
@@ -96,15 +96,17 @@ const ForfaitCardWrapper: React.FC<Props> = ({
     );
   }
 
-  // URGENT : overlay de bordure rouge pulsante
+  // URGENT : bordure rouge clignotante (opacity 1→0→1)
+  // Reproduit le web : box-shadow pulse visible→transparent→visible (1s ease-in-out)
   if (forfaitType === 'URGENT') {
     const borderOpacity = pulseAnim.interpolate({
       inputRange: [0, 1],
-      outputRange: [0.25, 1],
+      outputRange: [1, 0], // démarre visible, disparaît à 50%, revient
     });
 
     return (
       <View style={[{ borderRadius, overflow: 'hidden' }, style]}>
+        {children}
         <Animated.View
           pointerEvents="none"
           style={[
@@ -117,7 +119,6 @@ const ForfaitCardWrapper: React.FC<Props> = ({
             },
           ]}
         />
-        {children}
       </View>
     );
   }

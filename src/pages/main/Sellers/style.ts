@@ -9,7 +9,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     listContent: {
       paddingHorizontal: 16,
-      paddingBottom: 20,
+      paddingBottom: 80,
     },
     header: {
       paddingBottom: 16,

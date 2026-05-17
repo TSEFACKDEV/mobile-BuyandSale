@@ -55,7 +55,7 @@ const Favorites = () => {
       keyExtractor={keyExtractor}
       getItemLayout={getItemLayout}
       numColumns={2}
-      contentContainerStyle={{ padding: 8 }}
+      contentContainerStyle={{ padding: 8, paddingBottom: 80 }}
       columnWrapperStyle={{ gap: 8 }}
       maxToRenderPerBatch={6}
       updateCellsBatchingPeriod={100}

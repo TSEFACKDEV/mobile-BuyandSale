@@ -6,6 +6,7 @@ import { useThemeColors } from '../../contexts/ThemeContext';
 import { useAppSelector, useAppDispatch } from '../../hooks/store';
 import { fetchNotificationsAction } from '../../store/notification/actions';
 import { selectValidFavoritesCount } from '../../store/favorite/slice';
+import Logo from '../Logo';
 import createStyles from './style';
 
 interface TopNavigationProps {
@@ -98,10 +99,7 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
 
         {!title && !showBackButton && (
           <View style={styles.titleSection}>
-            <Text style={styles.appTitle}>
-              <Text style={styles.orangeText}>Buy</Text>
-              <Text style={styles.darkBlueText}>&Sale</Text>
-            </Text>
+            <Logo size={22} />
           </View>
         )}
 

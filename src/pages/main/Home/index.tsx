@@ -21,6 +21,7 @@ import { fetchPublicSellersAction } from '../../../store/user/actions';
 
 // Components
 import TopNavigation from '../../../components/TopNavigation';
+import DynamicHero from '../../../components/DynamicHero';
 import CategoryCard from '../../../components/CategoryCard';
 import ProductCard from '../../../components/ProductHomeCard';
 import SellerCard from '../../../components/SellerHomeCard';
@@ -127,11 +128,8 @@ const Home = () => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {/* Hero Section - Exactement comme le web */}
-        <View style={styles.heroSection}>
-          <Text style={styles.heroTitle}>{t('hero.title')}</Text>
-          <Text style={styles.heroSubtitle}>{t('hero.subtitle')}</Text>
-        </View>
+        {/* Hero Section - Carousel dynamique identique au web */}
+        <DynamicHero />
 
         {/* Catégories */}
         <View style={styles.section}>

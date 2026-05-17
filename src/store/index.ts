@@ -12,6 +12,7 @@ import favoriteSlice from './favorite/slice';
 import productSlice from './product/slice';
 import forfaitSlice from './forfait/slice';
 import paymentSlice from './payment/slice';
+import heroBannerSlice from './heroBanner/slice';
 import type { PersistConfig } from 'redux-persist';
 import { persistStore, persistReducer } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -48,6 +49,7 @@ export const store = configureStore({
     product: productSlice,
     forfait: forfaitSlice,
     payment: paymentSlice,
+    [heroBannerSlice.name]: heroBannerSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

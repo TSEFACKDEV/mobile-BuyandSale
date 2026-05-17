@@ -185,7 +185,7 @@ const SellerDetails: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView style={styles.scrollView}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={{ paddingBottom: 80 }}>
         {/* Gradient Header Background */}
         <LinearGradient
           colors={['#F97316', '#EC4899']}
