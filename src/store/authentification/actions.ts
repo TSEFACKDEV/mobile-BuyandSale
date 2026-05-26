@@ -82,20 +82,20 @@ export const loginAction = createAsyncThunk<
 // Action de déconnexion
 export const logoutAction = createAsyncThunk<void, void, ThunkApi>(
   'auth/logout',
-  async () => {
+  async (_, { getState }) => {
     try {
-      // Appel backend pour nettoyer les cookies (si web)
+      // Appel backend pour invalider le token côté serveur
+      const state = getState();
+      const token = (state as any).authentification?.auth?.entities?.token?.AccessToken;
       await fetch(`${API_CONFIG.BASE_URL}/${API_ENDPOINTS.USER_LOGOUT}`, {
         method: 'POST',
         headers: {
           'Content-type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
       });
-
-      return;
-    } catch (error: unknown) {
+    } catch {
       // Ne pas rejeter car on veut toujours déconnecter localement
-      return;
     }
   }
 );
@@ -198,7 +198,7 @@ export const refreshTokenAction = createAsyncThunk<
   ThunkApi
 >('auth/refreshToken', async (_, apiThunk) => {
   try {
-    const state = apiThunk.getState();
+    const state = apiThunk.getState() as any;
     const refreshToken = state.authentification?.auth?.entities?.token?.RefreshToken;
 
     if (!refreshToken) {

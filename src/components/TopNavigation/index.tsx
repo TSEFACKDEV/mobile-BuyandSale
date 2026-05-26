@@ -92,6 +92,8 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
             style={styles.backButton}
             onPress={handleBackPress}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Retour"
           >
             <Icon name="chevron-back" size={24} color={colors.primary} />
           </TouchableOpacity>
@@ -116,6 +118,8 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
             style={styles.iconButton}
             onPress={handleFavoritesPress}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={`Favoris${favoritesCount > 0 ? `, ${favoritesCount} article(s)` : ''}`}
           >
             <Icon name="heart-outline" size={24} color={colors.text} />
             {favoritesCount > 0 && (
@@ -132,6 +136,8 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
               style={styles.iconButton}
               onPress={handleNotificationPress}
               activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={`Notifications${unreadCount > 0 ? `, ${unreadCount} non lue(s)` : ''}`}
             >
               <Icon name="notifications-outline" size={24} color={colors.text} />
               {unreadCount > 0 && (

@@ -24,4 +24,5 @@ export interface ThunkApi {
   rejectValue: {
     message: string;
   };
+  state: unknown;
 }

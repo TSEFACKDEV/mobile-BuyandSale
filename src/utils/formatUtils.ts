@@ -8,6 +8,7 @@
  * @returns Prix formaté (ex: "500 000 FCFA")
  */
 export const formatPrice = (price: number): string => {
+  if (price == null || isNaN(price)) return '— FCFA';
   return `${price.toLocaleString('fr-FR')} FCFA`;
 };
 

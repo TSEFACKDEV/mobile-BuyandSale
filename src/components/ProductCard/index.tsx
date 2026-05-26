@@ -132,6 +132,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, containerStyle }) =>
           onLongPress={() => setSheetVisible(true)}
           delayLongPress={350}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={`${product.name}, ${formatPrice(product.price)}`}
         >
           {/* Image */}
           <View style={styles.imageContainer}>
@@ -156,6 +158,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, containerStyle }) =>
             <TouchableOpacity
               style={[styles.favoriteButton, { backgroundColor: isFavorite ? '#EF4444' : 'rgba(255,255,255,0.9)' }]}
               onPress={isAuthenticated ? handleToggleFavorite : handleRequireAuth}
+              accessibilityRole="button"
+              accessibilityLabel={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
             >
               <Icon
                 name={isFavorite ? 'heart' : 'heart-outline'}

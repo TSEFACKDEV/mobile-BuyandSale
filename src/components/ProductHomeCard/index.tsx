@@ -77,9 +77,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
 
   const handleShare = async () => {
     try {
+      const productUrl = (product as any).slug
+        ? `https://www.buyandsale.cm/produit/${(product as any).slug}`
+        : `https://www.buyandsale.cm/produit/${product.id}`;
       await Share.share({
-        message: `${product.name} — ${formatPrice(product.price)}\nDécouvrez cette annonce sur BuyAndSale`,
+        message: `${product.name} — ${formatPrice(product.price)}\n${productUrl}`,
         title: product.name,
+        url: productUrl, // iOS : active l'aperçu OG
       });
     } catch (error) {
       console.error('Erreur partage:', error);
@@ -146,6 +150,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
                 </View>
               )}
 
+              {/* Badge Prix */}
+              <View style={styles.priceBadge}>
+                <Text style={styles.priceText} numberOfLines={1}>{formatPrice(product.price)}</Text>
+              </View>
+
               {/* Bouton favori */}
               <TouchableOpacity
                 style={[styles.favoriteButton, { backgroundColor: isFavorite ? '#EF4444' : 'rgba(255,255,255,0.9)' }]}
@@ -161,17 +170,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
                 {product.name}
               </Text>
 
-              {product.city && (
-                <View style={styles.locationContainer}>
-                  <Icon name="location-outline" size={9} color={colors.textSecondary} />
-                  <Text style={styles.location} numberOfLines={1}>
-                    {product.city.name}
-                  </Text>
-                </View>
-              )}
-
-              <View style={styles.priceContainer}>
-                <Text style={styles.price}>{formatPrice(product.price)}</Text>
+              <View style={styles.bottomRow}>
+                {product.city && (
+                  <View style={styles.metaLeft}>
+                    <Icon name="location-outline" size={9} color={colors.textSecondary} />
+                    <Text style={styles.cityText} numberOfLines={1}>{product.city.name}</Text>
+                  </View>
+                )}
                 {product.viewCount !== undefined && (
                   <View style={styles.viewsContainer}>
                     <Icon name="eye-outline" size={9} color={colors.textSecondary} />

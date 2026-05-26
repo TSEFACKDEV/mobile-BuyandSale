@@ -2,6 +2,7 @@
   "expo": {
     "name": "buy_and_sale",
     "slug": "buy_and_sale",
+    "scheme": "buyandsale",
     "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -15,21 +16,21 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.buyandsale.app",
+      "associatedDomains": [
+        "applinks:buyandsale.cm",
+        "applinks:www.buyandsale.cm"
+      ],
       "infoPlist": {
         "NSAppTransportSecurity": {
-          "NSAllowsArbitraryLoads": true,
           "NSExceptionDomains": {
             "localhost": {
               "NSExceptionAllowsInsecureHTTPLoads": true
-            },
-            "192.168.1.28": {
-              "NSExceptionAllowsInsecureHTTPLoads": true
-            },
-            "192.168.1.28.nip.io": {
-              "NSExceptionAllowsInsecureHTTPLoads": true
             }
           }
-        }
+        },
+        "NSPhotoLibraryUsageDescription": "BuyAndSale accède à vos photos pour publier vos annonces.",
+        "NSPhotoLibraryAddUsageDescription": "BuyAndSale peut enregistrer des photos dans votre galerie.",
+        "NSCameraUsageDescription": "BuyAndSale peut utiliser l'appareil photo pour prendre des photos pour vos annonces."
       }
     },
     "android": {
@@ -39,14 +40,55 @@
       },
       "package": "com.buyandsale.app",
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.VIBRATE",
+        "android.permission.READ_MEDIA_IMAGES"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            { "scheme": "buyandsale" }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        },
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            { "scheme": "https", "host": "buyandsale.cm", "pathPrefix": "/produit" },
+            { "scheme": "https", "host": "www.buyandsale.cm", "pathPrefix": "/produit" }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-web-browser",
-      "expo-video"
+      "expo-video",
+      "expo-secure-store",
+      "@sentry/react-native",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "BuyAndSale accède à vos photos pour publier vos annonces.",
+          "cameraPermission": "BuyAndSale peut utiliser l'appareil photo pour prendre des photos pour vos annonces."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#F97316",
+          "defaultChannel": "default"
+        }
+      ]
     ]
   }
 }

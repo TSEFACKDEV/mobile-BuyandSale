@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { 
   View, 
   Text, 
@@ -6,11 +6,12 @@ import {
   TouchableOpacity, 
   RefreshControl
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useAppDispatch, useAppSelector } from '../../../hooks/store';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { useRecentlyViewed } from '../../../hooks/useRecentlyViewed';
 import { enrichCategoriesWithIcons } from '../../../utils/categoryHelpers';
 
 // Actions
@@ -40,28 +41,45 @@ const Home = () => {
   const homeProducts = useAppSelector(state => state.product.validatedProducts);
   const homeProductsStatus = useAppSelector(state => state.product.validatedProductsStatus);
   const productsLoading = homeProductsStatus === 'loading';
-  const { data: cities, status: cityStatus } = useAppSelector(state => state.city);
-  const citiesLoading = cityStatus === 'PENDING';
+  const currentProduct = useAppSelector(state => state.product.currentProduct);
+  const { data: cities } = useAppSelector(state => state.city);
   const publicSellers = useAppSelector(state => state.user.users.entities);
   const publicSellersStatus = useAppSelector(state => state.user.users.status);
   const sellersLoading = publicSellersStatus === 'PENDING';
-  const [refreshing, setRefreshing] = React.useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const { products: recentlyViewedProducts, reload: reloadRecentlyViewed } = useRecentlyViewed();
 
-  // Charger les données au montage SEULEMENT si elles ne sont pas déjà présentes
-  useEffect(() => {
-    // Ne charger que si les données principales sont vides
-    const needsInitialLoad = 
-      !categories || categories.length === 0 ||
-      !homeProducts || homeProducts.length === 0 ||
-      !cities || cities.length === 0 ||
-      !publicSellers || publicSellers.length === 0;
-
-    if (needsInitialLoad) {
-      loadInitialData();
+  // Fusion des snapshots AsyncStorage avec les viewCounts frais du Redux store
+  const mergedRecentlyViewed = useMemo(() => {
+    const freshMap = new Map<string, number>();
+    homeProducts?.forEach((p: any) => { if (p.viewCount !== undefined) freshMap.set(p.id, p.viewCount); });
+    if (currentProduct?.id && currentProduct.viewCount !== undefined) {
+      freshMap.set(currentProduct.id, currentProduct.viewCount);
     }
-  }, []);
+    if (!freshMap.size) return recentlyViewedProducts;
+    return recentlyViewedProducts.map((p: any) => {
+      const fresh = freshMap.get(p.id);
+      return fresh !== undefined ? { ...p, viewCount: fresh } : p;
+    });
+  }, [recentlyViewedProducts, homeProducts, currentProduct]);
 
-  const loadInitialData = async (retryCount = 2) => {
+  // Charger les données au montage et lors du retour sur l'onglet si nécessaire
+  useFocusEffect(
+    React.useCallback(() => {
+      reloadRecentlyViewed();
+      const needsLoad =
+        !categories || categories.length === 0 ||
+        !homeProducts || homeProducts.length === 0 ||
+        !cities || cities.length === 0 ||
+        homeProductsStatus === 'failed';
+
+      if (needsLoad) {
+        loadInitialData();
+      }
+    }, [homeProductsStatus, reloadRecentlyViewed])
+  );
+
+  const loadInitialData = async (retryCount = 0) => {
     try {
       await Promise.all([
         dispatch(getAllCategoriesAction({ limit: 20 })).unwrap(),
@@ -207,6 +225,14 @@ const Home = () => {
                 ))}
               </ScrollView>
             </View>
+          ) : homeProductsStatus === 'failed' ? (
+            <View style={styles.emptyContainer}>
+              <Icon name="cloud-offline-outline" size={48} color={theme.colors.error} />
+              <Text style={[styles.emptyText, { color: theme.colors.error }]}>{t('home.loadError')}</Text>
+              <TouchableOpacity onPress={() => loadInitialData()} style={{ marginTop: 12 }}>
+                <Text style={{ color: theme.colors.primary, fontWeight: '600' }}>{t('home.retry')}</Text>
+              </TouchableOpacity>
+            </View>
           ) : featuredProducts.length === 0 ? (
             <View style={styles.emptyContainer}>
               <Icon name="cube-outline" size={48} color={theme.colors.textSecondary} />
@@ -285,6 +311,24 @@ const Home = () => {
             </ScrollView>
           )}
         </View>
+
+        {/* Produits récemment vus */}
+        {recentlyViewedProducts.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t('home.recentlyViewed')}</Text>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.productsContainer}
+            >
+              {mergedRecentlyViewed.map((product: any) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
         {/* Comment ça marche */}
         <View style={styles.howItWorksSection}>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { ActivityIndicator, View, Image, Text, Platform } from 'react-native';
@@ -552,6 +552,55 @@ const MainStackNavigator = () => (
 );
 
 // =====================
+// Deep Linking Configuration
+// =====================
+const linking: LinkingOptions<any> = {
+  prefixes: [
+    'buyandsale://',
+    'https://buyandsale.cm',
+    'https://www.buyandsale.cm',
+  ],
+  config: {
+    screens: {
+      Main: {
+        screens: {
+          MainTab: {
+            screens: {
+              HomeTab: {
+                screens: {
+                  Home: '',
+                  ProductDetails: 'produit/:productId',
+                  SellerDetails: 'vendeur/:sellerId',
+                },
+              },
+              Products: {
+                screens: {
+                  ProductsList: 'produits',
+                  ProductDetails: 'produits/produit/:productId',
+                  SellerDetails: 'produits/vendeur/:sellerId',
+                },
+              },
+              Sellers: {
+                screens: {
+                  SellersList: 'vendeurs',
+                  SellerDetails: 'vendeurs/vendeur/:sellerId',
+                },
+              },
+            },
+          },
+        },
+      },
+      Auth: {
+        screens: {
+          Login: 'connexion',
+          Register: 'inscription',
+        },
+      },
+    },
+  },
+};
+
+// =====================
 // Root Navigator (Onboarding -> Auth -> Main)
 // =====================
 export const RootNavigator = () => {
@@ -568,7 +617,7 @@ export const RootNavigator = () => {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <RootStack.Navigator
         screenOptions={{
           headerShown: false,

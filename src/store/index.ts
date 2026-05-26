@@ -15,14 +15,14 @@ import paymentSlice from './payment/slice';
 import heroBannerSlice from './heroBanner/slice';
 import type { PersistConfig } from 'redux-persist';
 import { persistStore, persistReducer } from 'redux-persist';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import secureStorage from '../utils/secureStorage';
 
 // Configuration de persistance pour l'authentification
 const authPersistConfig: PersistConfig<
   ReturnType<typeof authentificationSlice.reducer>
 > = {
   key: 'buyAndSale-auth',
-  storage: AsyncStorage,
+  storage: secureStorage,
   whitelist: ['auth'], // Persister uniquement le state 'auth'
   version: 1,
 };

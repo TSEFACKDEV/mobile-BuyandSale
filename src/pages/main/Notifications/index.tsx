@@ -47,6 +47,7 @@ const Notifications = () => {
 
   // Charger les notifications au montage
   useEffect(() => {
+    dispatch(fetchNotificationsAction());
   }, [dispatch]);
 
   // Pull to refresh

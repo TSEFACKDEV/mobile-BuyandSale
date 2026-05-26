@@ -10,7 +10,7 @@ const getApiUrl = (): string => {
     // Fallback : mettre à jour l'IP ici si .env absent
     // ⚠️ Utiliser l'IP LAN du PC (Wi-Fi), pas les cartes virtuelles VMware/Hyper-V.
     // Le téléphone doit être sur le même réseau Wi-Fi.
-    return 'http://192.168.1.55:3001/api/buyandsale';
+    return 'http://192.168.1.28:3001/api/buyandsale';
     
     /* VERSION AVEC DÉTECTION AUTO (à réactiver si besoin)
     if (Platform.OS === 'android') {

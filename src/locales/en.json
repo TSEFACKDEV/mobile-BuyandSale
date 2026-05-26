@@ -16,12 +16,15 @@
     "seeAll": "See all",
     "featuredAds": "Featured Ads",
     "topSellers": "Top Sellers",
+    "recentlyViewed": "Recently Viewed",
     "loading": "Loading...",
     "loadingCategories": "Loading categories...",
     "loadingProducts": "Loading ads...",
     "noProducts": "No ads available",
     "noCategories": "No categories available",
-    "noSellers": "No sellers available"
+    "noSellers": "No sellers available",
+    "loadError": "Unable to load data",
+    "retry": "Retry"
   },
   "categories": {
     "Électronique": "Electronics",
@@ -725,6 +728,8 @@
     "maxImagesMessage": "You already have {max} images. Delete one to add more.",
     "permissionRequired": "Permission required",
     "permissionMessage": "We need your permission to access photos.",
+    "permissionPermanentlyDenied": "Photo access is blocked. Open settings to enable it.",
+    "openSettings": "Open Settings",
     "imagesAdded": "Success",
     "imagesAddedMessage": "{count} image(s) added!",
     "validationError": "Validation",

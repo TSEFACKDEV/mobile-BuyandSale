@@ -35,9 +35,11 @@ import {
 import { getImageUrl } from '../../../utils/imageUtils';
 import { normalizePhoneForWhatsApp, formatPhoneForDisplay } from '../../../utils/phoneUtils';
 import { useSellerReviews } from '../../../hooks/useSellerReviews';
+import { useRecentlyViewed } from '../../../hooks/useRecentlyViewed';
 import SellerRatings from '../../../components/SellerRatings';
 import { HomeStackParamList } from '../../../types/navigation';
 import ProductCard from '../../../components/ProductCard';
+import { ProductDetailsSkeleton } from '../../../components/LoadingVariants';
 import createStyles from './style';
 
 type ProductDetailsRouteProp = RouteProp<HomeStackParamList, 'ProductDetails'>;
@@ -58,6 +60,7 @@ const ProductDetails = () => {
   const styles = createStyles(theme);
 
   const { productId } = route.params;
+  const { addProduct } = useRecentlyViewed();
 
   // États locaux
   const [showPhoneNumber, setShowPhoneNumber] = useState(false);
@@ -188,10 +191,17 @@ const ProductDetails = () => {
     if (!product) return;
 
     try {
+      // URL web avec OG preview pour un aperçu riche dans WhatsApp/Telegram
+      const webUrl = product.slug
+        ? `https://www.buyandsale.cm/produit/${product.slug}`
+        : `https://www.buyandsale.cm/produit/${product.id}`;
+
       await Share.share({
-        message: `${product.name} - ${formatPrice(product.price)}\n\n${product.description}`,
+        title: product.name,
+        message: `${product.name} — ${formatPrice(product.price)}\n${webUrl}`,
+        url: webUrl, // iOS utilise url (active l'aperçu OG)
       });
-    } catch (error) {
+    } catch {
       // Silently fail
     }
   };
@@ -231,9 +241,11 @@ const ProductDetails = () => {
 
     const timer = setTimeout(async () => {
       try {
-        await dispatch(recordProductViewAction(product.id));
+        const result = await dispatch(recordProductViewAction(product.id)).unwrap();
+        addProduct({ ...product, viewCount: result.viewCount });
       } catch (error) {
-        // Silently fail - ne pas bloquer l'affichage si l'enregistrement échoue
+        // Fallback : stocker quand même avec l'ancien compteur
+        addProduct(product);
       }
     }, 1000);
 
@@ -244,17 +256,7 @@ const ProductDetails = () => {
   if (productStatus === 'loading') {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={['top']}>
-        <View style={styles.errorContainer}>
-          <View style={styles.errorHeader}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerButton}>
-              <Icon name="arrow-back" size={24} color={theme.colors.text} />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.errorContent}>
-            <Icon name="time-outline" size={64} color={theme.colors.primary} />
-            <Text style={styles.errorText}>{t('productDetails.loading')}</Text>
-          </View>
-        </View>
+        <ProductDetailsSkeleton />
       </SafeAreaView>
     );
   }

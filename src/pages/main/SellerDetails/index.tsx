@@ -29,6 +29,7 @@ import { useDialog } from '../../../contexts/DialogContext';
 import { getImageUrl } from '../../../utils/imageUtils';
 import { getDisplayName } from '../../../helpers/userHelper';
 import { normalizePhoneForWhatsApp, formatPhoneForDisplay } from '../../../utils/phoneUtils';
+import { ProductCardSkeleton } from '../../../components/LoadingVariants';
 import createStyles from './style';
 import type { HomeStackParamList } from '../../../types/navigation';
 import type { Product } from '../../../store/product/actions';
@@ -330,9 +331,7 @@ const SellerDetails: React.FC = () => {
           </Text>
 
           {isSellerProductsLoading && currentPage === 1 ? (
-            <View style={styles.loadingContainer}>
-              <Text style={styles.loadingText}>{t('common.loading')}</Text>
-            </View>
+            <ProductCardSkeleton count={4} />
           ) : sellerProducts && sellerProducts.length > 0 ? (
             <View style={styles.productsList}>
               {sellerProducts.map((product: Product) => (

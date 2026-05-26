@@ -38,7 +38,7 @@ export const useGoogleAuth = () => {
         routes: [{ name: 'Main' as any, params: { screen: 'HomeTab' } }],
       });
     } catch (error) {
-      console.error('❌ [Google Auth] Erreur:', error);
+      if (__DEV__) console.error('❌ [Google Auth] Erreur:', error);
       showWarning(
         t('auth.errors.title'),
         error instanceof Error ? error.message : t('auth.errors.google.authFailed')

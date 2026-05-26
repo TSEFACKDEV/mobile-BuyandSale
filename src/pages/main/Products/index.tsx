@@ -68,11 +68,11 @@ const Products = () => {
 
   // Local state
   const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<{
+    search?: string;
     categoryId?: string;
     cityId?: string;
     priceMin?: number;
@@ -80,14 +80,18 @@ const Products = () => {
     etat?: 'NEUF' | 'OCCASION' | 'CORRECT';
   }>({});
 
-  // Debounce pour la recherche (attend 500ms après la dernière saisie)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 500);
-
-    return () => clearTimeout(timer);
+  // Lancer la recherche manuellement (bouton loupe ou touche Entrée)
+  const handleSearch = useCallback(() => {
+    setFilters(prev => ({ ...prev, search: searchQuery.trim() || undefined }));
+    setCurrentPage(1);
   }, [searchQuery]);
+
+  // Effacer le champ de recherche et réinitialiser les résultats
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery('');
+    setFilters(prev => ({ ...prev, search: undefined }));
+    setCurrentPage(1);
+  }, []);
 
   // Charger catégories et villes seulement si elles ne sont pas déjà présentes
   useEffect(() => {
@@ -127,19 +131,14 @@ const Products = () => {
   useEffect(() => {
     // Créer une clé unique basée sur les filtres
     const filtersKey = JSON.stringify({ 
-      page: currentPage, 
+      page: currentPage,
+      search: filters.search,
       categoryId: filters.categoryId, 
       cityId: filters.cityId, 
       priceMin: filters.priceMin, 
       priceMax: filters.priceMax, 
       etat: filters.etat 
     });
-
-    // Si on a déjà des produits et que c'est le premier mount, initialiser la ref
-    if (!previousFiltersRef.current && validatedProducts && validatedProducts.length > 0 && validatedProductsStatus === 'succeeded') {
-      previousFiltersRef.current = filtersKey;
-      return;
-    }
 
     // Éviter les appels si les filtres n'ont pas changé et qu'on a déjà des produits chargés
     if (previousFiltersRef.current === filtersKey && 
@@ -162,7 +161,8 @@ const Products = () => {
         await dispatch(
           getValidatedProductsAction({
             page: currentPage,
-            limit: 12,
+            limit: 25,
+            search: filters.search,
             categoryId: filters.categoryId,
             cityId: filters.cityId,
             priceMin: filters.priceMin,
@@ -203,24 +203,12 @@ const Products = () => {
   }, [validatedProducts]);
 
 
-  // Filtrer par recherche
-  const filteredProducts = useMemo(() => {
-    if (!debouncedSearchQuery.trim()) return sortedProducts;
-
-    const query = debouncedSearchQuery.toLowerCase();
-    return sortedProducts.filter(
-      (product) =>
-        product.name?.toLowerCase().includes(query) ||
-        product.description?.toLowerCase().includes(query) ||
-        product.category.name.toLowerCase().includes(query)
-    );
-  }, [sortedProducts, debouncedSearchQuery]);
-
   // Refresh
   const handleRefresh = () => {
-    previousFiltersRef.current = ''; // Forcer le rechargement
+    previousFiltersRef.current = ''; // Bypass le garde "mêmes filtres" pour forcer le rechargement
     isLoadingRef.current = false;
-    setCurrentPage(1); // Le useEffect rechargera automatiquement
+    setFilters(prev => ({ ...prev }));
+    setCurrentPage(1);
   };
 
   // Appliquer les filtres du modal
@@ -259,7 +247,7 @@ const Products = () => {
 
   // Render stats and filters (without search bar)
   const renderListHeader = useCallback(() => {
-    const totalCount = validatedProductsPagination?.total || filteredProducts.length;
+    const totalCount = validatedProductsPagination?.total || sortedProducts.length;
     return (
       <View style={[styles.header, { backgroundColor: theme.background }]}>
         {/* Statistiques et filtres */}
@@ -302,7 +290,7 @@ const Products = () => {
       </View>
     </View>
     );
-  }, [theme, validatedProductsPagination?.total, filteredProducts.length, activeFiltersCount, language, t]);
+  }, [theme, validatedProductsPagination?.total, sortedProducts.length, activeFiltersCount, language, t]);
 
   // Render empty state
   const renderEmpty = () => {
@@ -322,7 +310,7 @@ const Products = () => {
         {searchQuery && (
           <TouchableOpacity
             style={[styles.clearButton, { backgroundColor: theme.primary }]}
-            onPress={() => setSearchQuery('')}
+            onPress={handleClearSearch}
           >
             <Text style={styles.clearButtonText}>{t('products.clearSearch')}</Text>
           </TouchableOpacity>
@@ -384,7 +372,9 @@ const Products = () => {
       
       {/* Barre de recherche fixe en dehors du FlatList */}
       <View style={[styles.searchContainer, { backgroundColor: theme.backgroundSecondary }]}>
-        <Ionicons name="search-outline" size={20} color={theme.textSecondary} />
+        <TouchableOpacity onPress={handleSearch}>
+          <Ionicons name="search-outline" size={20} color={theme.textSecondary} />
+        </TouchableOpacity>
         <TextInput
           style={[styles.searchInput, { color: theme.text }]}
           placeholder={t('products.searchPlaceholder')}
@@ -392,9 +382,10 @@ const Products = () => {
           value={searchQuery}
           onChangeText={setSearchQuery}
           returnKeyType="search"
+          onSubmitEditing={handleSearch}
         />
         {searchQuery ? (
-          <TouchableOpacity onPress={() => setSearchQuery('')}>
+          <TouchableOpacity onPress={handleClearSearch}>
             <Ionicons name="close-circle" size={20} color={theme.textSecondary} />
           </TouchableOpacity>
         ) : null}
@@ -402,7 +393,7 @@ const Products = () => {
 
       <FlatList
         ListHeaderComponent={renderListHeader}
-        data={filteredProducts}
+        data={sortedProducts}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         numColumns={2}

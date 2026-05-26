@@ -132,7 +132,6 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const systemColorScheme = useColorScheme();
   const [themeMode, setThemeMode] = useState<ThemeMode>('system');
-  const [isInitialized, setIsInitialized] = useState(false);
 
   // Charger le thème sauvegardé au démarrage
   useEffect(() => {
@@ -144,8 +143,6 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         }
       } catch (error) {
         // TODO: Implémenter système de logging
-      } finally {
-        setIsInitialized(true);
       }
     };
 
@@ -194,10 +191,6 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       // Erreur silencieuse
     }
   };
-
-  if (!isInitialized) {
-    return <>{children}</>;
-  }
 
   return (
     <ThemeContext.Provider

@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Modal,
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
@@ -20,6 +21,7 @@ import { useAppSelector, useAppDispatch } from '../../../hooks/store';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { RootNavigationProp } from '../../../types/navigation';
 import ConfirmDialog from '../../../components/ConfirmDialog';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Redux Actions
 import { getAllCategoriesAction } from '../../../store/category/actions';
@@ -78,6 +80,8 @@ const CONDITIONS = [
   { value: 'OCCASION', label: 'Occasion' },
   { value: 'CORRECT', label: 'Correct' },
 ] as const;
+
+const DRAFT_KEY = '@postAd_draft';
 
 const PostAds: React.FC = () => {
   const navigation = useNavigation<RootNavigationProp>();
@@ -140,6 +144,25 @@ const PostAds: React.FC = () => {
   });
 
   const isMountedRef = useRef(true);
+
+  // Restaurer le brouillon au montage (sans les images, leurs URI peuvent être périmées)
+  useEffect(() => {
+    AsyncStorage.getItem(DRAFT_KEY).then((raw) => {
+      if (!raw) return;
+      try {
+        const draft = JSON.parse(raw);
+        setFormData((prev) => ({ ...prev, ...draft, images: [] }));
+      } catch {
+        // Brouillon corrompu → ignore
+      }
+    });
+  }, []);
+
+  // Sauvegarder le brouillon à chaque changement (sans les images)
+  useEffect(() => {
+    const { images: _images, ...rest } = formData;
+    AsyncStorage.setItem(DRAFT_KEY, JSON.stringify(rest)).catch(() => {});
+  }, [formData]);
 
   // Charger les données au montage
   useEffect(() => {
@@ -233,16 +256,28 @@ const PostAds: React.FC = () => {
     }
 
     // Demander la permission
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const { status, canAskAgain } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      setConfirmDialog({
-        visible: true,
-        title: t('postAds.permissionRequired'),
-        message: t('postAds.permissionMessage'),
-        type: 'warning',
-        confirmText: 'OK',
-        onConfirm: closeDialog,
-      });
+      if (!canAskAgain) {
+        // Permission définitivement refusée → ouvrir les paramètres
+        setConfirmDialog({
+          visible: true,
+          title: t('postAds.permissionRequired'),
+          message: t('postAds.permissionPermanentlyDenied'),
+          type: 'warning',
+          confirmText: t('postAds.openSettings'),
+          onConfirm: () => { closeDialog(); Linking.openSettings(); },
+        });
+      } else {
+        setConfirmDialog({
+          visible: true,
+          title: t('postAds.permissionRequired'),
+          message: t('postAds.permissionMessage'),
+          type: 'warning',
+          confirmText: 'OK',
+          onConfirm: closeDialog,
+        });
+      }
       return;
     }
 
@@ -463,6 +498,7 @@ const PostAds: React.FC = () => {
 
         setCreatedProductId(createdProduct.id);
         setIsSubmitting(false);
+        AsyncStorage.removeItem(DRAFT_KEY).catch(() => {});
 
         // Afficher la modal de succès avec proposition de boost
         setShowSuccessModal(true);

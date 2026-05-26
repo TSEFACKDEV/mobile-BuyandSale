@@ -25,7 +25,7 @@ type LoginNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Login'
 const Login = () => {
   const navigation = useNavigation<LoginNavigationProp>()
   const { t } = useTranslation()
-  const { showWarning, showSuccess } = useDialog()
+  const { showWarning } = useDialog()
   const dispatch = useAppDispatch()
   
   const authState = useAppSelector(selectUserAuthenticated)

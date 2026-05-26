@@ -16,12 +16,15 @@
     "seeAll": "Voir tout",
     "featuredAds": "Annonces à la Une",
     "topSellers": "Vendeurs à la Une",
+    "recentlyViewed": "Récemment vus",
     "loading": "Chargement...",
     "loadingCategories": "Chargement des catégories...",
     "loadingProducts": "Chargement des annonces...",
     "noProducts": "Aucune annonce disponible",
     "noCategories": "Aucune catégorie disponible",
-    "noSellers": "Aucun vendeur disponible"
+    "noSellers": "Aucun vendeur disponible",
+    "loadError": "Impossible de charger les données",
+    "retry": "Réessayer"
   },
   "categories": {
     "Électronique": "Électronique",
@@ -724,6 +727,8 @@
       "maxImagesMessage": "Vous avez déjà {max} images. Supprimez-en une pour en ajouter.",
       "permissionRequired": "Permission requise",
       "permissionMessage": "Nous avons besoin de votre permission pour accéder aux photos.",
+      "permissionPermanentlyDenied": "L'accès aux photos est bloqué. Ouvrez les paramètres pour l'activer.",
+      "openSettings": "Ouvrir les paramètres",
       "imagesAdded": "Succès",
       "imagesAddedMessage": "{count} image(s) ajoutée(s) !",
       "validationError": "Validation",

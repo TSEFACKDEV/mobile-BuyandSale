@@ -139,6 +139,27 @@ export const ListSkeleton: React.FC<ListSkeletonProps> = ({
   );
 };
 
+export const ProductDetailsSkeleton: React.FC = () => {
+  const colors = useThemeColors();
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <Skeleton width="100%" height={300} borderRadius={0} />
+      <View style={{ padding: 16, gap: 12 }}>
+        <Skeleton width="70%" height={24} />
+        <Skeleton width="40%" height={28} />
+        <View style={{ flexDirection: 'row', gap: 12 }}>
+          <Skeleton width={100} height={16} />
+          <Skeleton width={80} height={16} />
+        </View>
+        <Skeleton width="100%" height={14} style={{ marginTop: 8 }} />
+        <Skeleton width="90%" height={14} />
+        <Skeleton width="80%" height={14} />
+        <Skeleton width="100%" height={48} borderRadius={12} style={{ marginTop: 16 }} />
+      </View>
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
   productCard: {
     borderRadius: 12,

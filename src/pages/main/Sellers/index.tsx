@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, FlatList, RefreshControl, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
@@ -48,33 +48,22 @@ const Sellers = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
+      setPage(1); // Revenir en page 1 à chaque nouvelle recherche
     }, 500);
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Filtrer les vendeurs par recherche
-  const filteredSellers = useMemo(() => {
-    if (!debouncedSearchQuery.trim()) return sellers;
-
-    const query = debouncedSearchQuery.toLowerCase();
-    return sellers.filter(
-      (seller) =>
-        seller.firstName?.toLowerCase().includes(query) ||
-        seller.lastName?.toLowerCase().includes(query) ||
-        `${seller.firstName} ${seller.lastName}`.toLowerCase().includes(query)
-    );
-  }, [sellers, debouncedSearchQuery]);
-
-  // Charger les vendeurs
+  // Charger les vendeurs (recherche côté serveur)
   useEffect(() => {
     dispatch(
       fetchPublicSellersAction({
-        page: page,
-        limit: 12,
+        page,
+        limit: 20,
+        search: debouncedSearchQuery.trim() || undefined,
       })
     );
-  }, [dispatch, page]);
+  }, [dispatch, page, debouncedSearchQuery]);
 
   // Gestionnaire de refresh
   const handleRefresh = useCallback(async () => {
@@ -83,11 +72,12 @@ const Sellers = () => {
     await dispatch(
       fetchPublicSellersAction({
         page: 1,
-        limit: 12,
+        limit: 20,
+        search: debouncedSearchQuery.trim() || undefined,
       })
     );
     setRefreshing(false);
-  }, [dispatch]);
+  }, [dispatch, debouncedSearchQuery]);
 
   // Gestionnaire de pagination
   const handleLoadMore = useCallback(() => {
@@ -119,16 +109,19 @@ const Sellers = () => {
     []
   );
 
-  // Rendu du header (stats uniquement)
-  const renderListHeader = useCallback(() => (
-    <View style={styles.header}>
-      <Text style={styles.statsText}>
-        {filteredSellers.length} {language === 'fr' 
-          ? (filteredSellers.length !== 1 ? 'vendeurs trouvés' : 'vendeur trouvé')
-          : (filteredSellers.length !== 1 ? 'sellers found' : 'seller found')}
-      </Text>
-    </View>
-  ), [filteredSellers.length, language, styles]);
+  // Rendu du header (stats depuis la pagination serveur)
+  const renderListHeader = useCallback(() => {
+    const totalCount = pagination?.total ?? sellers.length;
+    return (
+      <View style={styles.header}>
+        <Text style={styles.statsText}>
+          {totalCount} {language === 'fr'
+            ? (totalCount !== 1 ? 'vendeurs trouvés' : 'vendeur trouvé')
+            : (totalCount !== 1 ? 'sellers found' : 'seller found')}
+        </Text>
+      </View>
+    );
+  }, [pagination?.total, sellers.length, language, styles]);
 
   // Rendu de l'état vide
   const renderEmpty = () => (
@@ -201,7 +194,7 @@ const Sellers = () => {
       </View>
 
       <FlatList
-        data={filteredSellers}
+        data={sellers}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         getItemLayout={getItemLayout}

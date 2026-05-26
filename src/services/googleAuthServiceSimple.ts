@@ -31,7 +31,9 @@ export class GoogleAuthService {
    */
   static async signIn(): Promise<GoogleAuthResult> {
     try {
-      const sessionId = `mobile_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      const randomBytes = new Uint8Array(16);
+      crypto.getRandomValues(randomBytes);
+      const sessionId = `mobile_${Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('')}`;
       const authUrl = `${API_CONFIG.BASE_URL}/auth/google?mobile=true&sessionId=${sessionId}`;
       
       // Ouvrir le navigateur (non-bloquant)

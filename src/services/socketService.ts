@@ -1,6 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 import { Notification } from '../store/notification/actions';
 import pushNotificationService from './pushNotificationService';
+import API_CONFIG from '../config/api.config';
 
 class SocketService {
   private socket: Socket | null = null;
@@ -18,7 +19,7 @@ class SocketService {
     this.userId = userId;
     this.onNotificationCallback = onNotification;
 
-    const serverUrl = 'http://192.168.1.28:3001';
+    const serverUrl = API_CONFIG.BASE_URL.replace('/api/buyandsale', '');
 
     this.socket = io(serverUrl, {
       withCredentials: true,

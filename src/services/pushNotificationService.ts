@@ -90,6 +90,18 @@ class PushNotificationService {
       return true;
     }
   }
+
+  async getExpoPushToken(): Promise<string | null> {
+    try {
+      if (!Device.isDevice) return null;
+      const granted = await this.requestPermissions();
+      if (!granted) return null;
+      const tokenData = await Notifications.getExpoPushTokenAsync();
+      return tokenData.data;
+    } catch {
+      return null;
+    }
+  }
 }
 
 export default new PushNotificationService();

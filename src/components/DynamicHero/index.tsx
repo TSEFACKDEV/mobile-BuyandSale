@@ -12,7 +12,6 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { VideoView, useVideoPlayer } from 'expo-video';
-import { useNavigation } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '../../hooks/store';
 import { useTranslation } from '../../hooks/useTranslation';
 import { getActiveHeroBannersAction } from '../../store/heroBanner/actions';
@@ -43,7 +42,6 @@ const VideoBanner: React.FC<{ uri: string; style: object }> = ({ uri, style }) =
 
 const DynamicHero: React.FC = () => {
   const dispatch = useAppDispatch();
-  const navigation = useNavigation();
   const { t } = useTranslation();
   const banners = useAppSelector(selectActiveBanners);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -99,16 +97,10 @@ const DynamicHero: React.FC = () => {
 
   const handleBannerPress = (link: string | null) => {
     if (!link) return;
-    if (link.startsWith('http')) {
+    if (link.startsWith('https://')) {
       Linking.openURL(link).catch(() => {});
-    } else {
-      // Lien interne: tenter une navigation
-      try {
-        (navigation as any).navigate(link.replace(/^\//, ''));
-      } catch {
-        // no-op
-      }
     }
+    // Les liens internes arbitraires du backend ne sont pas exécutés
   };
 
   // Pas de bannières → fallback identique à la version web
