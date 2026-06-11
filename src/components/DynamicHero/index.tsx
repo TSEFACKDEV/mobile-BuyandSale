@@ -12,6 +12,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { VideoView, useVideoPlayer } from 'expo-video';
+import * as FileSystem from 'expo-file-system';
 import { useAppDispatch, useAppSelector } from '../../hooks/store';
 import { useTranslation } from '../../hooks/useTranslation';
 import { getActiveHeroBannersAction } from '../../store/heroBanner/actions';
@@ -22,22 +23,46 @@ import type { HeroBanner, MediaPosition } from '../../types/heroBanner.types';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const HERO_HEIGHT = 250;
 
-/** Sous-composant dédié à la lecture vidéo (useVideoPlayer ne peut pas être appelé conditionnellement) */
-const VideoBanner: React.FC<{ uri: string; style: object }> = ({ uri, style }) => {
-  const player = useVideoPlayer(uri, (p) => {
+/**
+ * Player monté UNIQUEMENT avec un URI local (fichier déjà téléchargé).
+ * useVideoPlayer ne change jamais de source → zéro requête réseau en boucle.
+ */
+const VideoPlayer: React.FC<{ localUri: string; style: object }> = ({ localUri, style }) => {
+  const player = useVideoPlayer(localUri, (p) => {
     p.loop = true;
     p.muted = true;
     p.play();
   });
+  return <VideoView style={style} player={player} nativeControls={false} contentFit="cover" />;
+};
 
-  return (
-    <VideoView
-      style={style}
-      player={player}
-      nativeControls={false}
-      contentFit="cover"
-    />
-  );
+/**
+ * Télécharge la vidéo dans le cache de l'app (une seule fois),
+ * puis monte <VideoPlayer> avec l'URI locale.
+ */
+const VideoBanner: React.FC<{ uri: string; style: object }> = ({ uri, style }) => {
+  const [localUri, setLocalUri] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const dir = `${FileSystem.cacheDirectory}hero/`;
+        await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
+        const dest = `${dir}${uri.split('/').pop()}`;
+        const info = await FileSystem.getInfoAsync(dest);
+        const finalUri = info.exists ? dest : (await FileSystem.downloadAsync(uri, dest)).uri;
+        if (!cancelled) setLocalUri(finalUri);
+      } catch {
+        if (!cancelled) setLocalUri(uri); // fallback réseau si erreur
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [uri]);
+
+  // Pendant le téléchargement, on affiche rien (le fond dégradé orange reste visible)
+  if (!localUri) return null;
+  return <VideoPlayer localUri={localUri} style={style} />;
 };
 
 const DynamicHero: React.FC = () => {
