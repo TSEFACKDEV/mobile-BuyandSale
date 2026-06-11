@@ -86,7 +86,8 @@
         "expo-notifications",
         {
           "color": "#F97316",
-          "defaultChannel": "default"
+          "defaultChannel": "buyandsale",
+          "sounds": ["default"]
         }
       ]
     ]

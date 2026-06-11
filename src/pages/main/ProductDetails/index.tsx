@@ -300,6 +300,7 @@ const ProductDetails = () => {
                 horizontal
                 pagingEnabled
                 showsHorizontalScrollIndicator={false}
+                removeClippedSubviews={false}
                 onScroll={(event) => {
                   const index = Math.round(event.nativeEvent.contentOffset.x / width);
                   setCurrentImageIndex(index);
@@ -630,6 +631,7 @@ const ProductDetails = () => {
                 horizontal
                 pagingEnabled
                 showsHorizontalScrollIndicator={false}
+                removeClippedSubviews={false}
                 onScroll={(event) => {
                   const index = Math.round(event.nativeEvent.contentOffset.x / width);
                   setModalImageIndex(index);

@@ -61,25 +61,25 @@ const BoostOfferModal: React.FC<BoostOfferModalProps> = ({
 
           <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
             {/* Card du produit */}
-            <View style={styles.productCard}>
+            <View style={[styles.productCard, { backgroundColor: colors.backgroundSecondary, borderColor: '#fb923c' }]}>
               <View style={styles.productHeader}>
-                <View style={styles.badge}>
-                  <Icon name="eye-outline" size={12} color="#b91c1c" />
-                  <Text style={styles.badgeText}>⚠️ Visibilité faible</Text>
+                <View style={[styles.badge, { backgroundColor: colors.backgroundTertiary }]}>
+                  <Icon name="eye-outline" size={12} color={colors.error} />
+                  <Text style={[styles.badgeText, { color: colors.error }]}>⚠️ Visibilité faible</Text>
                 </View>
-                <Text style={styles.viewCount}>
+                <Text style={[styles.viewCount, { color: '#ea580c' }]}>
                   {product.viewCount} vue{product.viewCount !== 1 ? 's' : ''}
                 </Text>
               </View>
-              <Text style={styles.productName} numberOfLines={2}>
+              <Text style={[styles.productName, { color: colors.text }]} numberOfLines={2}>
                 {product.name}
               </Text>
             </View>
 
             {/* Alerte */}
-            <View style={styles.alertBox}>
-              <Text style={styles.alertTitle}>🔻 Votre annonce ne décolle pas !</Text>
-              <Text style={styles.alertText}>
+            <View style={[styles.alertBox, { backgroundColor: colors.backgroundTertiary, borderLeftColor: colors.error }]}>
+              <Text style={[styles.alertTitle, { color: colors.error }]}>🔻 Votre annonce ne décolle pas !</Text>
+              <Text style={[styles.alertText, { color: colors.textSecondary }]}>
                 Les annonces boostées obtiennent 10x plus de vues et se vendent plus vite !
               </Text>
             </View>
@@ -88,26 +88,26 @@ const BoostOfferModal: React.FC<BoostOfferModalProps> = ({
             <View style={styles.benefitsContainer}>
               <View style={styles.benefitRow}>
                 <Icon name="flash" size={16} color="#16a34a" />
-                <Text style={styles.benefitText}>Visibilité maximale</Text>
+                <Text style={[styles.benefitText, { color: colors.text }]}>Visibilité maximale</Text>
               </View>
               <View style={styles.benefitRow}>
                 <Icon name="people" size={16} color="#2563eb" />
-                <Text style={styles.benefitText}>Plus d'acheteurs</Text>
+                <Text style={[styles.benefitText, { color: colors.text }]}>Plus d'acheteurs</Text>
               </View>
               <View style={styles.benefitRow}>
                 <Icon name="time" size={16} color="#9333ea" />
-                <Text style={styles.benefitText}>Vente rapide</Text>
+                <Text style={[styles.benefitText, { color: colors.text }]}>Vente rapide</Text>
               </View>
             </View>
           </ScrollView>
 
           {/* Buttons */}
-          <View style={styles.buttonsContainer}>
+          <View style={[styles.buttonsContainer, { borderTopWidth: 1, borderTopColor: colors.border }]}>
             <TouchableOpacity
-              style={styles.declineButton}
+              style={[styles.declineButton, { borderColor: colors.border }]}
               onPress={onDecline}
             >
-              <Text style={styles.declineButtonText}>Plus tard</Text>
+              <Text style={[styles.declineButtonText, { color: colors.textSecondary }]}>Plus tard</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.acceptButton}
@@ -169,10 +169,8 @@ const styles = StyleSheet.create({
   },
   productCard: {
     borderWidth: 2,
-    borderColor: '#fb923c',
     borderRadius: 12,
     padding: 12,
-    backgroundColor: '#fff7ed',
     marginBottom: 12,
   },
   productHeader: {
@@ -184,7 +182,6 @@ const styles = StyleSheet.create({
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fee2e2',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
@@ -192,23 +189,18 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 10,
     fontWeight: '600',
-    color: '#b91c1c',
     marginLeft: 4,
   },
   viewCount: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#ea580c',
   },
   productName: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1f2937',
   },
   alertBox: {
-    backgroundColor: '#fee2e2',
     borderLeftWidth: 4,
-    borderLeftColor: '#ef4444',
     borderRadius: 8,
     padding: 12,
     marginBottom: 12,
@@ -216,12 +208,10 @@ const styles = StyleSheet.create({
   alertTitle: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#991b1b',
     marginBottom: 4,
   },
   alertText: {
     fontSize: 12,
-    color: '#7f1d1d',
   },
   benefitsContainer: {
     marginBottom: 16,
@@ -233,7 +223,6 @@ const styles = StyleSheet.create({
   },
   benefitText: {
     fontSize: 12,
-    color: '#374151',
     marginLeft: 8,
     fontWeight: '600',
   },
@@ -251,13 +240,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#d1d5db',
     backgroundColor: 'transparent',
   },
   declineButtonText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#374151',
   },
   acceptButton: {
     flex: 1,
@@ -275,3 +262,4 @@ const styles = StyleSheet.create({
 });
 
 export default BoostOfferModal;
+

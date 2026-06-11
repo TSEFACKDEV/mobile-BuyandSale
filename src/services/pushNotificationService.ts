@@ -18,19 +18,6 @@ Notifications.setNotificationHandler({
 class PushNotificationService {
   private notificationsEnabled: boolean = true;
 
-  async initialize(): Promise<void> {
-    if (!Device.isDevice) {
-      return;
-    }
-
-    const enabled = await this.getNotificationPreference();
-    this.notificationsEnabled = enabled;
-
-    if (enabled) {
-      await this.requestPermissions();
-    }
-  }
-
   async requestPermissions(): Promise<boolean> {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
@@ -45,11 +32,14 @@ class PushNotificationService {
     }
 
     if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
+      await Notifications.setNotificationChannelAsync('buyandsale', {
+        name: 'BuyAndSale',
         importance: Notifications.AndroidImportance.MAX,
         vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF6F00',
+        lightColor: '#F97316',
+        sound: 'default',
+        enableVibrate: true,
+        showBadge: true,
       });
     }
 
@@ -68,6 +58,7 @@ class PushNotificationService {
         data,
         sound: true,
         priority: Notifications.AndroidNotificationPriority.HIGH,
+        ...(Platform.OS === 'android' ? { channelId: 'buyandsale' } : {}),
       },
       trigger: null,
     });

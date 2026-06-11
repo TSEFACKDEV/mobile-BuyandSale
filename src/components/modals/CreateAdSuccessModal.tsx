@@ -50,7 +50,7 @@ const CreateAdSuccessModal: React.FC<CreateAdSuccessModalProps> = ({
           </Text>
 
           {/* Section Boost */}
-          <View style={styles.boostBox}>
+          <View style={[styles.boostBox, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
             <Icon name="trending-up" size={32} color="#f97316" />
             <Text style={[styles.boostTitle, { color: colors.text }]}>
               Boostez votre visibilité
@@ -113,13 +113,11 @@ const styles = StyleSheet.create({
   },
   boostBox: {
     width: '100%',
-    backgroundColor: '#fff7ed',
     borderRadius: 12,
     padding: 20,
     marginBottom: 24,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#fed7aa',
   },
   boostTitle: {
     fontSize: 18,

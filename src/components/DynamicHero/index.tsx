@@ -12,7 +12,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { VideoView, useVideoPlayer } from 'expo-video';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { useAppDispatch, useAppSelector } from '../../hooks/store';
 import { useTranslation } from '../../hooks/useTranslation';
 import { getActiveHeroBannersAction } from '../../store/heroBanner/actions';

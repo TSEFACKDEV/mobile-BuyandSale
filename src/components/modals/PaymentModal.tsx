@@ -157,7 +157,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
                 <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
                   {/* Header */}
-                  <View style={styles.header}>
+                  <View style={[styles.header, { borderBottomColor: colors.border }]}>
                     <Text style={[styles.title, { color: colors.text }]}>
                       {t('userProfile.payment.title')}
                     </Text>
@@ -212,7 +212,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 {t('userProfile.payment.phoneNumber')} <Text style={styles.required}>{t('userProfile.payment.required')}</Text>
               </Text>
               <View style={[styles.phoneInputContainer, { borderColor: colors.border }]}>
-                <View style={[styles.countryCode, { backgroundColor: colors.background }]}>
+                <View style={[styles.countryCode, { backgroundColor: colors.background, borderRightColor: colors.border }]}>
                   <Text style={[styles.countryCodeText, { color: colors.text }]}>+237</Text>
                 </View>
                 <TextInput
@@ -303,7 +303,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
   },
   title: {
     fontSize: 20,
@@ -377,7 +376,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     justifyContent: 'center',
     borderRightWidth: 1,
-    borderRightColor: 'rgba(0, 0, 0, 0.1)',
   },
   countryCodeText: {
     fontSize: 16,
