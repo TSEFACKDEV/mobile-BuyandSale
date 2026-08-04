@@ -7,7 +7,8 @@ import {
   getUserProfileAction, 
   handleSocialAuthCallback, 
   updateUserAction,
-  refreshTokenAction 
+  refreshTokenAction,
+  deleteMyAccountAction,
 } from './actions';
 import { getErrorMessage } from '../../utils/errorHelpers';
 
@@ -148,6 +149,19 @@ const authentificationSlice = createSlice({
         if (action.payload?.data?.token && state.auth.entities) {
           state.auth.entities.token = action.payload.data.token;
         }
+      })
+
+      // === DELETE MY ACCOUNT ===
+      .addCase(deleteMyAccountAction.pending, (state) => {
+        state.auth.status = LoadingType.PENDING;
+      })
+      .addCase(deleteMyAccountAction.fulfilled, (state) => {
+        state.auth.entities = null;
+        state.auth.status = LoadingType.IDLE;
+        state.auth.error = null;
+      })
+      .addCase(deleteMyAccountAction.rejected, (state, action) => {
+        setAuthError(state, action);
       })
 
       // === UPDATE USER ===

@@ -10,6 +10,8 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Modal,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
@@ -23,7 +25,7 @@ import { useTheme, useThemeColors } from '../../../contexts/ThemeContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import { logoutAction, getUserProfileAction, updateUserAction } from '../../../store/authentification/actions';
+import { logoutAction, getUserProfileAction, updateUserAction, deleteMyAccountAction } from '../../../store/authentification/actions';
 import { getAllForfaitsAction } from '../../../store/forfait/actions';
 import {
   selectForfaits,
@@ -98,6 +100,12 @@ const UserProfile: React.FC = () => {
   const user = authState.auth.entities;
   const isAuthenticated = user !== null;
   const isLoggingOut = authState.auth.status === LoadingType.PENDING && !user;
+  const isSuperAdmin = user?.roles?.some(
+    (r: any) => r.role?.name === 'SUPER_ADMIN'
+  ) ?? false;
+  const isProtectedUser = isSuperAdmin || (user?.roles?.some(
+    (r: any) => r.role?.name === 'ADMIN'
+  ) ?? false);
   
   // Récupérer le paramètre initialTab depuis la navigation
   const params = route.params as { initialTab?: string } | undefined;
@@ -122,6 +130,9 @@ const UserProfile: React.FC = () => {
   const [selectedForfaitType, setSelectedForfaitType] = useState<string | null>(null);
   const [selectedForfaitPrice, setSelectedForfaitPrice] = useState<number>(0);
   const [currentPaymentId, setCurrentPaymentId] = useState<string | null>(null);
+  const [showDeletePasswordPrompt, setShowDeletePasswordPrompt] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const [profileData, setProfileData] = useState({
     firstName: user?.firstName || '',
@@ -214,6 +225,40 @@ const UserProfile: React.FC = () => {
       }
     );
   }, [dispatch, navigation, showDestructive, t]);
+
+  const handleDeleteAccount = useCallback(async () => {
+    const confirmed = await showDestructive(
+      'Supprimer mon compte',
+      'Êtes-vous absolument sûr ? Cette action est irréversible. Toutes vos annonces, avis et données seront définitivement supprimés.',
+      () => {
+        setDeletePassword('');
+        setShowDeletePasswordPrompt(true);
+      }
+    );
+  }, [showDestructive]);
+
+  const handleDeletePasswordSubmit = useCallback(async () => {
+    if (!deletePassword) {
+      Alert.alert('Erreur', 'Veuillez entrer votre mot de passe');
+      return;
+    }
+    setIsDeleting(true);
+    try {
+      await dispatch(deleteMyAccountAction({ password: deletePassword })).unwrap();
+      setShowDeletePasswordPrompt(false);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Auth' as any, params: { screen: 'Login' } }],
+      });
+    } catch (error: any) {
+      showWarning(
+        'Erreur',
+        error?.message || 'Une erreur est survenue lors de la suppression'
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [deletePassword, dispatch, navigation, showWarning]);
 
   const handleStartEdit = useCallback(() => {
     setProfileData({
@@ -1160,6 +1205,15 @@ const UserProfile: React.FC = () => {
                       <Icon name="log-out-outline" size={20} color="#FFFFFF" />
                       <Text style={styles.profileButtonText}>{t('userProfile.actions.logout')}</Text>
                     </TouchableOpacity>
+                    {!isProtectedUser && (
+                      <TouchableOpacity
+                        style={[styles.deleteAccountButton, { borderColor: '#EF4444' }]}
+                        onPress={handleDeleteAccount}
+                      >
+                        <Icon name="trash-outline" size={20} color="#EF4444" />
+                        <Text style={[styles.deleteAccountText]}>Supprimer mon compte</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
                 </View>
               )}
@@ -1229,6 +1283,92 @@ const UserProfile: React.FC = () => {
         onError={handlePaymentError}
         onClose={handlePaymentCancel}
       />
+
+      <Modal
+        visible={showDeletePasswordPrompt}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDeletePasswordPrompt(false)}
+      >
+        <View style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          padding: 24
+        }}>
+          <View style={{
+            backgroundColor: colors.surface,
+            borderRadius: 16,
+            padding: 24,
+            width: '100%',
+            maxWidth: 400,
+          }}>
+            <View style={{ alignItems: 'center', marginBottom: 16 }}>
+              <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: '#FEE2E2', justifyContent: 'center', alignItems: 'center', marginBottom: 12 }}>
+                <Icon name="trash-outline" size={24} color="#EF4444" />
+              </View>
+              <Text style={{ fontSize: 18, fontWeight: '600', color: colors.text, marginBottom: 8 }}>
+                Confirmez votre mot de passe
+              </Text>
+              <Text style={{ fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginBottom: 16 }}>
+                Veuillez entrer votre mot de passe pour confirmer la suppression définitive du compte.
+              </Text>
+            </View>
+            <TextInput
+              style={{
+                borderWidth: 1,
+                borderColor: colors.border,
+                borderRadius: 12,
+                padding: 12,
+                fontSize: 16,
+                color: colors.text,
+                backgroundColor: colors.background,
+                marginBottom: 16,
+              }}
+              placeholder="Votre mot de passe"
+              placeholderTextColor={colors.textTertiary}
+              secureTextEntry
+              value={deletePassword}
+              onChangeText={setDeletePassword}
+              autoFocus
+            />
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  padding: 14,
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  alignItems: 'center',
+                }}
+                onPress={() => setShowDeletePasswordPrompt(false)}
+              >
+                <Text style={{ fontSize: 16, fontWeight: '500', color: colors.text }}>Annuler</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  padding: 14,
+                  borderRadius: 12,
+                  backgroundColor: '#EF4444',
+                  alignItems: 'center',
+                  opacity: isDeleting ? 0.7 : 1,
+                }}
+                onPress={handleDeletePasswordSubmit}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={{ fontSize: 16, fontWeight: '500', color: '#FFFFFF' }}>Confirmer</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 };

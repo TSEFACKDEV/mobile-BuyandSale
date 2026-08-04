@@ -239,6 +239,40 @@ export const refreshTokenAction = createAsyncThunk<
   }
 });
 
+// Action pour supprimer son propre compte
+export const deleteMyAccountAction = createAsyncThunk<
+  ApiResponse<{ id: string }>,
+  { password: string },
+  ThunkApi
+>('auth/deleteMyAccount', async ({ password }, apiThunk) => {
+  try {
+    const state = apiThunk.getState() as any;
+    const user = state.authentification?.auth?.entities;
+    if (!user?.id) throw new Error('Utilisateur non identifié');
+
+    const response = await fetchWithAuth(
+      `${API_CONFIG.BASE_URL}/${API_ENDPOINTS.USER_DELETE.replace(':id', user.id)}`,
+      {
+        method: 'DELETE',
+        headers: { 'Content-type': 'application/json' },
+        body: JSON.stringify({ password }),
+      }
+    );
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.meta?.message || 'Échec de la suppression du compte');
+    }
+    return data;
+  } catch (error: unknown) {
+    return apiThunk.rejectWithValue({
+      message:
+        (error as Error).message ||
+        'Une erreur est survenue lors de la suppression',
+    });
+  }
+});
+
 // Action pour mettre à jour le profil utilisateur
 export const updateUserAction = createAsyncThunk<
   ApiResponse<AuthUser>,
